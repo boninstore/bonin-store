@@ -289,7 +289,7 @@
       </div>
 
       <div class="bg-white p-6 rounded-3xl shadow-md border-2 border-pink-pastel max-w-2xl">
-        <p class="text-xs text-slate-400 mb-4 font-semibold">Isi form resi paket kalian disini dan data akan otomatis disinkronkan ke daftar barang kalian.</p>
+        <p class="text-xs text-slate-400 mb-4 font-semibold">Isi form resi paket kalian disini dan data akan otomatis sinkron ke daftar barang kalian.</p>
         
         <form id="resi-form" class="space-y-4">
           <div>
@@ -369,12 +369,12 @@
             <thead>
               <tr class="bg-pink-pastel text-white text-xs tracking-wider font-semibold">
                 <th class="p-4 border-b border-cream font-medium">Nomer Resi</th>
-                <th class="p-4 border-b border-cream w-1/3 font-medium">Detail Barang (Lebih Besar)</th>
+                <th class="p-4 border-b border-cream w-1/3 font-medium">Detail Barang</th>
                 <th class="p-4 border-b border-cream font-medium">Negara</th>
                 <th class="p-4 border-b border-cream font-medium">Shipping Batch</th>
                 <th class="p-4 border-b border-cream font-medium">Tanggal Update</th>
                 <th class="p-4 border-b border-cream font-medium">Pemilik Akun</th>
-                <th class="p-4 border-b border-cream text-center font-medium">Foto Update (1 & 2)</th>
+                <th class="p-4 border-b border-cream text-center font-medium">Foto Update</th>
                 <th class="p-4 border-b border-cream text-center font-medium">Aksi</th>
               </tr>
             </thead>
@@ -426,14 +426,14 @@
         </div>
 
         <div class="flex flex-col min-w-[150px]">
-          <label class="text-[9px] font-bold text-slate-400 uppercase mb-1">Shipping Batch (Tersinkron)</label>
+          <label class="text-[9px] font-bold text-slate-400 uppercase mb-1">Shipping Batch</label>
           <select id="filter-invoice-batch" onchange="renderInvoice()" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none bg-white font-medium">
             <option value="Semua">Semua Batch 📦</option>
           </select>
         </div>
 
         <div class="text-xs text-slate-400 font-semibold font-medium">
-          *Pilih filter di atas untuk menyaring rincian logistik pergudangan.
+          *silahkan pilih negara batch barang kalian disini.
         </div>
       </div>
 
@@ -1974,12 +1974,11 @@
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(22);
       doc.setTextColor(mainColor[0], mainColor[1], mainColor[2]);
-      doc.text("BONIN STORE", 14, 18);
+      doc.text("BONIN STORE INVOICE", 14, 18);
 
       doc.setFont("Helvetica", "normal");
       doc.setFontSize(10);
       doc.setTextColor(100, 100, 100);
-      doc.text("Data Barang Warehouse Bonin Store", 14, 24);
       doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, 14, 29);
 
       doc.setFont("Helvetica", "bold");
