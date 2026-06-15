@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Barang Warehouse Bonin Store</title>
+  <title>Bonin Store Warehouse</title>
   <link class="rounded-full" rel="icon" type="image/jpg" href="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg">
   
   <!-- Tailwind CSS -->
@@ -76,8 +76,8 @@
     </div>
   </div>
 
-  <!-- HEADER BAR: Stripe 3 & Logo at the far left -->
-  <header class="bg-white shadow-md border-b-4 border-yellow-pastel sticky top-0 z-40 px-4 py-3 flex justify-between items-center">
+  <!-- HEADER BAR: Hidden by default on Login Page -->
+  <header id="app-header" class="hidden bg-white shadow-md border-b-4 border-yellow-pastel sticky top-0 z-40 px-4 py-3 justify-between items-center">
     <div class="flex items-center space-x-3">
       <!-- Menu Button (Stripe 3) - Far Left -->
       <button id="menu-btn" class="p-2 rounded-xl bg-purple-pastel hover:bg-opacity-90 transition-all text-white shadow-md flex items-center justify-center" title="Menu">
@@ -92,15 +92,21 @@
       <!-- App Title -->
       <div>
         <h1 class="text-xs font-bold text-pink-pastel tracking-wide leading-none uppercase">Bonin Store</h1>
-        <span class="text-[8px] text-purple-pastel font-semibold tracking-wider">WAREHOUSE PANEL</span>
+        <span class="text-[8px] text-purple-pastel font-semibold tracking-wider">Your One-Stop Shop</span>
       </div>
     </div>
     
-    <!-- Right side: User info badge -->
+    <!-- Right side: User info badge & Top-Right Logout -->
     <div class="flex items-center space-x-3">
-      <div id="user-badge" class="hidden md:flex flex-col text-right">
-        <span class="text-[9px] text-slate-400 font-bold leading-none" id="current-user-role">GUEST</span>
-        <span class="text-xs font-semibold text-slate-700" id="current-user-name">Not Logged In</span>
+      <div id="user-badge" class="hidden items-center space-x-2">
+        <div class="flex flex-col text-right">
+          <span class="text-[9px] text-slate-400 font-bold leading-none" id="current-user-role">GUEST</span>
+          <span class="text-xs font-semibold text-slate-700" id="current-user-name">Not Logged In</span>
+        </div>
+        <!-- Logout Button (Pojok Kanan Atas) -->
+        <button id="logout-btn-top" class="p-1.5 rounded-xl bg-pink-pastel hover:bg-opacity-90 text-white shadow-sm flex items-center justify-center transition-all hover:scale-105" title="Keluar dari Akun">
+          <i data-lucide="log-out" class="w-4 h-4"></i>
+        </button>
       </div>
     </div>
   </header>
@@ -142,10 +148,11 @@
   <!-- AUTHENTICATION PAGE (LOGIN) -->
   <main id="login-container" class="flex-1 flex flex-col justify-center items-center px-4 py-12">
     <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border-t-8 border-pink-pastel overflow-hidden">
-      <div class="p-8 text-center bg-cream bg-opacity-40">
+      <!-- Logo Banner Container (Brighter Background & Bottom Border added) -->
+      <div class="p-8 text-center bg-rose-50 bg-opacity-60 border-b border-slate-100">
         <img src="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg" 
              alt="Bonin Store Logo" 
-             class="w-24 h-24 mx-auto rounded-full object-cover border-4 border-yellow-pastel shadow-md mb-4">
+             class="w-24 h-24 mx-auto rounded-full object-cover border-4 border-pink-pastel shadow-md mb-4">
         <h2 class="text-lg font-bold text-pink-pastel leading-tight">Bonin Store</h2>
         <p class="text-xs text-slate-400 font-medium mt-1">Data Barang Warehouse</p>
       </div>
@@ -167,12 +174,16 @@
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
               <i data-lucide="lock" class="w-4 h-4"></i>
             </span>
-            <input type="password" id="password-input" required class="w-full pl-10 pr-4 py-2.5 rounded-2xl border-2 border-slate-100 focus:border-pink-pastel focus:outline-none transition-all text-xs" placeholder="••••••••">
+            <input type="password" id="password-input" required class="w-full pl-10 pr-10 py-2.5 rounded-2xl border-2 border-slate-100 focus:border-pink-pastel focus:outline-none transition-all text-xs" placeholder="••••••••">
+            <!-- Toggle password visibility button -->
+            <button type="button" id="toggle-password-btn" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-pink-pastel transition-colors" title="Lihat Kata Sandi">
+              <i data-lucide="eye" id="toggle-password-icon" class="w-4 h-4"></i>
+            </button>
           </div>
         </div>
 
         <button type="submit" class="w-full py-2.5 rounded-2xl bg-pink-pastel hover:bg-opacity-90 text-white font-bold tracking-wide transition-all shadow-lg text-xs font-medium">
-          Log In
+          Masuk ke Dashboard
         </button>
       </form>
     </div>
@@ -190,7 +201,7 @@
         <div class="relative z-10 space-y-2">
           <span class="px-2.5 py-0.5 bg-pink-pastel text-white rounded-full text-[9px] font-bold uppercase tracking-wider">Dashboard</span>
           <h2 class="text-lg md:text-xl font-bold text-pink-pastel leading-tight" id="welcome-message">Halo, Selamat Datang!</h2>
-          <p class="text-xs text-slate-500 max-w-xl">Pantau data barang, pengiriman, pembuatan invoice, refund shopee, dan logistik impor Korea, China & Thailand dalam satu aplikasi.</p>
+          <p class="text-xs text-slate-500 max-w-xl">Pantau barang, pengiriman, invoice, refund barang kalian dalam satu aplikasi.</p>
         </div>
       </div>
 
@@ -267,7 +278,7 @@
       </div>
 
       <div class="bg-white p-6 rounded-3xl shadow-md border-2 border-pink-pastel max-w-2xl">
-        <p class="text-xs text-slate-400 mb-4 font-semibold">Gunakan form di bawah ini untuk mendaftarkan resi baru. Data akan otomatis disinkronkan ke daftar barang kalian.</p>
+        <p class="text-xs text-slate-400 mb-4 font-semibold">Isi form resi paket kalian disini dan data akan otomatis disinkronkan ke daftar barang kalian.</p>
         
         <form id="resi-form" class="space-y-4">
           <div>
@@ -283,15 +294,15 @@
           <div>
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Negara Tujuan</label>
             <select id="resi-negara" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-pink-pastel focus:outline-none transition-all text-xs bg-white">
-              <option value="Korea">Korea 🇰🇷</option>
-              <option value="China">China 🇨🇳</option>
-              <option value="Thailand">Thailand 🇹🇭</option>
+              <option value="Korea">Korea</option>
+              <option value="China">China</option>
+              <option value="Thailand">Thailand</option>
             </select>
           </div>
 
           <button type="submit" class="w-full py-2 px-4 rounded-xl bg-pink-pastel hover:bg-opacity-90 text-white font-bold transition-all shadow-md flex items-center justify-center space-x-2 text-xs font-medium">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
-            <span>Simpan Data Resi</span>
+            <span>Simpan Data</span>
           </button>
         </form>
       </div>
@@ -311,7 +322,7 @@
           </div>
           <div>
             <h2 class="text-md font-bold text-pink-pastel">Daftar Barang</h2>
-            <p class="text-xs text-slate-400">Cek update status barang kalian disini, kalian juga dapat mencarinya di kolom search.</p>
+            <p class="text-xs text-slate-400">Semua data resi & update barang masing-masing negara ada disini!</p>
           </div>
         </div>
 
@@ -378,7 +389,7 @@
           </div>
           <div>
             <h2 class="text-md font-bold text-pink-pastel">Tagihan & Invoice</h2>
-            <p class="text-xs text-slate-400">Tagihan akan dipisah berdasarkan Batch & Negara, silahkan cek nomer resi barang kalian disini.</p>
+            <p class="text-xs text-slate-400">Cek tagihan berdasarkan Batch & Negara awal, kalian bisa mencari berdasarkan nomer resi juga.</p>
           </div>
         </div>
 
@@ -411,7 +422,7 @@
         </div>
 
         <div class="text-xs text-slate-400 font-semibold font-medium">
-          *Pilih negara dan batch barang kalian disini.
+          *Pilih filter di atas untuk menyaring rincian logistik pergudangan.
         </div>
       </div>
 
@@ -453,7 +464,7 @@
           </div>
           <div>
             <h2 class="text-md font-bold text-pink-pastel">Form Refund Shopee</h2>
-            <p class="text-xs text-slate-400">Pencatatan rincian dana refund transaksi checkout Shopee.</p>
+            <p class="text-xs text-slate-400">Hanya untuk user yang mempunyai lebihan nominal untuk check out Shopee.</p>
           </div>
         </div>
 
@@ -510,11 +521,11 @@
               <input type="number" id="refund-total-amount" required placeholder="50000" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel font-medium font-mono text-pink-pastel font-bold bg-white">
             </div>
 
-            <!-- NEW FIELD: Note / Keterangan -->
+            <!-- Note / Keterangan -->
             <div>
               <label class="block text-slate-500 font-bold mb-1 uppercase tracking-wider">Note / Keterangan</label>
               <textarea id="refund-note" rows="2" placeholder="Contoh: Refund barang kosong / kelebihan transfer" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium" style="resize: none;"></textarea>
-              <p class="text-[9px] text-slate-400 mt-1">*Masukkan keterangan manual atau catatan khusus untuk transaksi refund ini.</p>
+              <p class="text-[9px] text-slate-400 mt-1">*Masukkan catatan khusus untuk transaksi refund ini, misal batch gabungan atau lainnya.</p>
             </div>
 
             <button type="submit" class="w-full py-2.5 bg-pink-pastel text-white font-bold rounded-xl hover:bg-opacity-95 transition-all shadow-md flex items-center justify-center space-x-1">
@@ -543,7 +554,7 @@
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[650px]">
               <thead>
-                <tr class="bg-pink-pastel bg-opacity-10 text-pink-pastel font-bold text-xs">
+                <tr class="bg-pink-pastel bg-opacity-10 text-white font-bold text-xs">
                   <th class="p-3 font-medium">No. Order Shopee / Keterangan</th>
                   <th class="p-3 font-medium">Batch</th>
                   <th class="p-3 font-medium">User</th>
@@ -589,7 +600,8 @@
         <form id="add-user-form" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
           <input type="text" id="new-user-nama" required placeholder="Nama Lengkap" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
           <input type="text" id="new-user-username" required placeholder="Username" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
-          <input type="password" id="new-user-password" required placeholder="Password" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
+          <!-- Password Input (Opsi password terlihat: Diubah dari type password ke text) -->
+          <input type="text" id="new-user-password" required placeholder="Password" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
           <input type="tel" id="new-user-phone" required placeholder="No WA (Contoh: 628123456789)" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
           <select id="new-user-role" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel bg-white font-medium">
             <option value="pengguna">Pengguna (Form Input Sahaja)</option>
@@ -648,15 +660,15 @@
     ];
 
     const defaultBarang = [
-      { id: "1", resi: "1234567", detail: "5 Pcs Album K-pop, 1 Pcs Lipbalm", pemilik: "ariel", tanggalUpdate: "2026-06-15", foto1: "", foto2: "", shippingBatch: "Batch 1A", negara: "Korea" },
-      { id: "2", resi: "1234567", detail: "20 Pcs Kaos Pastel Cute, 5 Jaket Pink", pemilik: "budi", tanggalUpdate: "2026-06-14", foto1: "", foto2: "", shippingBatch: "Batch 1A", negara: "China" },
-      { id: "3", resi: "TH12345", detail: "10 Botol Saus Thailand Premium", pemilik: "ariel", tanggalUpdate: "2026-06-15", foto1: "", foto2: "", shippingBatch: "Batch 2B", negara: "Thailand" }
+      { id: "1", resi: "1234567", detail: "-", pemilik: "ariel", tanggalUpdate: "2026-06-15", foto1: "", foto2: "", shippingBatch: "Batch 1A", negara: "Korea" },
+      { id: "2", resi: "1234567", detail: "-", pemilik: "budi", tanggalUpdate: "2026-06-14", foto1: "", foto2: "", shippingBatch: "Batch 1A", negara: "China" },
+      { id: "3", resi: "1234567", detail: "-", pemilik: "ariel", tanggalUpdate: "2026-06-15", foto1: "", foto2: "", shippingBatch: "Batch 2B", negara: "Thailand" }
     ];
 
     const defaultInvoices = [
-      { id: "inv-1", shippingBatch: "Batch 1A", resi: "1234567", detail: " ", pemilik: "ariel", qty: 2.5, rateSharing: 120000, feeWh: 15000, total: 315000 },
-      { id: "inv-2", shippingBatch: "Batch 1A", resi: "1234567", detail: " ", pemilik: "budi", qty: 5.0, rateSharing: 85000, feeWh: 25000, total: 450000 },
-      { id: "inv-3", shippingBatch: "Batch 2B", resi: "TH12345", detail: " ", pemilik: "ariel", qty: 1.2, rateSharing: 95000, feeWh: 10000, total: 124000 }
+      { id: "inv-1", shippingBatch: "Batch 1A", resi: "1234567", detail: "-", pemilik: "ariel", qty: 2.5, rateSharing: 120000, feeWh: 15000, total: 315000 },
+      { id: "inv-2", shippingBatch: "Batch 1A", resi: "1234567", detail: "-", pemilik: "budi", qty: 5.0, rateSharing: 85000, feeWh: 25000, total: 450000 },
+      { id: "inv-3", shippingBatch: "Batch 2B", resi: "1234567", detail: "-", pemilik: "ariel", qty: 1.2, rateSharing: 95000, feeWh: 10000, total: 124000 }
     ];
 
     const defaultRefunds = [
@@ -674,6 +686,7 @@
     // Application state
     let currentUser = null;
     let activeTabNegara = "Semua";
+    const loginAttempts = {}; // Tracks failed logins per username
 
     // Dynamic confirmation callback store
     let confirmCallback = null;
@@ -730,16 +743,69 @@
       confirmCallback = null;
     });
 
+    // PASSWORD VISIBILITY TOGGLE
+    const togglePasswordBtn = document.getElementById('toggle-password-btn');
+    const passwordInput = document.getElementById('password-input');
+    const togglePasswordIcon = document.getElementById('toggle-password-icon');
+
+    togglePasswordBtn.addEventListener('click', () => {
+      if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        togglePasswordIcon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        passwordInput.type = 'password';
+        togglePasswordIcon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    });
+
     // AUTH ACTIONS
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const usernameVal = document.getElementById('username-input').value.trim().toLowerCase();
       const passwordVal = document.getElementById('password-input').value;
 
-      const matchedUser = users.find(u => u.username === usernameVal && u.password === passwordVal);
+      const matchedUser = users.find(u => u.username === usernameVal);
 
       if (!matchedUser) {
-        showToast("Gagal masuk! Periksa username dan password Anda.", "error");
+        showToast("Gagal masuk! Username tidak terdaftar.", "error");
+        return;
+      }
+
+      // Check wrong password
+      if (matchedUser.password !== passwordVal) {
+        if (!loginAttempts[usernameVal]) {
+          loginAttempts[usernameVal] = 0;
+        }
+        loginAttempts[usernameVal]++;
+
+        const sisaPercobaan = 3 - loginAttempts[usernameVal];
+
+        if (loginAttempts[usernameVal] >= 3) {
+          // Reset password to "123"
+          matchedUser.password = "123";
+          localStorage.setItem('bs_users', JSON.stringify(users));
+          loginAttempts[usernameVal] = 0; // reset attempts counter
+
+          // Pop-up warning informing reset
+          triggerCustomConfirm(
+            "Sandi Otomatis Di-Reset!",
+            `Anda telah salah memasukkan password sebanyak 3 kali berturut-turut. Password akun @${usernameVal} telah di-reset otomatis ke pengaturan awal: "123".`,
+            () => {
+              // Restore modal button text state when closed
+              document.getElementById('btn-confirm-cancel').classList.remove('hidden');
+              document.getElementById('btn-confirm-ok').innerText = "Ya, Hapus";
+            }
+          );
+          // Customize modal temporarily to show single acknowledge button
+          document.getElementById('btn-confirm-cancel').classList.add('hidden');
+          document.getElementById('btn-confirm-ok').innerText = "Saya Mengerti";
+
+          // Clear password input
+          passwordInput.value = "";
+        } else {
+          showToast(`Password salah! Sisa percobaan: ${sisaPercobaan}x sebelum reset otomatis ke "123".`, "error");
+        }
         return;
       }
 
@@ -748,19 +814,40 @@
         return;
       }
 
+      // Reset attempts on successful login
+      loginAttempts[usernameVal] = 0;
+
       currentUser = matchedUser;
       showToast(`Selamat datang kembali, ${currentUser.nama}!`, "success");
       enterDashboard();
     });
 
-    document.getElementById('logout-btn').addEventListener('click', function() {
+    // GLOBAL LOGOUT FUNCTION
+    function logoutUser() {
       currentUser = null;
+      
+      // Hide Top Header completely
+      const header = document.getElementById('app-header');
+      header.classList.remove('flex');
+      header.classList.add('hidden');
+
       userBadge.classList.add('hidden');
+      userBadge.classList.remove('flex');
       appContainer.classList.add('hidden');
       loginContainer.classList.remove('hidden');
       sidebar.classList.add('-translate-x-full');
-      showToast("Berhasil keluar.", "success");
-    });
+      
+      // Reset password field and visibility to hidden
+      passwordInput.value = "";
+      passwordInput.type = "password";
+      togglePasswordIcon.setAttribute('data-lucide', 'eye');
+      lucide.createIcons();
+
+      showToast("Berhasil keluar dari akun.", "success");
+    }
+
+    document.getElementById('logout-btn').addEventListener('click', logoutUser);
+    document.getElementById('logout-btn-top').addEventListener('click', logoutUser);
 
     // Toggle Sidebar Menu
     menuBtn.addEventListener('click', () => {
@@ -775,8 +862,14 @@
       loginContainer.classList.add('hidden');
       appContainer.classList.remove('hidden');
       
-      // Update User Badge header
+      // Show Top Header (flex layout)
+      const header = document.getElementById('app-header');
+      header.classList.remove('hidden');
+      header.classList.add('flex');
+
+      // Update User Badge header (Flex Layout on top-right)
       userBadge.classList.remove('hidden');
+      userBadge.classList.add('flex');
       document.getElementById('current-user-role').innerText = currentUser.role.toUpperCase();
       document.getElementById('current-user-name').innerText = currentUser.nama;
       document.getElementById('welcome-message').innerText = `Halo, Selamat Datang ${currentUser.nama}!`;
@@ -1110,6 +1203,7 @@
       );
     }
 
+    // Lightbox viewer
     function viewPhoto(base64Str, title) {
       document.getElementById('photo-modal-title').innerText = title;
       document.getElementById('photo-modal-img').src = base64Str;
@@ -1280,7 +1374,7 @@
               
               ${currentUser.role === 'admin' ? `
                 <button onclick="sendFonnteWhatsApp('${pUser}', '${batchName}', ${totalUserAmount})" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] shadow-sm transition-all flex items-center space-x-1 font-medium">
-                  <i data-lucide="send" class="w-3 h-3"></i>
+                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
                   <span>Kirim Invoice WA (Fonnte)</span>
                 </button>
               ` : ''}
@@ -1629,7 +1723,7 @@
             <span class="block text-slate-700 font-bold">${item.noOrderShopee}</span>
             <span class="text-[9px] text-slate-400">${item.tanggal || ''}</span>
             
-            <!-- REVISED: Note/Keterangan rendering based on roles -->
+            <!-- Note/Keterangan rendering based on roles -->
             ${isAdmin ? `
               <div class="mt-1.5 flex items-center gap-1">
                 <span class="text-[9px] text-pink-pastel font-bold shrink-0">Note:</span>
@@ -1758,7 +1852,7 @@
       );
     }
 
-    // PDF receipt print out for a refund shopee transaction including Notes
+    // PDF receipt print out
     function printRefundReceipt(id) {
       const ref = refunds.find(r => r.id === id);
       if (!ref) return;
@@ -2067,7 +2161,8 @@
             <input type="text" value="${u.username}" placeholder="Ubah Username" ${isMainAdmin ? 'disabled' : ''} onchange="updateUserField('${u.username}', 'username', this.value)" 
               class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-pink-pastel w-28 disabled:bg-slate-100 disabled:text-slate-400 font-medium">
 
-            <input type="password" value="${u.password}" placeholder="Password" onchange="updateUserField('${u.username}', 'password', this.value)" 
+            <!-- Password Terlihat: Diubah dari type="password" menjadi type="text" -->
+            <input type="text" value="${u.password}" placeholder="Password" onchange="updateUserField('${u.username}', 'password', this.value)" 
               class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-pink-pastel w-24 font-medium">
 
             <input type="text" value="${u.phone || ''}" placeholder="No WA (cth: 628...)" onchange="updateUserField('${u.username}', 'phone', this.value)" 
@@ -2096,7 +2191,16 @@
       if (idx !== -1) {
         users[idx][field] = value;
         localStorage.setItem('bs_users', JSON.stringify(users));
+
+        // SINKRONISASI REAL-TIME NAMA DAN HEADER
+        if (currentUser && currentUser.username === username) {
+          currentUser[field] = value;
+          document.getElementById('current-user-name').innerText = currentUser.nama;
+          document.getElementById('welcome-message').innerText = `Halo, Selamat Datang ${currentUser.nama}!`;
+        }
+
         showToast(`Data pengguna @${username} berhasil diperbarui!`, "success");
+        renderUserManagement();
       }
     }
 
