@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Warehouse Bonin Store</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+    .sidebar-active { background-color: #4f46e5; color: white; }
+    .loader { border-top-color: #4f46e5; animation: spinner 0.6s linear infinite; }
+    @keyframes spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="antialiased text-slate-800">
+
+  <div id="loadingOverlay" class="fixed inset-0 bg-white/80 z-50 flex flex-col items-center justify-center">
+    <div class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-12 w-12 mb-4"></div>
+    <p class="text-sm font-semibold text-indigo-600 animate-pulse">Menghubungkan ke Cloud Database Bonin Store...</p>
+  </div>
+
+  <div id="toast" class="fixed top-5 right-5 z-50 transform translate-x-full transition-all duration-300 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3">
+    <i id="toastIcon" class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toastMessage" class="text-sm font-medium">Aksi berhasil!</span>
+  </div>
+
+  <div id="loginPage" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-slate-100 p-4">
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 bg-indigo-600 text-white rounded-2xl flex items-center justify-center mx-auto text-2xl font-bold shadow-lg shadow-indigo-200 mb-4">B</div>
+        <h1 class="text-2xl font-bold text-slate-900">Warehouse Bonin Store</h1>
+        <p class="text-sm text-slate-500 mt-1">Silakan masuk menggunakan akun Anda</p>
+      </div>
+      <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Username</label>
+          <input type="text" id="username" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" placeholder="Masukkan username">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-2">Password</label>
+          <input type="password" id="password" required class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" placeholder="••••••••">
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 rounded-xl shadow-lg shadow-indigo-100 transition duration-200">Masuk Aplikasi</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="mainApp" class="hidden min-h-screen flex flex-col md:flex-row">
+    <aside class="w-full md:w-64 bg-slate-900 text-slate-400 flex flex-col border-r border-slate-800">
+      <div class="p-6 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-8 h-8 bg-indigo-600 text-white font-bold rounded-lg flex items-center justify-center text-sm">B</div>
+          <span class="font-bold text-white text-lg tracking-wide">Bonin Cloud</span>
+        </div>
+        <span id="userBadge" class="text-[10px] uppercase font-bold bg-indigo-500/20 text-indigo-400 px-2 py-1 rounded-md">Role</span>
+      </div>
+      <nav class="flex-1 p-4 space-y-1.5" id="navigationMenu">
+        </nav>
+      <div class="p-4 border-t border-slate-800">
+        <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl text-rose-400 hover:bg-rose-500/10 transition">
+          <i class="fa-solid fa-arrow-right-from-bracket"></i> Keluar Sistem
+        </button>
+      </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col overflow-x-hidden">
+      <header class="bg-white border-b border-slate-200 px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 id="currentMenuTitle" class="text-xl font-bold text-slate-900">Dashboard Utama</h2>
+          <p class="text-xs text-slate-400 mt-0.5" id="currentMenuDesc">Ringkasan aktivitas pergudangan real-time</p>
+        </div>
+        <div class="flex items-center gap-4">
+          <div class="text-right">
+            <p id="profileName" class="text-sm font-semibold text-slate-900">Nama User</p>
+            <p id="profileRole" class="text-xs text-slate-400 capitalize">Role</p>
+          </div>
+          <div class="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-600 font-bold border border-slate-200" id="avatarInitial">U</div>
+        </div>
+      </header>
+
+      <div class="flex-1 p-8" id="viewContainer">
+        </div>
+    </main>
+  </div>
+
+  <script>
+    // State Global Aplikasi
+    let database = { users: [], barang: [], invoices: [], refunds: [] };
+    let currentUser = null;
+    let activeMenu = 'dashboard';
+
+    // Booting pertama kali: Ambil data dari Google Sheets Cloud
+    window.addEventListener('DOMContentLoaded', () => {
+      fetchCloudData();
+    });
+
+    function fetchCloudData() {
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler((response) => {
+          showLoading(false);
+          if (response.success) {
+            database = response;
+            console.log("Database Sync Sukses:", database);
+            // Cek jika sesi login masih ada (opsional) atau pertahankan halaman login
+          } else {
+            showToast("Gagal memuat database: " + response.message, "error");
+          }
+        })
+        .withFailureHandler((err) => {
+          showLoading(false);
+          showToast("Koneksi gagal: " + err, "error");
+        })
+        .getAllData();
+    }
+
+    // Sistem Navigasi & Render Konten Berdasarkan Role Pengguna
+    const menuConfig = {
+      dashboard: { title: "Dashboard", desc: "Statistik global gudang", icon: "fa-chart-pie", allowed: ["admin", "staff", "agen"] },
+      barang: { title: "Data Barang", desc: "Kelola logistik gudang & resi", icon: "fa-box-archive", allowed: ["admin", "staff", "agen"] },
+      invoices: { title: "Invoices", desc: "Tagihan shipping fee customer", icon: "fa-file-invoice-dollar", allowed: ["admin", "staff", "agen"] },
+      refunds: { title: "Refund Shopee", desc: "Pencatatan klaim pengembalian dana", icon: "fa-money-bill-transfer", allowed: ["admin", "staff"] },
+      users: { title: "Manajemen User", desc: "Pengaturan akun karyawan & agen", icon: "fa-users-gear", allowed: ["admin"] }
+    };
+
+    function renderSidebarMenu() {
+      const menuNav = document.getElementById('navigationMenu');
+      menuNav.innerHTML = '';
+      
+      for (const [key, menu] of Object.entries(menuConfig)) {
+        if (menu.allowed.includes(currentUser.role)) {
+          const btn = document.createElement('button');
+          btn.className = `w-full flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition duration-150 ${activeMenu === key ? 'sidebar-active shadow-lg shadow-indigo-600/10' : 'hover:bg-slate-800 hover:text-white'}`;
+          btn.innerHTML = `<i class="fa-solid ${menu.icon} text-base"></i> ${menu.title}`;
+          btn.onclick = () => switchMenu(key);
+          menuNav.appendChild(btn);
+        }
+      }
+    }
+
+    function switchMenu(menuKey) {
+      activeMenu = menuKey;
+      document.getElementById('currentMenuTitle').innerText = menuConfig[menuKey].title;
+      document.getElementById('currentMenuDesc').innerText = menuConfig[menuKey].desc;
+      renderSidebarMenu();
+      
+      const container = document.getElementById('viewContainer');
+      
+      if (menuKey === 'dashboard') renderDashboardView(container);
+      else if (menuKey === 'barang') renderBarangView(container);
+      else if (menuKey === 'invoices') renderInvoicesView(container);
+      else if (menuKey === 'refunds') renderRefundsView(container);
+      else if (menuKey === 'users') renderUsersView(container);
+    }
+
+    // --- VIEW INTERFACES GENERATORS ---
+
+    function renderDashboardView(el) {
+      // Filter data sesuai hak akses (Agen hanya bisa melihat datanya sendiri)
+      const filteredBarang = currentUser.role === 'agen' ? database.barang.filter(b => b.pemilik === currentUser.username) : database.barang;
+      const filteredInvoice = currentUser.role === 'agen' ? database.invoices.filter(i => i.pemilik === currentUser.username) : database.invoices;
+
+      el.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4"><span class="text-xs uppercase font-bold tracking-wider text-slate-400">Total Barang</span><div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center"><i class="fa-solid fa-box"></i></div></div>
+            <h3 class="text-3xl font-bold text-slate-900">${filteredBarang.length} <span class="text-sm font-normal text-slate-400">Pcs</span></h3>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4"><span class="text-xs uppercase font-bold tracking-wider text-slate-400">Total Tagihan</span><div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-receipt"></i></div></div>
+            <h3 class="text-3xl font-bold text-slate-900">${filteredInvoice.length} <span class="text-sm font-normal text-slate-400">Invoice</span></h3>
+          </div>
+          <div class="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-4"><span class="text-xs uppercase font-bold tracking-wider text-slate-400">Akun Terhubung</span><div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center"><i class="fa-solid fa-circle-user"></i></div></div>
+            <h3 class="text-lg font-bold text-slate-900 capitalize">${currentUser.nama}</h3>
+            <p class="text-xs text-slate-400 mt-1">Status: ${currentUser.status}</p>
+          </div>
+        </div>
+        <div class="bg-indigo-900 text-white rounded-3xl p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-xl shadow-indigo-900/10">
+          <div>
+            <h4 class="text-xl font-bold mb-1">Selamat Datang di Portal Gudang Bonin Store</h4>
+            <p class="text-indigo-200 text-sm max-w-xl">Semua data tersinkronisasi secara aman di cloud database. Silakan gunakan menu samping untuk mulai mengelola atau melihat riwayat logistik.</p>
+          </div>
+          <button onclick="fetchCloudData()" class="bg-white/10 hover:bg-white/20 text-white text-sm font-semibold px-6 py-3 rounded-xl transition"><i class="fa-solid fa-rotate mr-2"></i> Sinkronisasi Ulang</button>
+        </div>
+      `;
+    }
+
+    function renderBarangView(el) {
+      const isReadonly = currentUser.role === 'agen';
+      const items = isReadonly ? database.barang.filter(b => b.pemilik === currentUser.username) : database.barang;
+
+      let rowsHtml = items.map(b => `
+        <tr class="border-b border-slate-100 hover:bg-slate-50/50">
+          <td class="px-6 py-4 text-sm font-semibold text-indigo-600">${b.id}</td>
+          <td class="px-6 py-4 text-sm text-slate-700 font-medium">${b.resi}</td>
+          <td class="px-6 py-4 text-sm text-slate-500">${b.detail}</td>
+          <td class="px-6 py-4 text-sm text-slate-600 font-medium">${b.pemilik}</td>
+          <td class="px-6 py-4 text-sm text-slate-400">${b.shippingBatch || '-'}</td>
+          <td class="px-6 py-4 text-sm">${isReadonly ? '' : `<button onclick="deleteRowItem('Database_Barang', '${b.id}')" class="text-rose-500 hover:text-rose-700 text-xs font-semibold"><i class="fa-solid fa-trash"></i> Hapus</button>`}</td>
+        </tr>
+      `).join('');
+
+      el.innerHTML = `
+        ${isReadonly ? '' : `
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 mb-8">
+          <h4 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Input Barang Masuk Cloud</h4>
+          <form id="formBarang" onsubmit="saveBarang(event)" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" id="b_resi" placeholder="Nomor Resi" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <input type="text" id="b_detail" placeholder="Detail Item / Keterangan" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none">
+            <select id="b_pemilik" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 outline-none">
+              <option value="">Pilih Pemilik (Agen)</option>
+              ${database.users.filter(u => u.role === 'agen').map(u => `<option value="${u.username}">${u.nama}</option>`).join('')}
+            </select>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl transition">Simpan Barang</button>
+          </form>
+        </div>`}
+        <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                  <th class="px-6 py-4">ID Cloud</th><th class="px-6 py-4">Resi</th><th class="px-6 py-4">Detail</th><th class="px-6 py-4">Pemilik</th><th class="px-6 py-4">Batch</th><th class="px-6 py-4">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml || '<tr><td colspan="6" class="text-center py-8 text-slate-400 text-sm">Belum ada data logistik cloud.</td></tr>'}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderInvoicesView(el) {
+      const isReadonly = currentUser.role === 'agen';
+      const items = isReadonly ? database.invoices.filter(i => i.pemilik === currentUser.username) : database.invoices;
+
+      let rowsHtml = items.map(i => `
+        <tr class="border-b border-slate-100 hover:bg-slate-50/50">
+          <td class="px-6 py-4 text-sm font-semibold text-slate-700">${i.id}</td>
+          <td class="px-6 py-4 text-sm text-slate-500">${i.shippingBatch}</td>
+          <td class="px-6 py-4 text-sm text-indigo-600 font-semibold">${i.pemilik}</td>
+          <td class="px-6 py-4 text-sm text-slate-700 font-medium">${i.qty}</td>
+          <td class="px-6 py-4 text-sm font-bold text-slate-900">Rp ${Number(i.total || 0).toLocaleString('id-ID')}</td>
+          <td class="px-6 py-4 text-sm">${isReadonly ? '' : `<button onclick="deleteRowItem('Database_Invoices', '${i.id}')" class="text-rose-500 hover:text-rose-700 text-xs font-semibold"><i class="fa-solid fa-trash"></i></button>`}</td>
+        </tr>
+      `).join('');
+
+      el.innerHTML = `
+        ${isReadonly ? '' : `
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 mb-8">
+          <h4 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Buat Invoice Transaksi Baru</h4>
+          <form id="formInvoice" onsubmit="saveInvoice(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <input type="text" id="i_batch" placeholder="Batch Shipping" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+            <select id="i_pemilik" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="">Pilih Agen</option>
+              ${database.users.filter(u => u.role === 'agen').map(u => `<option value="${u.username}">${u.nama}</option>`).join('')}
+            </select>
+            <input type="number" id="i_qty" placeholder="Qty" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="number" id="i_total" placeholder="Total Tagihan (Rp)" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl transition">Generate Invoice</button>
+          </form>
+        </div>`}
+        <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                  <th class="px-6 py-4">ID Invoice</th><th class="px-6 py-4">Batch</th><th class="px-6 py-4">Customer/Agen</th><th class="px-6 py-4">Qty</th><th class="px-6 py-4">Total Tagihan</th><th class="px-6 py-4">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml || '<tr><td colspan="6" class="text-center py-8 text-slate-400 text-sm">Belum ada riwayat tagihan invoice.</td></tr>'}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderRefundsView(el) {
+      let rowsHtml = database.refunds.map(r => `
+        <tr class="border-b border-slate-100 hover:bg-slate-50/50">
+          <td class="px-6 py-4 text-sm font-semibold text-slate-700">${r.id}</td>
+          <td class="px-6 py-4 text-sm text-slate-600 font-medium">${r.pemilik}</td>
+          <td class="px-6 py-4 text-sm text-indigo-600">${r.noOrderShopee}</td>
+          <td class="px-6 py-4 text-sm font-semibold text-slate-900">Rp ${Number(r.totalRefund || 0).toLocaleString('id-ID')}</td>
+          <td class="px-6 py-4 text-sm">
+            <select onchange="updateLiveStatus('Database_Refunds', '${r.id}', 'statusRefund', this.value)" class="text-xs font-semibold px-2.5 py-1 rounded-full border focus:outline-none ${r.statusRefund === 'Selesai' ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-amber-50 border-amber-200 text-amber-600'}">
+              <option value="Pending" ${r.statusRefund === 'Pending' ? 'selected' : ''}>Pending</option>
+              <option value="Selesai" ${r.statusRefund === 'Selesai' ? 'selected' : ''}>Selesai</option>
+            </select>
+          </td>
+          <td class="px-6 py-4 text-sm text-slate-400">${r.keterangan || '-'}</td>
+        </tr>
+      `).join('');
+
+      el.innerHTML = `
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 mb-8">
+          <h4 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Input Refund Shopee Customer</h4>
+          <form id="formRefund" onsubmit="saveRefund(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <input type="text" id="r_pemilik" placeholder="Nama Pemilik/Agen" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="text" id="r_shopee" placeholder="No Order Shopee" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="number" id="r_total" placeholder="Nominal Refund (Rp)" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="text" id="r_ket" placeholder="Keterangan Tambahan" class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl transition">Simpan Refund</button>
+          </form>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                  <th class="px-6 py-4">ID</th><th class="px-6 py-4">Pemilik</th><th class="px-6 py-4">No Shopee</th><th class="px-6 py-4">Total</th><th class="px-6 py-4">Status</th><th class="px-6 py-4">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml || '<tr><td colspan="6" class="text-center py-8 text-slate-400 text-sm">Belum ada riwayat refund.</td></tr>'}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderUsersView(el) {
+      let rowsHtml = database.users.map(u => `
+        <tr class="border-b border-slate-100 hover:bg-slate-50/50">
+          <td class="px-6 py-4 text-sm font-semibold text-slate-900">${u.nama}</td>
+          <td class="px-6 py-4 text-sm text-slate-600 font-medium">${u.username}</td>
+          <td class="px-6 py-4 text-sm text-slate-400">${u.password}</td>
+          <td class="px-6 py-4 text-sm"><span class="px-2.5 py-1 rounded-md text-xs uppercase font-bold tracking-wider ${u.role === 'admin' ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-600'}">${u.role}</span></td>
+          <td class="px-6 py-4 text-sm">
+            <select onchange="updateLiveStatus('Database_Users', '${u.username}', 'status', this.value)" class="text-xs font-semibold px-2 py-0.5 rounded border ${u.status === 'aktif' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-rose-50 text-rose-600 border-rose-200'}">
+              <option value="aktif" ${u.status === 'aktif' ? 'selected' : ''}>Aktif</option>
+              <option value="nonaktif" ${u.status === 'nonaktif' ? 'selected' : ''}>Nonaktif</option>
+            </select>
+          </td>
+        </tr>
+      `).join('');
+
+      el.innerHTML = `
+        <div class="bg-white border border-slate-200 rounded-3xl p-6 mb-8">
+          <h4 class="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4">Daftarkan User Baru (Karyawan/Agen)</h4>
+          <form id="formUser" onsubmit="saveUser(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <input type="text" id="u_nama" placeholder="Nama Lengkap" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="text" id="u_user" placeholder="Username" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="text" id="u_pass" placeholder="Password Akses" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+            <select id="u_role" required class="px-4 py-2.5 text-sm rounded-xl border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500">
+              <option value="staff">Staff Gudang</option>
+              <option value="agen">Agen / Customer</option>
+              <option value="admin">Administrator</option>
+            </select>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl transition">Daftarkan User</button>
+          </form>
+        </div>
+        <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 text-slate-400 text-xs font-bold uppercase tracking-wider border-b border-slate-200">
+                  <th class="px-6 py-4">Nama</th><th class="px-6 py-4">Username</th><th class="px-6 py-4">Password</th><th class="px-6 py-4">Akses Role</th><th class="px-6 py-4">Status</th>
+                </tr>
+              </thead>
+              <tbody>${rowsHtml}</tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // --- LOGIKA AKSI FORM & TRANSAKSI REAL-TIME KE SPREADSHEET ---
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const userVal = document.getElementById('username').value.trim();
+      const passVal = document.getElementById('password').value;
+
+      const userMatch = database.users.find(u => u.username === userVal && u.password === passVal);
+      
+      if (userMatch) {
+        if (userMatch.status !== 'aktif') {
+          showToast("Akun Anda dinonaktifkan oleh administrator.", "error");
+          return;
+        }
+        currentUser = userMatch;
+        document.getElementById('loginPage').classList.add('hidden');
+        document.getElementById('mainApp').classList.remove('hidden');
+        
+        document.getElementById('profileName').innerText = currentUser.nama;
+        document.getElementById('profileRole').innerText = currentUser.role;
+        document.getElementById('avatarInitial').innerText = currentUser.nama.charAt(0).toUpperCase();
+        document.getElementById('userBadge').innerText = currentUser.role;
+
+        switchMenu('dashboard');
+        showToast(`Selamat datang kembali, ${currentUser.nama}!`, "success");
+      } else {
+        showToast("Username atau password salah.", "error");
+      }
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      document.getElementById('mainApp').classList.add('hidden');
+      document.getElementById('loginPage').classList.remove('hidden');
+      document.getElementById('loginForm').reset();
+      showToast("Berhasil keluar sistem.", "success");
+    }
+
+    function saveBarang(e) {
+      e.preventDefault();
+      const item = {
+        id: "BRG-" + Date.now(),
+        resi: document.getElementById('b_resi').value.trim(),
+        detail: document.getElementById('b_detail').value.trim(),
+        pemilik: document.getElementById('b_pemilik').value,
+        tanggalUpdate: new Date().toISOString().split('T')[0],
+        shippingBatch: "", negara: ""
+      };
+      
+      executeInsert('Database_Barang', item, () => switchMenu('barang'));
+    }
+
+    function saveInvoice(e) {
+      e.preventDefault();
+      const item = {
+        id: "INV-" + Date.now(),
+        shippingBatch: document.getElementById('i_batch').value.trim(),
+        resi: "", detail: "",
+        pemilik: document.getElementById('i_pemilik').value,
+        qty: document.getElementById('i_qty').value,
+        rateSharing: 0, feeWh: 0,
+        total: document.getElementById('i_total').value
+      };
+      executeInsert('Database_Invoices', item, () => switchMenu('invoices'));
+    }
+
+    function saveRefund(e) {
+      e.preventDefault();
+      const item = {
+        id: "REF-" + Date.now(),
+        pemilik: document.getElementById('r_pemilik').value.trim(),
+        shippingBatch: "",
+        noOrderShopee: document.getElementById('r_shopee').value.trim(),
+        nominalTransfer: 0, nominalShopee: 0,
+        totalRefund: document.getElementById('r_total').value,
+        statusRefund: "Pending",
+        tanggal: new Date().toISOString().split('T')[0],
+        keterangan: document.getElementById('r_ket').value.trim()
+      };
+      executeInsert('Database_Refunds', item, () => switchMenu('refunds'));
+    }
+
+    function saveUser(e) {
+      e.preventDefault();
+      const item = {
+        nama: document.getElementById('u_nama').value.trim(),
+        username: document.getElementById('u_user').value.trim().toLowerCase(),
+        password: document.getElementById('u_pass').value,
+        role: document.getElementById('u_role').value,
+        status: "aktif", phone: ""
+      };
+      
+      // Cek duplikasi username lokal sebelum kirim
+      if (database.users.some(u => u.username === item.username)) {
+        showToast("Username sudah digunakan!", "error");
+        return;
+      }
+      executeInsert('Database_Users', item, () => switchMenu('users'));
+    }
+
+    // Generic Cloud Insert Runner
+    function executeInsert(sheetName, dataObj, callback) {
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler((res) => {
+          if (res.success) {
+            showToast(res.message, "success");
+            // Refresh database lokal instant
+            google.script.run.withSuccessHandler((freshData) => {
+              database = freshData;
+              showLoading(false);
+              callback();
+            }).getAllData();
+          } else {
+            showLoading(false);
+            showToast("Gagal menyimpan: " + res.message, "error");
+          }
+        })
+        .insertData(sheetName, dataObj);
+    }
+
+    // Generic Cloud Delete Row Runner
+    function deleteRowItem(sheetName, id) {
+      if (!confirm("Apakah Anda yakin ingin menghapus data ini secara permanen dari Cloud Sheets?")) return;
+      showLoading(true);
+      google.script.run
+        .withSuccessHandler((res) => {
+          if (res.success) {
+            showToast(res.message, "success");
+            google.script.run.withSuccessHandler((freshData) => {
+              database = freshData;
+              showLoading(false);
+              switchMenu(activeMenu);
+            }).getAllData();
+          }
+        })
+        .deleteDataRow(sheetName, id);
+    }
+
+    // Live Inline Edit Status (Dropdown change handler)
+    function updateLiveStatus(sheetName, id, fieldName, value) {
+      showToast("Sedang menyinkronkan status...", "success");
+      google.script.run
+        .withSuccessHandler((res) => {
+          if (res.success) {
+            showToast("Status cloud diperbarui!", "success");
+            // update local state
+            const targetArr = sheetName === 'Database_Users' ? database.users : database.refunds;
+            const uniqueKey = sheetName === 'Database_Users' ? 'username' : 'id';
+            const item = targetArr.find(x => x[uniqueKey].toString() === id.toString());
+            if (item) item[fieldName] = value;
+          }
+        })
+        .updateDataField(sheetName, id, fieldName, value);
+    }
+
+    // --- HELPER UTILITY ---
+    function showLoading(status) {
+      document.getElementById('loadingOverlay').style.display = status ? 'flex' : 'none';
+    }
+
+    function showToast(msg, type = "success") {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toastIcon');
+      document.getElementById('toastMessage').innerText = msg;
+      
+      if (type === "success") {
+        icon.className = "fa-solid fa-circle-check text-emerald-400";
+      } else {
+        icon.className = "fa-solid fa-circle-exclamation text-rose-400";
+      }
+      
+      toast.classList.remove('translate-x-full');
+      setTimeout(() => {
+        toast.classList.add('translate-x-full');
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
