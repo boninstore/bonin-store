@@ -1575,6 +1575,184 @@
       lucide.createIcons();
     }
 
+    // Toggle Spreadsheet Import Panel view
+    function toggleImportPanel() {
+      const panel = document.getElementById('admin-mass-import-panel');
+      if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
+        document.getElementById('import-textarea').value = '';
+        cancelImportPreview();
+      } else {
+        panel.classList.add('hidden');
+      }
+    }
+
+    // Process pasted spreadsheet/CSV data
+    function processSpreadsheetData() {
+      const rawText = document.getElementById('import-textarea').value;
+      if (!rawText.trim()) {
+        showToast("Mohon tempelkan data spreadsheet terlebih dahulu!", "error");
+        return;
+      }
+
+      const lines = rawText.split('\n');
+      temporaryParsedImportRows = [];
+      let skippedLinesCount = 0;
+
+      lines.forEach(line => {
+        if (!line.trim()) return;
+
+        // Split standard Excel copy-paste (Tab) or alternative separators (Comma/Semicolon)
+        let cols = line.split('\t');
+        if (cols.length < 3) cols = line.split(';');
+        if (cols.length < 3) cols = line.split(',');
+
+        const batch = cols[0]?.trim() || "";
+        const resi = cols[1]?.trim() || "";
+        const username = cols[2]?.trim().toLowerCase() || "";
+        const detail = cols[3]?.trim() || "-";
+        
+        const rawQty = cols[4]?.replace(/[^0-9.]/g, '') || "0";
+        const qty = parseFloat(rawQty) || 0;
+
+        const rawRate = cols[5]?.replace(/[^0-9.]/g, '') || "0";
+        const rate = parseFloat(rawRate) || 0;
+
+        const rawFee = cols[6]?.replace(/[^0-9.]/g, '') || "0";
+        const fee = parseFloat(rawFee) || 0;
+
+        // Mandatory fields check
+        if (!batch || !resi || !username) {
+          skippedLinesCount++;
+          return;
+        }
+
+        const userObj = users.find(u => u.username === username);
+        const userIsValid = !!userObj;
+
+        temporaryParsedImportRows.push({
+          batch,
+          resi,
+          username,
+          detail,
+          qty,
+          rate,
+          fee,
+          total: (qty * rate) + fee,
+          userIsValid,
+          userRealName: userObj ? userObj.nama : "Tidak Ditemukan"
+        });
+      });
+
+      if (temporaryParsedImportRows.length === 0) {
+        showToast(`Gagal membaca data! ${skippedLinesCount} baris diabaikan karena kolom tidak lengkap.`, "error");
+        return;
+      }
+
+      // Render parsed data in preview table
+      const previewTbody = document.getElementById('import-preview-tbody');
+      previewTbody.innerHTML = '';
+
+      temporaryParsedImportRows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = row.userIsValid ? "hover:bg-slate-50 text-slate-700" : "bg-red-50 text-red-900";
+        tr.innerHTML = `
+          <td class="p-3 font-semibold border-b">${row.batch}</td>
+          <td class="p-3 border-b">${row.resi}</td>
+          <td class="p-3 border-b">@${row.username}</td>
+          <td class="p-3 border-b max-w-[150px] truncate" title="${row.detail}">${row.detail}</td>
+          <td class="p-3 border-b text-right font-semibold">${row.qty}</td>
+          <td class="p-3 border-b text-right font-mono text-[11px]">Rp ${row.rate.toLocaleString('id-ID')}</td>
+          <td class="p-3 border-b text-right font-mono text-[11px]">Rp ${row.fee.toLocaleString('id-ID')}</td>
+          <td class="p-3 border-b text-right font-bold text-emerald-600 font-mono">Rp ${row.total.toLocaleString('id-ID')}</td>
+          <td class="p-3 border-b text-center font-bold">
+            ${row.userIsValid ? 
+              `<span class="text-emerald-600">✓ ${row.userRealName}</span>` : 
+              `<span class="text-pink-pastel">⚠ Akun Tidak Ada</span>`
+            }
+          </td>
+        `;
+        previewTbody.appendChild(tr);
+      });
+
+      document.getElementById('import-preview-box').classList.remove('hidden');
+      showToast(`Berhasil membaca ${temporaryParsedImportRows.length} baris data. Silakan teliti pratinjau sebelum menyimpan!`, "success");
+    }
+
+    function cancelImportPreview() {
+      temporaryParsedImportRows = [];
+      document.getElementById('import-preview-box').classList.add('hidden');
+      document.getElementById('import-preview-tbody').innerHTML = '';
+    }
+
+    // Save Mass Uploaded Data to Database
+    function saveMassImportedData() {
+      if (temporaryParsedImportRows.length === 0) return;
+
+      const invalidRows = temporaryParsedImportRows.filter(r => !r.userIsValid);
+      if (invalidRows.length > 0) {
+        showToast("Tidak bisa menyimpan! Masih ada username pemilik akun yang tidak terdaftar.", "error");
+        return;
+      }
+
+      const mode = document.querySelector('input[name="import-mode"]:checked').value; 
+      const batchesToProcess = [...new Set(temporaryParsedImportRows.map(r => r.batch))];
+
+      if (mode === "replace") {
+        invoices = invoices.filter(inv => !batchesToProcess.includes(inv.shippingBatch));
+      }
+
+      temporaryParsedImportRows.forEach(row => {
+        const newInvoice = {
+          id: "inv-bulk-" + Date.now() + Math.floor(Math.random() * 100000),
+          shippingBatch: row.batch,
+          resi: row.resi,
+          detail: row.detail,
+          pemilik: row.username,
+          qty: row.qty,
+          rateSharing: row.rate,
+          feeWh: row.fee,
+          total: row.total
+        };
+        invoices.push(newInvoice);
+
+        const existingBarangIdx = barang.findIndex(b => b.resi === row.resi);
+        if (existingBarangIdx === -1) {
+          const dateString = new Date().toISOString().split('T')[0];
+          
+          let inferredNegara = "Korea";
+          if (row.resi.toUpperCase().startsWith("CN")) inferredNegara = "China";
+          else if (row.resi.toUpperCase().startsWith("TH")) inferredNegara = "Thailand";
+
+          const newBarang = {
+            id: "brg-bulk-" + Date.now() + Math.floor(Math.random() * 100000),
+            resi: row.resi,
+            detail: row.detail,
+            pemilik: row.username,
+            tanggalUpdate: dateString,
+            foto1: "",
+            foto2: "",
+            shippingBatch: row.batch,
+            negara: inferredNegara
+          };
+          barang.push(newBarang);
+        } else {
+          barang[existingBarangIdx].shippingBatch = row.batch;
+          barang[existingBarangIdx].pemilik = row.username;
+          barang[existingBarangIdx].detail = row.detail;
+        }
+      });
+
+      localStorage.setItem('bs_invoices', JSON.stringify(invoices));
+      localStorage.setItem('bs_barang', JSON.stringify(barang));
+
+      showToast(`Sukses mengimpor massal ${temporaryParsedImportRows.length} tagihan secara instan!`, "success");
+      
+      toggleImportPanel(); 
+      syncShippingBatchDropdown();
+      renderInvoice();
+    }
+
     // Tambah item manual dengan Dropdown Pemilik Akun terdaftar & SINKRON KE BARANG
     function addManualInvoice() {
       const sBatch = document.getElementById('manual-batch').value.trim();
