@@ -5,21 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bonin Store Warehouse</title>
 
-  <!-- Favicon Link -->
-  <link rel="icon" type="image/png" href="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png">
+  <link class="rounded-full" rel="icon" type="image/png" href="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png">
   
-  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   
-  <!-- Google Fonts - Plus Jakarta Sans (Clean, Simple, Professional) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   
-  <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   
-  <!-- jsPDF & AutoTable for PDF Generation -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
@@ -55,7 +50,6 @@
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
 
-  <!-- Floating Custom Toast Notification -->
   <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-white border-2 border-pink-pastel px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-3 max-w-sm">
     <span class="p-1 rounded-full bg-yellow-pastel text-pink-pastel" id="toast-icon">
       <i data-lucide="bell" class="w-4 h-4"></i>
@@ -63,7 +57,6 @@
     <p id="toast-message" class="text-sm font-semibold text-slate-700"></p>
   </div>
 
-  <!-- Custom Confirmation Modal (Replaces Native Confirm) -->
   <div id="custom-confirm-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-50 hidden flex justify-center items-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center border-t-8 border-pink-pastel space-y-4 shadow-2xl transform scale-95 transition-all">
       <div class="p-3 bg-red-100 text-pink-pastel rounded-full w-14 h-14 mx-auto flex items-center justify-center">
@@ -78,34 +71,28 @@
     </div>
   </div>
 
-  <!-- HEADER BAR: Hidden by default on Login Page -->
   <header id="app-header" class="hidden bg-white shadow-md border-b-4 border-yellow-pastel sticky top-0 z-40 px-4 py-3 justify-between items-center">
     <div class="flex items-center space-x-3">
-      <!-- Menu Button (Stripe 3) - Far Left -->
       <button id="menu-btn" class="p-2 rounded-xl bg-purple-pastel hover:bg-opacity-90 transition-all text-white shadow-md flex items-center justify-center" title="Menu">
         <i data-lucide="menu" class="w-5 h-5"></i>
       </button>
 
-      <!-- Logo Header Updated -->
-      <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" 
+      <img src="https://www.image2url.com/r2/default/images/1781624586792-e0953d8c-42b2-4618-adad-2cae65c4932c.jpg" 
            alt="Bonin Store Logo" 
            class="w-10 h-10 rounded-full object-cover border-2 border-pink-pastel shadow-sm">
 
-      <!-- App Title -->
       <div>
         <h1 class="text-xs font-bold text-pink-pastel tracking-wide leading-none uppercase">BONIN STORE</h1>
         <span class="text-[8px] text-purple-pastel font-semibold tracking-wider">Your One-Stop Shop</span>
       </div>
     </div>
     
-    <!-- Right side: User info badge & Top-Right Logout -->
     <div class="flex items-center space-x-3">
       <div id="user-badge" class="hidden items-center space-x-2">
         <div class="flex flex-col text-right">
           <span class="text-[9px] text-slate-400 font-bold leading-none" id="current-user-role">GUEST</span>
           <span class="text-xs font-semibold text-slate-700" id="current-user-name">Not Logged In</span>
         </div>
-        <!-- Logout Button (Pojok Kanan Atas) -->
         <button id="logout-btn-top" class="p-1.5 rounded-xl bg-pink-pastel hover:bg-opacity-90 text-white shadow-sm flex items-center justify-center transition-all hover:scale-105" title="Keluar dari Akun">
           <i data-lucide="log-out" class="w-4 h-4"></i>
         </button>
@@ -113,7 +100,6 @@
     </div>
   </header>
 
-  <!-- COLLAPSIBLE SIDEBAR MENU -->
   <div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-80 bg-white border-r-4 border-yellow-pastel shadow-2xl transform -translate-x-full transition-transform duration-300 flex flex-col">
     <div class="p-5 border-b border-cream flex justify-between items-center bg-cream">
       <div class="flex items-center space-x-2">
@@ -125,12 +111,9 @@
       </button>
     </div>
     
-    <!-- Navigations -->
     <div class="flex-1 p-5 space-y-3 overflow-y-auto" id="nav-links">
-      <!-- Menu items injected by JS -->
-    </div>
+      </div>
 
-    <!-- App Configuration Settings (Admin Only) -->
     <div id="fonnte-config-box" class="p-4 bg-yellow-pastel bg-opacity-20 m-4 rounded-2xl border border-dashed border-yellow-pastel hidden">
       <h4 class="text-xs font-bold text-slate-700 flex items-center gap-1 mb-2">
         <i data-lucide="settings" class="w-3.5 h-3.5 text-pink-pastel"></i> Pengaturan Fonnte API
@@ -147,12 +130,10 @@
     </div>
   </div>
 
-  <!-- AUTHENTICATION PAGE (LOGIN) -->
   <main id="login-container" class="flex-1 flex flex-col justify-center items-center px-4 py-12">
     <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border-t-8 border-pink-pastel overflow-hidden">
-      <!-- Logo Banner Container (Brighter Background & Bottom Border added) -->
       <div class="p-8 text-center bg-rose-50 bg-opacity-60 border-b border-slate-100">
-        <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" 
+        <img src="https://www.image2url.com/r2/default/images/1781624586792-e0953d8c-42b2-4618-adad-2cae65c4932c.jpg" 
              alt="Bonin Store Logo" 
              class="w-24 h-24 mx-auto rounded-full object-cover border-4 border-yellow-pastel shadow-md mb-4">
         <h2 class="text-lg font-bold text-pink-pastel leading-tight">BONIN STORE</h2>
@@ -177,14 +158,12 @@
               <i data-lucide="lock" class="w-4 h-4"></i>
             </span>
             <input type="password" id="password-input" required class="w-full pl-10 pr-10 py-2.5 rounded-2xl border-2 border-slate-100 focus:border-pink-pastel focus:outline-none transition-all text-xs" placeholder="••••••••">
-            <!-- Toggle password visibility button -->
             <button type="button" id="toggle-password-btn" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-pink-pastel transition-colors" title="Lihat Kata Sandi">
               <i data-lucide="eye" id="toggle-password-icon" class="w-4 h-4"></i>
             </button>
           </div>
         </div>
 
-        <!-- Remember Me Checkbox -->
         <div class="flex items-center justify-between pb-1">
           <label class="flex items-center space-x-2.5 cursor-pointer select-none">
             <input type="checkbox" id="remember-me" class="w-4 h-4 rounded border-slate-300 text-pink-pastel focus:ring-pink-pastel focus:ring-opacity-20 accent-pink-pastel cursor-pointer">
@@ -199,14 +178,12 @@
     </div>
   </main>
 
-  <!-- APP CONTENT CONTAINER (HIDDEN UNTIL LOGIN) -->
   <main id="app-container" class="hidden flex-1 container mx-auto px-4 py-6 space-y-6">
     
-    <!-- DASHBOARD BANNER -->
     <section id="menu-dashboard" class="menu-section space-y-6">
       <div class="bg-white border-2 border-pink-pastel p-6 rounded-3xl shadow-sm text-slate-700 relative overflow-hidden">
         <div class="absolute -right-10 -bottom-10 opacity-20">
-          <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" class="w-55 h-55 rounded-full object-cover">
+          <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" class="w-45 h-45 rounded-full object-cover">
         </div>
         <div class="relative z-10 space-y-2">
           <span class="px-2.5 py-0.5 bg-pink-pastel text-white rounded-full text-[9px] font-bold uppercase tracking-wider">Dashboard</span>
@@ -215,9 +192,7 @@
         </div>
       </div>
 
-      <!-- ANALYTICS CARDS WITH REVISED COUNTRY ICONS -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <!-- Card 1 (Total Resi) -->
         <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 border-b-4 border-pink-pastel flex items-center space-x-3">
           <div class="w-10 h-10 bg-pink-100 text-pink-pastel rounded-xl flex items-center justify-center shadow-inner">
             <i data-lucide="clipboard-list" class="w-5 h-5"></i>
@@ -228,52 +203,46 @@
           </div>
         </div>
 
-        <!-- Card 2 (Korea - REVISED Flag Icon) -->
         <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 border-b-4 border-yellow-pastel flex items-center space-x-3">
           <div class="w-10 h-10 bg-yellow-50 rounded-xl flex items-center justify-center shadow-inner p-1">
             <img src="https://img.icons8.com/?size=100&id=SnmJf31KPyXW&format=png&color=000000" alt="Korea Icon" class="w-8 h-8 object-contain">
           </div>
           <div>
-            <h4 class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Korea 🇰🇷</h4>
+            <h4 class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Korea</h4>
             <span class="text-base font-bold text-slate-700" id="stat-korea">0</span>
           </div>
         </div>
 
-        <!-- Card 3 (China - Flag Icon) -->
         <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 border-b-4 border-purple-pastel flex items-center space-x-3">
           <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center shadow-inner p-1">
             <img src="https://img.icons8.com/?size=100&id=G_yNTaQiMVgQ&format=png&color=000000" alt="China Icon" class="w-8 h-8 object-contain">
           </div>
           <div>
-            <h4 class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">China 🇨🇳</h4>
+            <h4 class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">China</h4>
             <span class="text-base font-bold text-slate-700" id="stat-china">0</span>
           </div>
         </div>
 
-        <!-- Card 4 (Thailand - REVISED Flag Icon) -->
         <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 border-b-4 border-pink-500 flex items-center space-x-3">
           <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center shadow-inner p-1">
             <img src="https://img.icons8.com/?size=100&id=IrLX4C3vtDRK&format=png&color=000000" alt="Thailand Icon" class="w-8 h-8 object-contain">
           </div>
           <div>
-            <h4 class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Thailand 🇹🇭</h4>
+            <h4 class="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Thailand</h4>
             <span class="text-base font-bold text-slate-700" id="stat-thailand">0</span>
           </div>
         </div>
       </div>
 
-      <!-- QUICK SHORTCUTS -->
       <div class="bg-white p-6 rounded-3xl shadow-sm">
         <h3 class="text-sm text-slate-700 font-bold mb-4 flex items-center gap-2">
           <i data-lucide="layout-grid" class="text-pink-pastel w-4 h-4"></i> Menu Navigasi Cepat
         </h3>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="dashboard-shortcuts">
-          <!-- Shortcuts dynamic by role -->
-        </div>
+          </div>
       </div>
     </section>
 
-    <!-- FORM INPUT RESI BARANG -->
     <section id="menu-form-resi" class="menu-section hidden space-y-4">
       <button onclick="switchSection('dashboard')" class="flex items-center space-x-1 text-xs font-bold text-pink-pastel hover:text-purple-pastel transition-colors mb-2 bg-white px-3 py-1.5 rounded-xl border border-cream shadow-sm w-fit font-medium">
         <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -304,9 +273,9 @@
           <div>
             <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Negara Tujuan</label>
             <select id="resi-negara" required class="w-full px-4 py-2 rounded-xl border border-slate-200 focus:border-pink-pastel focus:outline-none transition-all text-xs bg-white">
-              <option value="Korea">Korea 🇰🇷</option>
-              <option value="China">China 🇨🇳</option>
-              <option value="Thailand">Thailand 🇹🇭</option>
+              <option value="Korea">Korea</option>
+              <option value="China">China</option>
+              <option value="Thailand">Thailand</option>
             </select>
           </div>
 
@@ -318,7 +287,6 @@
       </div>
     </section>
 
-    <!-- DAFTAR BARANG (COLUMNAR TABLE VIEW & INLINE EDITING) -->
     <section id="menu-daftar-barang" class="menu-section hidden space-y-4">
       <button onclick="switchSection('dashboard')" class="flex items-center space-x-1 text-xs font-bold text-pink-pastel hover:text-purple-pastel transition-colors mb-2 bg-white px-3 py-1.5 rounded-xl border border-cream shadow-sm w-fit font-medium">
         <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -336,7 +304,6 @@
           </div>
         </div>
 
-        <!-- SEARCH BAR -->
         <div class="relative w-full md:w-64">
           <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
             <i data-lucide="search" class="w-3.5 h-3.5"></i>
@@ -345,23 +312,21 @@
         </div>
       </div>
 
-      <!-- NEGARA TABS -->
       <div class="flex space-x-2 border-b-2 border-cream pb-2 overflow-x-auto">
         <button onclick="filterNegara('Semua')" id="tab-negara-Semua" class="tab-negara px-4 py-2 text-xs font-bold rounded-xl transition-all bg-pink-pastel text-white shadow-sm font-medium">
           Semua 🌏
         </button>
         <button onclick="filterNegara('Korea')" id="tab-negara-Korea" class="tab-negara px-4 py-2 text-xs font-bold rounded-xl transition-all bg-white text-slate-600 border border-slate-200 font-medium">
-          Korea 🇰🇷
+          Korea
         </button>
         <button onclick="filterNegara('China')" id="tab-negara-China" class="tab-negara px-4 py-2 text-xs font-bold rounded-xl transition-all bg-white text-slate-600 border border-slate-200 font-medium">
-          China 🇨🇳
+          China
         </button>
         <button onclick="filterNegara('Thailand')" id="tab-negara-Thailand" class="tab-negara px-4 py-2 text-xs font-bold rounded-xl transition-all bg-white text-slate-600 border border-slate-200 font-medium">
-          Thailand 🇹🇭
+          Thailand
         </button>
       </div>
 
-      <!-- RESPONSIVE TABLE VIEW FOR DAFTAR BARANG -->
       <div class="bg-white rounded-3xl shadow-md overflow-hidden border border-cream">
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse min-w-[1000px]">
@@ -378,14 +343,12 @@
               </tr>
             </thead>
             <tbody id="barang-table-body" class="divide-y divide-slate-100 text-xs">
-              <!-- Injected dynamically -->
-            </tbody>
+              </tbody>
           </table>
         </div>
       </div>
     </section>
 
-    <!-- INVOICE SECTION -->
     <section id="menu-invoice" class="menu-section hidden space-y-4">
       <button onclick="switchSection('dashboard')" class="flex items-center space-x-1 text-xs font-bold text-pink-pastel hover:text-purple-pastel transition-colors mb-2 bg-white px-3 py-1.5 rounded-xl border border-cream shadow-sm w-fit font-medium">
         <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -403,7 +366,6 @@
           </div>
         </div>
 
-        <!-- SEARCH INVOICE -->
         <div class="relative w-full md:w-64">
           <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
             <i data-lucide="search" class="w-3.5 h-3.5"></i>
@@ -412,15 +374,14 @@
         </div>
       </div>
 
-      <!-- FILTER PANEL -->
       <div class="bg-white p-4 rounded-3xl shadow-sm border border-yellow-pastel border-opacity-45 flex flex-wrap gap-4 items-center">
         <div class="flex flex-col min-w-[150px]">
           <label class="text-[9px] font-bold text-slate-400 uppercase mb-1">Negara Tujuan</label>
           <select id="filter-invoice-negara" onchange="syncShippingBatchDropdown(); renderInvoice();" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none bg-white font-medium">
             <option value="Semua">Semua Negara 🌏</option>
-            <option value="Korea">Korea 🇰🇷</option>
-            <option value="China">China 🇨🇳</option>
-            <option value="Thailand">Thailand 🇹🇭</option>
+            <option value="Korea">Korea</option>
+            <option value="China">China</option>
+            <option value="Thailand">Thailand</option>
           </select>
         </div>
 
@@ -431,11 +392,10 @@
           </select>
         </div>
 
-        <div class="text-xs text-slate-400 font-semibold font-medium">
+        <div class="text-xs text-slate-400 font-semibold font-medium flex-1">
           *silahkan pilih negara batch barang kalian disini.
         </div>
-      </div>
-      
+
         <div id="admin-import-toggle-btn-container" class="hidden">
           <button onclick="toggleImportPanel()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md transition-all flex items-center space-x-1.5 font-medium">
             <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
@@ -443,26 +403,24 @@
           </button>
         </div>
       </div>
-      
-      <!-- ADMIN ADD MANUAL INVOICE ROW -->
+
       <div id="admin-manual-invoice" class="bg-white p-5 rounded-3xl shadow-sm border border-yellow-pastel hidden space-y-3">
         <h3 class="text-xs text-slate-700 font-bold flex items-center gap-2 font-medium">
-          <i data-lucide="plus-circle" class="text-pink-pastel w-4 h-4"></i> Tambah Item
+          <i data-lucide="plus-circle" class="text-pink-pastel w-4 h-4"></i> Tambah Item Manual
         </h3>
         <div class="grid grid-cols-1 sm:grid-cols-6 gap-3">
           <input type="text" id="manual-batch" placeholder="Shipping Batch (Manual)" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel font-medium">
           <input type="text" id="manual-resi" placeholder="No Resi" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel font-medium">
           
           <select id="manual-user" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel bg-white font-medium">
-            <!-- Dynamically populated -->
-          </select>
+            </select>
           
           <input type="text" id="manual-detail" placeholder="Detail Barang" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel col-span-1 sm:col-span-2 font-medium">
           <button onclick="addManualInvoice()" class="py-2 px-4 rounded-xl bg-pink-pastel text-white font-bold text-xs shadow-sm hover:bg-opacity-90 font-medium">Tambah</button>
         </div>
       </div>
 
-            <!-- SPREADSHEET ONLY IMPORT PANEL -->
+      <!-- SPREADSHEET ONLY IMPORT PANEL -->
       <div id="admin-mass-import-panel" class="bg-white p-6 rounded-3xl shadow-md border-2 border-emerald-400 hidden space-y-5">
         <div class="flex justify-between items-center border-b border-slate-100 pb-3">
           <h3 class="text-sm text-slate-700 font-bold flex items-center gap-2">
@@ -534,14 +492,11 @@
           </div>
         </div>
       </div>
-      
-      <!-- LIST CONTAINER FOR INVOICE BATCHES -->
+
       <div id="invoice-batch-wrapper" class="space-y-6">
-        <!-- Injected dynamically -->
-      </div>
+        </div>
     </section>
 
-    <!-- FORM REFUND SHOPEE -->
     <section id="menu-refund-shopee" class="menu-section hidden space-y-4">
       <button onclick="switchSection('dashboard')" class="flex items-center space-x-1 text-xs font-bold text-pink-pastel hover:text-purple-pastel transition-colors mb-2 bg-white px-3 py-1.5 rounded-xl border border-cream shadow-sm w-fit font-medium">
         <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -555,7 +510,7 @@
           </div>
           <div>
             <h2 class="text-md font-bold text-pink-pastel">Form Refund Shopee</h2>
-            <p class="text-xs text-slate-400">Hanya untuk user yang mempunyai lebihan pembayaran.</p>
+            <p class="text-xs text-slate-400">Hanya untuk user yang mempunyai lebihan nominal untuk check out Shopee.</p>
           </div>
         </div>
 
@@ -570,7 +525,6 @@
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- LEFT: INPUT FORM -->
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 h-fit space-y-4">
           <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
             <i data-lucide="plus-circle" class="w-4 h-4 text-pink-pastel"></i> Catat Refund Baru
@@ -579,15 +533,13 @@
             <div>
               <label class="block text-slate-500 font-bold mb-1 uppercase tracking-wider">Pemilik Akun</label>
               <select id="refund-user" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:border-pink-pastel font-medium">
-                <!-- Injected via JS -->
-              </select>
+                </select>
             </div>
 
             <div>
               <label class="block text-slate-500 font-bold mb-1 uppercase tracking-wider">Shipping Batch</label>
               <select id="refund-batch" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:border-pink-pastel font-medium">
-                <!-- Injected via JS -->
-              </select>
+                </select>
             </div>
 
             <div>
@@ -606,13 +558,11 @@
               </div>
             </div>
 
-            <!-- Total Refund input box -->
             <div>
               <label class="block text-slate-500 font-bold mb-1 uppercase tracking-wider">Total Refund (Rp)</label>
               <input type="number" id="refund-total-amount" required placeholder="50000" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel font-medium font-mono text-pink-pastel font-bold bg-white">
             </div>
 
-            <!-- Note / Keterangan -->
             <div>
               <label class="block text-slate-500 font-bold mb-1 uppercase tracking-wider">Note / Keterangan</label>
               <textarea id="refund-note" rows="2" placeholder="Contoh: Refund barang kosong / kelebihan transfer" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium" style="resize: none;"></textarea>
@@ -626,7 +576,6 @@
           </form>
         </div>
 
-        <!-- RIGHT: TABLE LIST -->
         <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-4">
           <div class="flex justify-between items-center flex-wrap gap-2">
             <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">
@@ -645,7 +594,7 @@
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[650px]">
               <thead>
-                <tr class="bg-pink-pastel bg-opacity-10 text-white font-bold text-xs">
+                <tr class="bg-pink-pastel bg-opacity-10 text-pink-pastel font-bold text-xs">
                   <th class="p-3 font-medium">No. Order Shopee / Keterangan</th>
                   <th class="p-3 font-medium">Batch</th>
                   <th class="p-3 font-medium">User</th>
@@ -656,15 +605,13 @@
                 </tr>
               </thead>
               <tbody id="refund-table-body" class="divide-y divide-slate-100 text-xs">
-                <!-- Injected via JS -->
-              </tbody>
+                </tbody>
             </table>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- USER MANAGEMENT (ADMIN ONLY) -->
     <section id="menu-user-management" class="menu-section hidden space-y-4">
       <button onclick="switchSection('dashboard')" class="flex items-center space-x-1 text-xs font-bold text-pink-pastel hover:text-purple-pastel transition-colors mb-2 bg-white px-3 py-1.5 rounded-xl border border-cream shadow-sm w-fit font-medium">
         <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -683,7 +630,6 @@
         </div>
       </div>
 
-      <!-- ADD NEW USER FORM -->
       <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-150 space-y-4">
         <h3 class="text-xs text-slate-700 font-bold flex items-center gap-2 font-medium">
           <i data-lucide="user-plus" class="text-pink-pastel w-4 h-4"></i> Tambah Pengguna Baru
@@ -691,7 +637,6 @@
         <form id="add-user-form" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
           <input type="text" id="new-user-nama" required placeholder="Nama Lengkap" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
           <input type="text" id="new-user-username" required placeholder="Username" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
-          <!-- Password Input (Opsi password terlihat: Diubah dari type password ke text) -->
           <input type="text" id="new-user-password" required placeholder="Password" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
           <input type="tel" id="new-user-phone" required placeholder="No WA (Contoh: 628123456789)" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
           <select id="new-user-role" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel bg-white font-medium">
@@ -707,20 +652,17 @@
         </form>
       </div>
 
-      <!-- LIST OF USERS -->
       <div class="bg-white rounded-3xl shadow-md overflow-hidden">
         <div class="p-4 bg-cream bg-opacity-40 border-b border-cream">
           <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider font-medium">Daftar Akun Pengguna</h4>
         </div>
         <div class="divide-y divide-slate-100" id="user-list-wrapper">
-          <!-- User rows loaded here -->
-        </div>
+          </div>
       </div>
     </section>
 
   </main>
 
-  <!-- LIGHTBOX / PHOTO PREVIEW MODAL -->
   <div id="photo-modal" class="fixed inset-0 bg-slate-900 bg-opacity-80 z-50 hidden flex justify-center items-center p-4">
     <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative">
       <button onclick="closePhotoModal()" class="absolute top-3 right-3 p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors z-10">
@@ -778,6 +720,7 @@
     let currentUser = null;
     let activeTabNegara = "Semua";
     const loginAttempts = {}; // Tracks failed logins per username
+    let temporaryParsedImportRows = []; // Temporary storage for mass upload
 
     // Dynamic confirmation callback store
     let confirmCallback = null;
@@ -994,8 +937,10 @@
       if (currentUser.role === 'admin') {
         document.getElementById('fonnte-config-box').classList.remove('hidden');
         document.getElementById('fonnte-token-input').value = fonnteToken;
+        document.getElementById('admin-import-toggle-btn-container').classList.remove('hidden');
       } else {
         document.getElementById('fonnte-config-box').classList.add('hidden');
+        document.getElementById('admin-import-toggle-btn-container').classList.add('hidden');
       }
 
       renderMenuLinks();
@@ -1175,43 +1120,40 @@
         const tr = document.createElement('tr');
         tr.className = "hover:bg-cream hover:bg-opacity-20 transition-all font-semibold text-slate-700";
         tr.innerHTML = `
-          <!-- No Resi (Bisa diedit admin & user) -->
           <td class="p-3 min-w-[120px]">
             <input type="text" value="${item.resi}" onchange="updateBarangField('${item.id}', 'resi', this.value)" 
-              class="w-full bg-cream bg-opacity-20 hover:bg-opacity-50 focus:bg-white px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel font-medium">
+              class="w-full bg-cream bg-opacity-20 hover:bg-opacity-50 focus:bg-white px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel font-medium"
+              ${isUserRole ? 'disabled' : ''}>
           </td>
 
-          <!-- Detail Barang -->
           <td class="p-3 w-1/3 min-w-[250px]">
             <textarea rows="2" onchange="updateBarangField('${item.id}', 'detail', this.value)" 
-              class="w-full bg-cream bg-opacity-20 hover:bg-opacity-50 focus:bg-white px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel resize-y min-h-[55px] font-medium">${item.detail}</textarea>
+              class="w-full bg-cream bg-opacity-20 hover:bg-opacity-50 focus:bg-white px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel resize-y min-h-[55px] font-medium"
+              ${isUserRole ? 'disabled' : ''}>${item.detail}</textarea>
           </td>
 
-          <!-- Negara Tujuan -->
           <td class="p-3 min-w-[110px]">
             <select onchange="updateBarangField('${item.id}', 'negara', this.value)" 
-              class="w-full bg-cream bg-opacity-20 px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel bg-white font-medium">
+              class="w-full bg-cream bg-opacity-20 px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel bg-white font-medium"
+              ${isUserRole ? 'disabled' : ''}>
               <option value="Korea" ${item.negara === 'Korea' ? 'selected' : ''}>Korea 🇰🇷</option>
               <option value="China" ${item.negara === 'China' ? 'selected' : ''}>China 🇨🇳</option>
               <option value="Thailand" ${item.negara === 'Thailand' ? 'selected' : ''}>Thailand 🇹🇭</option>
             </select>
           </td>
 
-          <!-- Shipping Batch -->
           <td class="p-3 min-w-[110px]">
             <input type="text" value="${item.shippingBatch || ''}" ${!isEditable ? 'disabled' : ''} 
               placeholder="cth: Batch 1A" onchange="updateBarangField('${item.id}', 'shippingBatch', this.value)" 
               class="w-full bg-cream bg-opacity-20 hover:bg-opacity-50 focus:bg-white px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel disabled:bg-slate-50 disabled:text-slate-400 font-medium">
           </td>
 
-          <!-- Tanggal Update -->
           <td class="p-3 min-w-[120px]">
             <input type="date" value="${item.tanggalUpdate || ''}" ${!isEditable ? 'disabled' : ''} 
               onchange="updateBarangField('${item.id}', 'tanggalUpdate', this.value)" 
               class="w-full bg-cream bg-opacity-20 px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel disabled:bg-slate-50 disabled:text-slate-400 font-medium">
           </td>
 
-          <!-- Pemilik Akun -->
           <td class="p-3 min-w-[150px]">
             <select ${!isEditable ? 'disabled' : ''} onchange="updateBarangField('${item.id}', 'pemilik', this.value)" 
               class="w-full bg-cream bg-opacity-20 px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel bg-white disabled:bg-slate-50 disabled:text-slate-400 font-medium">
@@ -1221,15 +1163,13 @@
             </select>
           </td>
 
-          <!-- Foto Update 1 & 2 (User can view but cannot upload/edit) -->
           <td class="p-3 text-center min-w-[160px]">
             <div class="flex flex-col gap-1.5 items-center justify-center font-medium">
-              <!-- Foto 1 Row -->
               <div class="flex items-center space-x-1 justify-between w-full max-w-[140px]">
                 <span class="text-[9px] text-slate-400 font-bold">F1:</span>
                 <div class="flex items-center space-x-1">
                   ${item.foto1 ? `
-                    <button onclick="viewPhoto('${item.foto1}', '${item.resi} - Foto 1')" class="px-2 py-0.5 bg-yellow-pastel hover:bg-opacity-90 text-slate-800 rounded-lg text-[9px] font-bold transition-all shadow-sm">
+                    <button onclick="viewPhotoFromDb('${item.id}', 'foto1')" class="px-2 py-0.5 bg-yellow-pastel hover:bg-opacity-90 text-slate-800 rounded-lg text-[9px] font-bold transition-all shadow-sm">
                       Lihat
                     </button>
                   ` : `<span class="text-[9px] text-slate-300">Belum Ada</span>`}
@@ -1242,12 +1182,11 @@
                 </div>
               </div>
 
-              <!-- Foto 2 Row -->
               <div class="flex items-center space-x-1 justify-between w-full max-w-[140px]">
                 <span class="text-[9px] text-slate-400 font-bold">F2:</span>
                 <div class="flex items-center space-x-1">
                   ${item.foto2 ? `
-                    <button onclick="viewPhoto('${item.foto2}', '${item.resi} - Foto 2')" class="px-2 py-0.5 bg-yellow-pastel hover:bg-opacity-90 text-slate-800 rounded-lg text-[9px] font-bold transition-all shadow-sm">
+                    <button onclick="viewPhotoFromDb('${item.id}', 'foto2')" class="px-2 py-0.5 bg-yellow-pastel hover:bg-opacity-90 text-slate-800 rounded-lg text-[9px] font-bold transition-all shadow-sm">
                       Lihat
                     </button>
                   ` : `<span class="text-[9px] text-slate-300">Belum Ada</span>`}
@@ -1262,7 +1201,6 @@
             </div>
           </td>
 
-          <!-- Aksi Hapus -->
           <td class="p-3 text-center min-w-[60px]">
             ${currentUser.role === 'admin' ? `
               <button onclick="deleteBarang('${item.id}')" class="p-1.5 text-slate-300 hover:text-pink-pastel transition-colors">
@@ -1275,6 +1213,16 @@
       });
 
       lucide.createIcons();
+    }
+
+    // Dynamic Photo Viewer from Local Database by Item ID
+    function viewPhotoFromDb(itemId, field) {
+      const item = barang.find(b => b.id === itemId);
+      if (item && item[field]) {
+        viewPhoto(item[field], `${item.resi} - ${field === 'foto1' ? 'Foto 1' : 'Foto 2'}`);
+      } else {
+        showToast("Foto tidak ditemukan.", "error");
+      }
     }
 
     function updateBarangField(id, field, value) {
@@ -1296,6 +1244,7 @@
       }
     }
 
+    // Image upload handlers
     function uploadPhoto(id, field, input) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
@@ -1370,7 +1319,7 @@
         selectFilter.value = "Semua";
       }
 
-      // Populate manual invoice user dropdown too
+      // Populate manual invoice user dropdown
       const selectUser = document.getElementById('manual-user');
       if (selectUser) {
         selectUser.innerHTML = users.map(u => `
@@ -1847,7 +1796,6 @@
       );
     }
 
-    // Ubah nama batch juga ikut mengubah barang terhubung
     function renameShippingBatch(oldName, newName) {
       if (!newName.trim()) return;
       
@@ -1915,7 +1863,6 @@
       const refundUserSelect = document.getElementById('refund-user');
       const refundBatchSelect = document.getElementById('refund-batch');
 
-      // 1. Populate Users Dropdown
       if (currentUser.role === 'pengguna') {
         refundUserSelect.innerHTML = `<option value="${currentUser.username}">${currentUser.nama} (@${currentUser.username})</option>`;
         refundUserSelect.disabled = true;
@@ -1926,7 +1873,6 @@
         refundUserSelect.disabled = false;
       }
 
-      // 2. Populate Shipping Batch Dropdown from active warehouse shipments
       const uniqueBatches = [...new Set(barang.map(b => b.shippingBatch).filter(Boolean))];
       if (uniqueBatches.length === 0) {
         refundBatchSelect.innerHTML = `
@@ -1939,7 +1885,6 @@
         `).join('') + `<option value="Batch Manual">Input Baru / Lainnya</option>`;
       }
 
-      // Reset form
       document.getElementById('refund-form').reset();
       renderRefundTable();
     }
@@ -1988,7 +1933,6 @@
         ? refunds.filter(r => r.pemilik === currentUser.username)
         : refunds;
 
-      // Filter by search query
       if (searchVal) {
         filteredRefunds = filteredRefunds.filter(r => 
           r.noOrderShopee.toLowerCase().includes(searchVal) ||
@@ -1997,7 +1941,6 @@
         );
       }
 
-      // Filter by status refund
       if (statusFilterVal !== "semua") {
         filteredRefunds = filteredRefunds.filter(r => r.statusRefund === statusFilterVal);
       }
@@ -2025,7 +1968,6 @@
             <span class="block text-slate-700 font-bold">${item.noOrderShopee}</span>
             <span class="text-[9px] text-slate-400">${item.tanggal || ''}</span>
             
-            <!-- Note/Keterangan rendering based on roles -->
             ${isAdmin ? `
               <div class="mt-1.5 flex items-center gap-1">
                 <span class="text-[9px] text-pink-pastel font-bold shrink-0">Note:</span>
@@ -2049,7 +1991,6 @@
             <span class="block font-medium">${uProfile.nama}</span>
             <span class="text-[9px] text-slate-400">@${item.pemilik}</span>
           </td>
-          <!-- Nominal values only editable by Admin -->
           <td class="p-3 text-right">
             ${isAdmin ? `
               <div class="space-y-1">
@@ -2071,7 +2012,6 @@
               <span class="block text-[11px] text-slate-400 font-mono">CO: Rp ${item.nominalShopee.toLocaleString('id-ID')}</span>
             `}
           </td>
-          <!-- Total refund only editable by Admin -->
           <td class="p-3 text-right font-bold font-mono text-pink-pastel text-sm">
             ${isAdmin ? `
               <div class="flex items-center justify-end space-x-1">
@@ -2116,7 +2056,6 @@
       lucide.createIcons();
     }
 
-    // Handles inline manual editing changes by Admin safely supporting Strings
     function updateRefundField(id, field, value) {
       const idx = refunds.findIndex(r => r.id === id);
       if (idx !== -1) {
@@ -2162,11 +2101,11 @@
       const uProfile = users.find(u => u.username === ref.pemilik) || { nama: ref.pemilik };
 
       const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('p', 'mm', [100, 160]); // Slip receipt size (100mm x 160mm)
+      const doc = new jsPDF('p', 'mm', [100, 160]); 
 
       doc.setFont("Helvetica", "bold");
       doc.setFontSize(14);
-      doc.setTextColor(212, 85, 117); // Pink pastel
+      doc.setTextColor(212, 85, 117); 
       doc.text("BONIN STORE", 50, 15, { align: 'center' });
 
       doc.setFont("Helvetica", "normal");
@@ -2223,7 +2162,7 @@
       doc.text(`Rp ${ref.nominalShopee.toLocaleString('id-ID')}`, 90, currentY, { align: 'right' });
 
       currentY += 10;
-      doc.setFillColor(255, 244, 225); // Cream background
+      doc.setFillColor(255, 244, 225); 
       doc.rect(8, currentY - 6, 84, 12, 'F');
       
       doc.setFontSize(10);
@@ -2462,7 +2401,6 @@
             <input type="text" value="${u.username}" placeholder="Ubah Username" ${isMainAdmin ? 'disabled' : ''} onchange="updateUserField('${u.username}', 'username', this.value)" 
               class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-pink-pastel w-28 disabled:bg-slate-100 disabled:text-slate-400 font-medium">
 
-            <!-- Password Terlihat: Diubah dari type="password" menjadi type="text" -->
             <input type="text" value="${u.password}" placeholder="Password" onchange="updateUserField('${u.username}', 'password', this.value)" 
               class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-pink-pastel w-24 font-medium">
 
@@ -2493,7 +2431,6 @@
         users[idx][field] = value;
         localStorage.setItem('bs_users', JSON.stringify(users));
 
-        // SINKRONISASI REAL-TIME NAMA DAN HEADER
         if (currentUser && currentUser.username === username) {
           currentUser[field] = value;
           document.getElementById('current-user-name').innerText = currentUser.nama;
@@ -2515,7 +2452,6 @@
       }
     }
 
-    // ON PAGE LOAD: Autofill remembered credentials if saved
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
 
