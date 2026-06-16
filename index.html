@@ -182,8 +182,8 @@
     
     <section id="menu-dashboard" class="menu-section space-y-6">
       <div class="bg-white border-2 border-pink-pastel p-6 rounded-3xl shadow-sm text-slate-700 relative overflow-hidden">
-        <div class="absolute -right-10 -bottom-10 opacity-20">
-          <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" class="w-45 h-45 rounded-full object-cover">
+        <div class="absolute -right-20 -bottom-20 opacity-20">
+          <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" class="w-40 h-40 rounded-full object-cover">
         </div>
         <div class="relative z-10 space-y-2">
           <span class="px-2.5 py-0.5 bg-pink-pastel text-white rounded-full text-[9px] font-bold uppercase tracking-wider">Dashboard</span>
@@ -2311,7 +2311,7 @@
         itemsListText += `${index + 1}. Resi: *${item.resi}*\n   📦 ${item.detail}\n   ⚖️ Qty: ${item.qty} | Fee WH: Rp ${item.feeWh.toLocaleString('id-ID')} | Total: *Rp ${itemTotal.toLocaleString('id-ID')}*\n\n`;
       });
 
-      const waMessage = `Halo kak *${uProfile.nama}*,\n\nTagihan Invoice dari *Bonin Store* untuk pengiriman *${batchName}* sudah siap! Berikut rincian barang kakak:\n\n${itemsListText}*GRAND TOTAL TAGIHAN: Rp ${amount.toLocaleString('id-ID')}*\n\nSilakan lakukan pembayaran dan konfirmasi kepada Admin Gudang Bonin Store. Terima kasih atas kepercayaan Anda! 🌸✨`;
+      const waMessage = `Halo kak *${uProfile.nama}*,\n\nTagihan Invoice dari *Bonin Store* untuk pengiriman *${batchName}* sudah siap! Berikut rincian barang kakak:\n\n${itemsListText}*GRAND TOTAL TAGIHAN: Rp ${amount.toLocaleString('id-ID')}*\n\nSilakan lakukan pembayaran dan konfirmasi kepada Admin Bonin Store. Terima kasih atas kepercayaan Anda! 🌸✨`;
 
       const formData = new FormData();
       formData.append('target', uProfile.phone);
