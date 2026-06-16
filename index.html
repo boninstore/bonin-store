@@ -185,11 +185,11 @@
           </div>
         </div>
         
-           <!-- Tambahan Checkbox Ingat Saya (Save Password & Username) -->
-        <div class="flex items-center justify-between">
-          <label class="flex items-center space-x-2 cursor-pointer select-none">
-            <input type="checkbox" id="remember-me" class="rounded border-slate-300 text-pink-pastel focus:ring-pink-pastel w-4 h-4 accent-[#d45575]">
-            <span class="text-xs text-slate-500 font-medium">Ingat Saya (Simpan akun)</span>
+          <!-- Remember Me Checkbox (Dapat Menyimpan Username & Password) -->
+        <div class="flex items-center justify-between pb-1">
+          <label class="flex items-center space-x-2.5 cursor-pointer select-none">
+            <input type="checkbox" id="remember-me" class="w-4 h-4 rounded border-slate-300 text-pink-pastel focus:ring-pink-pastel focus:ring-opacity-20 accent-pink-pastel cursor-pointer">
+            <span class="text-xs text-slate-500 font-semibold">Ingat Saya (Simpan Akun)</span>
           </label>
         </div>
 
@@ -1116,23 +1116,27 @@
             </select>
           </td>
 
-          <!-- Foto Update 1 & 2 -->
-          <td class="p-3 text-center min-w-[150px]">
-            ${isEditable ? `
-              <div class="flex flex-col gap-1 items-center justify-center font-medium">
+          <!-- Foto Update 1 & 2 (User can view but cannot upload/edit) -->
+          <td class="p-3 text-center min-w-[160px]">
+            <div class="flex flex-col gap-1.5 items-center justify-center font-medium">
+              <!-- Foto 1 Row -->
+              <div class="flex items-center space-x-1 justify-between w-full max-w-[140px]">
+                <span class="text-[9px] text-slate-400 font-bold">F1:</span>
                 <div class="flex items-center space-x-1">
-                  <span class="text-[9px] text-slate-400 font-bold">F1:</span>
                   ${item.foto1 ? `
-                    <button onclick="viewPhoto('${item.foto1}', '${item.resi} - Foto 1')" class="p-1 bg-yellow-pastel hover:bg-opacity-90 text-slate-800 rounded-lg text-[9px] font-bold transition-all">
+                    <button onclick="viewPhoto('${item.foto1}', '${item.resi} - Foto 1')" class="px-2 py-0.5 bg-yellow-pastel hover:bg-opacity-90 text-slate-800 rounded-lg text-[9px] font-bold transition-all shadow-sm">
                       Lihat
                     </button>
+                  ` : `<span class="text-[9px] text-slate-300">Belum Ada</span>`}
+                  ${isEditable ? `
+                    <label class="cursor-pointer bg-purple-pastel hover:bg-opacity-90 text-white text-[9px] font-bold px-2 py-0.5 rounded-lg transition-all shadow-sm">
+                      Upload
+                      <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto('${item.id}', 'foto1', this)">
+                    </label>
                   ` : ''}
-                  <label class="cursor-pointer bg-purple-pastel hover:bg-opacity-90 text-white text-[9px] font-bold px-2 py-0.5 rounded-lg transition-all">
-                    Upload
-                    <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto('${item.id}', 'foto1', this)">
-                  </label>
                 </div>
-
+              </div>
+              
                 <div class="flex items-center space-x-1">
                   <span class="text-[9px] text-slate-400 font-bold">F2:</span>
                   ${item.foto2 ? `
