@@ -4,9 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bonin Store Warehouse</title>
-  <link class="rounded-full" rel="icon" type="image/jpg" href="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg">
 
-  <!-- Favicon Updated to the New PNG Link -->
+  <!-- Favicon Link -->
   <link rel="icon" type="image/png" href="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png">
   
   <!-- Tailwind CSS -->
@@ -87,8 +86,8 @@
         <i data-lucide="menu" class="w-5 h-5"></i>
       </button>
 
-      <!-- Logo -->
-      <img src="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg" 
+      <!-- Logo Header Updated -->
+      <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" 
            alt="Bonin Store Logo" 
            class="w-10 h-10 rounded-full object-cover border-2 border-pink-pastel shadow-sm">
 
@@ -153,9 +152,9 @@
     <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border-t-8 border-pink-pastel overflow-hidden">
       <!-- Logo Banner Container (Brighter Background & Bottom Border added) -->
       <div class="p-8 text-center bg-rose-50 bg-opacity-60 border-b border-slate-100">
-        <img src="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg" 
+        <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" 
              alt="Bonin Store Logo" 
-             class="w-24 h-24 mx-auto rounded-full object-cover border-4 border-pink-pastel shadow-md mb-4">
+             class="w-24 h-24 mx-auto rounded-full object-cover border-4 border-yellow-pastel shadow-md mb-4">
         <h2 class="text-lg font-bold text-pink-pastel leading-tight">BONIN STORE</h2>
         <p class="text-xs text-slate-400 font-medium mt-1">Data Barang Warehouse</p>
       </div>
@@ -183,6 +182,14 @@
               <i data-lucide="eye" id="toggle-password-icon" class="w-4 h-4"></i>
             </button>
           </div>
+        </div>
+
+        <!-- Remember Me Checkbox -->
+        <div class="flex items-center justify-between pb-1">
+          <label class="flex items-center space-x-2.5 cursor-pointer select-none">
+            <input type="checkbox" id="remember-me" class="w-4 h-4 rounded border-slate-300 text-pink-pastel focus:ring-pink-pastel focus:ring-opacity-20 accent-pink-pastel cursor-pointer">
+            <span class="text-xs text-slate-500 font-semibold">Ingat Saya (Simpan Sandi)</span>
+          </label>
         </div>
 
         <button type="submit" class="w-full py-2.5 rounded-2xl bg-pink-pastel hover:bg-opacity-90 text-white font-bold tracking-wide transition-all shadow-lg text-xs font-medium">
@@ -557,7 +564,7 @@
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[650px]">
               <thead>
-                <tr class="bg-pink-pastel bg-opacity-10 text-white font-bold text-xs">
+                <tr class="bg-pink-pastel bg-opacity-10 text-pink-pastel font-bold text-xs">
                   <th class="p-3 font-medium">No. Order Shopee / Keterangan</th>
                   <th class="p-3 font-medium">Batch</th>
                   <th class="p-3 font-medium">User</th>
@@ -767,6 +774,7 @@
       e.preventDefault();
       const usernameVal = document.getElementById('username-input').value.trim().toLowerCase();
       const passwordVal = document.getElementById('password-input').value;
+      const rememberMeChecked = document.getElementById('remember-me').checked;
 
       const matchedUser = users.find(u => u.username === usernameVal);
 
@@ -817,6 +825,17 @@
         return;
       }
 
+      // Handle "Remember Me" credentials saving
+      if (rememberMeChecked) {
+        localStorage.setItem('bs_remembered_username', usernameVal);
+        localStorage.setItem('bs_remembered_password', passwordVal);
+        localStorage.setItem('bs_remember_me_checked', 'true');
+      } else {
+        localStorage.removeItem('bs_remembered_username');
+        localStorage.removeItem('bs_remembered_password');
+        localStorage.removeItem('bs_remember_me_checked');
+      }
+
       // Reset attempts on successful login
       loginAttempts[usernameVal] = 0;
 
@@ -840,8 +859,21 @@
       loginContainer.classList.remove('hidden');
       sidebar.classList.add('-translate-x-full');
       
-      // Reset password field and visibility to hidden
-      passwordInput.value = "";
+      // Reset password field to blank unless remember-me fills it back
+      const rememberedUser = localStorage.getItem('bs_remembered_username');
+      const rememberedPass = localStorage.getItem('bs_remembered_password');
+      const rememberChecked = localStorage.getItem('bs_remember_me_checked') === 'true';
+
+      if (rememberChecked && rememberedUser && rememberedPass) {
+        document.getElementById('username-input').value = rememberedUser;
+        passwordInput.value = rememberedPass;
+        document.getElementById('remember-me').checked = true;
+      } else {
+        document.getElementById('username-input').value = "";
+        passwordInput.value = "";
+        document.getElementById('remember-me').checked = false;
+      }
+
       passwordInput.type = "password";
       togglePasswordIcon.setAttribute('data-lucide', 'eye');
       lucide.createIcons();
@@ -1012,7 +1044,7 @@
 
 
     // ==========================================
-    // MODULE 2: DAFTAR BARANG (COLUMNAR VIEW & DROPDOWN PEMILIK)
+    // MODULE 2: DAFTAR BARANG (COLUMNAR VIEW & PHOTO ACCESS LEVEL)
     // ==========================================
     function filterNegara(country) {
       activeTabNegara = country;
@@ -1128,21 +1160,25 @@
                   ` : ''}
                 </div>
               </div>
-              
+
+              <!-- Foto 2 Row -->
+              <div class="flex items-center space-x-1 justify-between w-full max-w-[140px]">
+                <span class="text-[9px] text-slate-400 font-bold">F2:</span>
                 <div class="flex items-center space-x-1">
-                  <span class="text-[9px] text-slate-400 font-bold">F2:</span>
                   ${item.foto2 ? `
-                    <button onclick="viewPhoto('${item.foto2}', '${item.resi} - Foto 2')" class="p-1 bg-yellow-pastel hover:bg-opacity-90 text-slate-800 rounded-lg text-[9px] font-bold transition-all">
+                    <button onclick="viewPhoto('${item.foto2}', '${item.resi} - Foto 2')" class="px-2 py-0.5 bg-yellow-pastel hover:bg-opacity-90 text-slate-800 rounded-lg text-[9px] font-bold transition-all shadow-sm">
                       Lihat
                     </button>
+                  ` : `<span class="text-[9px] text-slate-300">Belum Ada</span>`}
+                  ${isEditable ? `
+                    <label class="cursor-pointer bg-purple-pastel hover:bg-opacity-90 text-white text-[9px] font-bold px-2 py-0.5 rounded-lg transition-all shadow-sm">
+                      Upload
+                      <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto('${item.id}', 'foto2', this)">
+                    </label>
                   ` : ''}
-                  <label class="cursor-pointer bg-purple-pastel hover:bg-opacity-90 text-white text-[9px] font-bold px-2 py-0.5 rounded-lg transition-all">
-                    Upload
-                    <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto('${item.id}', 'foto2', this)">
-                  </label>
                 </div>
               </div>
-            ` : `<span class="text-slate-400 text-[10px]">Akses Terbatas</span>`}
+            </div>
           </td>
 
           <!-- Aksi Hapus -->
@@ -2220,8 +2256,19 @@
       }
     }
 
+    // ON PAGE LOAD: Autofill remembered credentials if saved
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
+
+      const rememberedUser = localStorage.getItem('bs_remembered_username');
+      const rememberedPass = localStorage.getItem('bs_remembered_password');
+      const rememberChecked = localStorage.getItem('bs_remember_me_checked') === 'true';
+
+      if (rememberedUser && rememberedPass && rememberChecked) {
+        document.getElementById('username-input').value = rememberedUser;
+        document.getElementById('password-input').value = rememberedPass;
+        document.getElementById('remember-me').checked = true;
+      }
     });
   </script>
 </body>
