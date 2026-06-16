@@ -435,7 +435,15 @@
           *silahkan pilih negara batch barang kalian disini.
         </div>
       </div>
-
+      
+        <div id="admin-import-toggle-btn-container" class="hidden">
+          <button onclick="toggleImportPanel()" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md transition-all flex items-center space-x-1.5 font-medium">
+            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+            <span>Import Massal Spreadsheet 📊</span>
+          </button>
+        </div>
+      </div>
+      
       <!-- ADMIN ADD MANUAL INVOICE ROW -->
       <div id="admin-manual-invoice" class="bg-white p-5 rounded-3xl shadow-sm border border-yellow-pastel hidden space-y-3">
         <h3 class="text-xs text-slate-700 font-bold flex items-center gap-2 font-medium">
@@ -454,6 +462,79 @@
         </div>
       </div>
 
+            <!-- SPREADSHEET ONLY IMPORT PANEL -->
+      <div id="admin-mass-import-panel" class="bg-white p-6 rounded-3xl shadow-md border-2 border-emerald-400 hidden space-y-5">
+        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+          <h3 class="text-sm text-slate-700 font-bold flex items-center gap-2">
+            <i data-lucide="upload-cloud" class="text-emerald-500 w-5 h-5"></i>
+            <span>Import Massal dari Spreadsheet</span>
+          </h3>
+          <button onclick="toggleImportPanel()" class="text-slate-400 hover:text-slate-600">
+            <i data-lucide="x" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <div class="text-xs text-slate-500 space-y-1.5 leading-relaxed">
+            <p>📋 <strong>Cara Penggunaan Import Spreadsheet:</strong></p>
+            <ol class="list-decimal list-inside space-y-1">
+              <li>Salin/Copy baris data dari Excel atau Google Sheets Anda.</li>
+              <li>Pastikan urutan kolom sesuai standar berikut: <br>
+                <code class="bg-slate-100 text-pink-pastel px-1.5 py-0.5 rounded font-mono font-bold text-[10px]">Shipping Batch [Tab] No Resi [Tab] Username Pemilik [Tab] Detail Barang [Tab] Qty/Berat [Tab] Rate Sharing [Tab] Fee Warehouse</code>
+              </li>
+              <li>Tempelkan langsung pada kotak teks di bawah ini lalu klik tombol <strong>"Proses Data"</strong>.</li>
+            </ol>
+          </div>
+
+          <textarea id="import-textarea" rows="5" placeholder="Tempel/Paste kolom spreadsheet di sini..." class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-emerald-500 focus:outline-none text-xs font-mono"></textarea>
+
+          <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-50 p-4 rounded-2xl">
+            <div class="flex items-center space-x-6">
+              <span class="text-xs font-bold text-slate-600">Metode Penyimpanan:</span>
+              <label class="inline-flex items-center space-x-2 text-xs cursor-pointer">
+                <input type="radio" name="import-mode" value="append" checked class="accent-emerald-500 cursor-pointer">
+                <span class="font-semibold text-slate-700">Append (Tambahkan ke data lama)</span>
+              </label>
+              <label class="inline-flex items-center space-x-2 text-xs cursor-pointer">
+                <input type="radio" name="import-mode" value="replace" class="accent-emerald-500 cursor-pointer">
+                <span class="font-semibold text-slate-700">Replace (Timpa seluruh Batch terkait)</span>
+              </label>
+            </div>
+            <button onclick="processSpreadsheetData()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md flex items-center space-x-1 transition-all">
+              <i data-lucide="activity" class="w-4 h-4"></i>
+              <span>Proses Data</span>
+            </button>
+          </div>
+
+          <div id="import-preview-box" class="hidden space-y-3">
+            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Pratinjau Hasil Pembacaan Data</h4>
+            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+              <table class="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr class="bg-slate-100 text-slate-600 font-bold">
+                    <th class="p-3 border-b">Batch</th>
+                    <th class="p-3 border-b">No. Resi</th>
+                    <th class="p-3 border-b">Username</th>
+                    <th class="p-3 border-b">Detail Barang</th>
+                    <th class="p-3 border-b text-right">Qty/Berat</th>
+                    <th class="p-3 border-b text-right">Rate</th>
+                    <th class="p-3 border-b text-right">Fee WH</th>
+                    <th class="p-3 border-b text-right">Total Tagihan</th>
+                    <th class="p-3 border-b text-center">Status User</th>
+                  </tr>
+                </thead>
+                <tbody id="import-preview-tbody" class="divide-y divide-slate-100 bg-white">
+                  </tbody>
+              </table>
+            </div>
+            <div class="flex justify-end space-x-3 pt-2">
+              <button onclick="cancelImportPreview()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">Batal</button>
+              <button onclick="saveMassImportedData()" id="btn-save-mass-import" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-md">Simpan Massal Data</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
       <!-- LIST CONTAINER FOR INVOICE BATCHES -->
       <div id="invoice-batch-wrapper" class="space-y-6">
         <!-- Injected dynamically -->
