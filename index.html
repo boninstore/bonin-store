@@ -29,14 +29,15 @@
     .bg-cream { background-color: #fff4e1; }
     .bg-pink-pastel { background-color: #d45575; }
     .text-pink-pastel { color: #d45575; }
-    .border-pink-pastel { border-color: #d45575; }
+    
+    /* REVISI: Definisi warna border kustom agar terlihat sangat jelas, tajam, dan tidak pudar */
+    .border-pink-pastel { border-color: #d45575 !important; }
+    .border-yellow-pastel { border-color: #ffcb5e !important; }
+    .border-purple-pastel { border-color: #b1b0d8 !important; }
+    
     .bg-yellow-pastel { background-color: #ffcb5e; }
     .bg-purple-pastel { background-color: #b1b0d8; }
     .text-purple-pastel { color: #b1b0d8; }
-    
-    /* REVISI: Definisi warna border kustom agar terlihat jelas dan tidak tersembunyi */
-    .border-yellow-pastel { border-color: #ffcb5e !important; }
-    .border-purple-pastel { border-color: #b1b0d8 !important; }
     
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
@@ -135,7 +136,6 @@
   </div>
 
   <main id="login-container" class="flex-1 flex flex-col justify-center items-center px-4 py-12">
-    <!-- REVISI BORDER: Menggunakan border-4 border-yellow-pastel di seluruh keliling login card -->
     <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border-4 border-yellow-pastel overflow-hidden">
       <div class="p-8 text-center bg-rose-50 bg-opacity-60 border-b border-slate-100">
         <img src="https://www.image2url.com/r2/default/images/1781624586792-e0953d8c-42b2-4618-adad-2cae65c4932c.jpg" 
@@ -186,7 +186,6 @@
   <main id="app-container" class="hidden flex-1 container mx-auto px-4 py-6 space-y-6">
     
     <section id="menu-dashboard" class="menu-section space-y-6">
-      <!-- REVISI BUBBLE: Logo dipindah ke kanan, pas dengan gelembung, dan responsif di layar mobile -->
       <div class="bg-white border-2 border-pink-pastel p-5 sm:p-6 rounded-3xl shadow-sm text-slate-700 flex justify-between items-center gap-4 relative overflow-hidden">
         <div class="relative z-10 space-y-2 flex-1 min-w-0">
           <span class="px-2.5 py-0.5 bg-pink-pastel text-white rounded-full text-[9px] font-bold uppercase tracking-wider">Dashboard</span>
@@ -200,7 +199,7 @@
         </div>
       </div>
 
-      <!-- NOTIFIKASI UPDATE FOTO: Kedaluwarsa otomatis dalam 48 jam (2x24 jam) -->
+      <!-- NOTIFIKASI UPDATE FOTO -->
       <div id="dashboard-notifications-panel" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-yellow-pastel hidden space-y-4">
         <h3 class="text-sm text-slate-700 font-bold flex items-center gap-2">
           <span class="relative flex h-3 w-3">
@@ -214,8 +213,11 @@
         </div>
       </div>
 
+      <!-- REVISI KARTU STATISTIK: Seluruh border kustom diatur tebal dan solid (terutama Total Resi dan Thailand) -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 border-b-4 border-pink-pastel flex items-center space-x-3">
+        
+        <!-- Panel 1: Total Resi (Pink Pastel Border Tebal & Sangat Jelas) -->
+        <div class="bg-white p-5 rounded-3xl shadow-sm border-2 border-pink-pastel flex items-center space-x-3">
           <div class="w-10 h-10 bg-pink-100 text-pink-pastel rounded-xl flex items-center justify-center shadow-inner">
             <i data-lucide="clipboard-list" class="w-5 h-5"></i>
           </div>
@@ -225,7 +227,8 @@
           </div>
         </div>
 
-        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 border-b-4 border-yellow-pastel flex items-center space-x-3">
+        <!-- Panel 2: Korea (Kuning Pastel Border Tebal) -->
+        <div class="bg-white p-5 rounded-3xl shadow-sm border-2 border-yellow-pastel flex items-center space-x-3">
           <div class="w-10 h-10 bg-yellow-50 rounded-xl flex items-center justify-center shadow-inner p-1">
             <img src="https://img.icons8.com/?size=100&id=SnmJf31KPyXW&format=png&color=000000" alt="Korea Icon" class="w-8 h-8 object-contain">
           </div>
@@ -235,7 +238,8 @@
           </div>
         </div>
 
-        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 border-b-4 border-purple-pastel flex items-center space-x-3">
+        <!-- Panel 3: China (Urgu Pastel Border Tebal) -->
+        <div class="bg-white p-5 rounded-3xl shadow-sm border-2 border-purple-pastel flex items-center space-x-3">
           <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center shadow-inner p-1">
             <img src="https://img.icons8.com/?size=100&id=G_yNTaQiMVgQ&format=png&color=000000" alt="China Icon" class="w-8 h-8 object-contain">
           </div>
@@ -245,7 +249,8 @@
           </div>
         </div>
 
-        <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-100 border-b-4 border-pink-500 flex items-center space-x-3">
+        <!-- Panel 4: Thailand (Pink Pastel Border Tebal & Sangat Jelas) -->
+        <div class="bg-white p-5 rounded-3xl shadow-sm border-2 border-pink-pastel flex items-center space-x-3">
           <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center shadow-inner p-1">
             <img src="https://img.icons8.com/?size=100&id=IrLX4C3vtDRK&format=png&color=000000" alt="Thailand Icon" class="w-8 h-8 object-contain">
           </div>
@@ -396,7 +401,6 @@
         </div>
       </div>
 
-      <!-- REVISI BORDER: Memastikan border kuning pastel solid 100% tanpa opacity agar bersinar terang -->
       <div class="bg-white p-4 rounded-3xl shadow-sm border border-yellow-pastel flex flex-wrap gap-4 items-center">
         <div class="flex flex-col min-w-[150px]">
           <label class="text-[9px] font-bold text-slate-400 uppercase mb-1">Negara Tujuan</label>
@@ -1772,12 +1776,6 @@
 
       document.getElementById('import-preview-box').classList.remove('hidden');
       showToast(`Berhasil membaca ${temporaryParsedImportRows.length} baris data. Silakan teliti pratinjau sebelum menyimpan!`, "success");
-    }
-
-    function cancelImportPreview() {
-      temporaryParsedImportRows = [];
-      document.getElementById('import-preview-box').classList.add('hidden');
-      document.getElementById('import-preview-tbody').innerHTML = '';
     }
 
     // Save Mass Uploaded Data to Database
