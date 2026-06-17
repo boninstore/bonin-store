@@ -11,7 +11,7 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=300;400;500;600;700&display=swap" rel="stylesheet">
   
   <script src="https://unpkg.com/lucide@latest"></script>
   
@@ -33,6 +33,10 @@
     .bg-yellow-pastel { background-color: #ffcb5e; }
     .bg-purple-pastel { background-color: #b1b0d8; }
     .text-purple-pastel { color: #b1b0d8; }
+    
+    /* REVISI: Definisi warna border kustom agar terlihat jelas dan tidak tersembunyi */
+    .border-yellow-pastel { border-color: #ffcb5e !important; }
+    .border-purple-pastel { border-color: #b1b0d8 !important; }
     
     /* Custom Scrollbar */
     ::-webkit-scrollbar {
@@ -131,11 +135,12 @@
   </div>
 
   <main id="login-container" class="flex-1 flex flex-col justify-center items-center px-4 py-12">
-    <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border-t-8 border-pink-pastel overflow-hidden">
+    <!-- REVISI BORDER: Menggunakan border-4 border-yellow-pastel di seluruh keliling login card -->
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border-4 border-yellow-pastel overflow-hidden">
       <div class="p-8 text-center bg-rose-50 bg-opacity-60 border-b border-slate-100">
         <img src="https://www.image2url.com/r2/default/images/1781624586792-e0953d8c-42b2-4618-adad-2cae65c4932c.jpg" 
              alt="Bonin Store Logo" 
-             class="w-24 h-24 mx-auto rounded-full object-cover border-4 border-yellow-pastel shadow-md mb-4">
+             class="w-24 h-24 mx-auto rounded-full object-cover border-4 border-pink-pastel shadow-md mb-4">
         <h2 class="text-lg font-bold text-pink-pastel leading-tight">BONIN STORE</h2>
         <p class="text-xs text-slate-400 font-medium mt-1">Data Barang Warehouse</p>
       </div>
@@ -181,14 +186,31 @@
   <main id="app-container" class="hidden flex-1 container mx-auto px-4 py-6 space-y-6">
     
     <section id="menu-dashboard" class="menu-section space-y-6">
-      <div class="bg-white border-2 border-pink-pastel p-6 rounded-3xl shadow-sm text-slate-700 relative overflow-hidden">
-        <div class="absolute -right-20 -bottom-70 opacity-20">
-          <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" class="w-40 h-40 rounded-full object-cover">
-        </div>
-        <div class="relative z-10 space-y-2">
+      <!-- REVISI BUBBLE: Logo dipindah ke kanan, pas dengan gelembung, dan responsif di layar mobile -->
+      <div class="bg-white border-2 border-pink-pastel p-5 sm:p-6 rounded-3xl shadow-sm text-slate-700 flex justify-between items-center gap-4 relative overflow-hidden">
+        <div class="relative z-10 space-y-2 flex-1 min-w-0">
           <span class="px-2.5 py-0.5 bg-pink-pastel text-white rounded-full text-[9px] font-bold uppercase tracking-wider">Dashboard</span>
-          <h2 class="text-lg md:text-xl font-bold text-pink-pastel leading-tight" id="welcome-message">Halo, Selamat Datang!</h2>
-          <p class="text-xs text-slate-500 max-w-xl">Pantau barang, pengiriman, invoice, refund barang kalian dalam satu aplikasi.</p>
+          <h2 class="text-base sm:text-lg md:text-xl font-bold text-pink-pastel leading-tight truncate" id="welcome-message">Halo, Selamat Datang!</h2>
+          <p class="text-xs text-slate-500 line-clamp-2 sm:line-clamp-none max-w-xl">Pantau barang, pengiriman, invoice, refund barang kalian dalam satu aplikasi.</p>
+        </div>
+        <div class="relative shrink-0 z-10">
+          <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" 
+               alt="Bonin Store Logo" 
+               class="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full object-cover border-2 sm:border-4 border-white shadow-md">
+        </div>
+      </div>
+
+      <!-- NOTIFIKASI UPDATE FOTO: Kedaluwarsa otomatis dalam 48 jam (2x24 jam) -->
+      <div id="dashboard-notifications-panel" class="bg-white p-6 rounded-3xl shadow-sm border-2 border-yellow-pastel hidden space-y-4">
+        <h3 class="text-sm text-slate-700 font-bold flex items-center gap-2">
+          <span class="relative flex h-3 w-3">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-3 w-3 bg-pink-pastel"></span>
+          </span>
+          <span>Notifikasi Update Barang 📸 (notifikasi akan hilang dalam 2x24 jam)</span>
+        </h3>
+        <div id="dashboard-notifications-list" class="space-y-3 max-h-60 overflow-y-auto pr-1">
+          <!-- Diisi otomatis melalui Javascript -->
         </div>
       </div>
 
@@ -374,7 +396,8 @@
         </div>
       </div>
 
-      <div class="bg-white p-4 rounded-3xl shadow-sm border border-yellow-pastel border-opacity-45 flex flex-wrap gap-4 items-center">
+      <!-- REVISI BORDER: Memastikan border kuning pastel solid 100% tanpa opacity agar bersinar terang -->
+      <div class="bg-white p-4 rounded-3xl shadow-sm border border-yellow-pastel flex flex-wrap gap-4 items-center">
         <div class="flex flex-col min-w-[150px]">
           <label class="text-[9px] font-bold text-slate-400 uppercase mb-1">Negara Tujuan</label>
           <select id="filter-invoice-negara" onchange="syncShippingBatchDropdown(); renderInvoice();" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs focus:outline-none bg-white font-medium">
@@ -437,7 +460,7 @@
             <p>📋 <strong>Cara Penggunaan Import Spreadsheet:</strong></p>
             <ol class="list-decimal list-inside space-y-1">
               <li>Salin/Copy baris data dari Excel atau Google Sheets Anda.</li>
-              <li>Pastikan urutan kolom sesuai standar berikut: <br>
+              <li>Pastikan urulan kolom sesuai standar berikut: <br>
                 <code class="bg-slate-100 text-pink-pastel px-1.5 py-0.5 rounded font-mono font-bold text-[10px]">Shipping Batch [Tab] No Resi [Tab] Username Pemilik [Tab] Detail Barang [Tab] Qty/Berat [Tab] Rate Sharing [Tab] Fee Warehouse</code>
               </li>
               <li>Tempelkan langsung pada kotak teks di bawah ini lalu klik tombol <strong>"Proses Data"</strong>.</li>
@@ -1025,6 +1048,121 @@
       lucide.createIcons();
     }
 
+    // REVISI NOTIFIKASI: Notifikasi kedaluwarsa & hilang otomatis dalam 48 jam (2x24 jam)
+    function renderDashboardNotifications() {
+      const notifPanel = document.getElementById('dashboard-notifications-panel');
+      const notifList = document.getElementById('dashboard-notifications-list');
+      if (!notifPanel || !notifList) return;
+
+      notifPanel.classList.remove('hidden');
+
+      const now = Date.now();
+      const fortyEightHours = 2 * 24 * 60 * 60 * 1000; // 172800000 ms
+
+      let itemsWithPhotos = [];
+
+      itemsWithPhotos = barang.filter(b => {
+        // Harus ada setidaknya salah satu foto
+        if (!b.foto1 && !b.foto2) return false;
+
+        // Filter berdasarkan hak akses kepemilikan akun jika dia level pengguna biasa
+        if (currentUser.role === 'pengguna' && b.pemilik !== currentUser.username) {
+          return false;
+        }
+
+        // Cek kedaluwarsa foto 1 (Jika tidak ada timestamp rujukan detail, fallback ke aslinya)
+        let showFoto1 = false;
+        if (b.foto1) {
+          const uploadTime = b.foto1Time ? Number(b.foto1Time) : (b.tanggalUpdate ? new Date(b.tanggalUpdate).getTime() : 0);
+          if (now - uploadTime < fortyEightHours) {
+            showFoto1 = true;
+          }
+        }
+
+        // Cek kedaluwarsa foto 2
+        let showFoto2 = false;
+        if (b.foto2) {
+          const uploadTime = b.foto2Time ? Number(b.foto2Time) : (b.tanggalUpdate ? new Date(b.tanggalUpdate).getTime() : 0);
+          if (now - uploadTime < fortyEightHours) {
+            showFoto2 = true;
+          }
+        }
+
+        // Simpan properti status tampilan temporer untuk tombol rendering list
+        b._showFoto1 = showFoto1;
+        b._showFoto2 = showFoto2;
+
+        return showFoto1 || showFoto2;
+      });
+
+      notifList.innerHTML = '';
+
+      if (itemsWithPhotos.length === 0) {
+        notifList.innerHTML = `
+          <div class="p-4 bg-slate-50 rounded-2xl text-center border border-dashed border-slate-200">
+            <p class="text-xs text-slate-400 font-semibold">Belum ada update foto paket terbaru. Mohon ditunggu ya! 🌸</p>
+          </div>
+        `;
+        return;
+      }
+
+      // Urutkan berdasarkan waktu unggah foto paling baru
+      itemsWithPhotos.sort((a, b) => {
+        const timeA = Math.max(a.foto1Time || 0, a.foto2Time || 0);
+        const timeB = Math.max(b.foto1Time || 0, b.foto2Time || 0);
+        return timeB - timeA;
+      });
+
+      itemsWithPhotos.forEach(item => {
+        const wrapper = document.createElement('div');
+        wrapper.className = "p-3.5 bg-yellow-pastel bg-opacity-10 border border-yellow-pastel border-opacity-40 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs";
+        
+        let photoButtons = '';
+        if (item.foto1 && item._showFoto1) {
+          photoButtons += `
+            <button onclick="viewPhotoFromDb('${item.id}', 'foto1')" class="px-3 py-1.5 bg-pink-pastel hover:bg-opacity-95 text-white font-bold rounded-xl transition-all shadow-sm">
+              Foto 1 📸
+            </button>
+          `;
+        }
+        if (item.foto2 && item._showFoto2) {
+          photoButtons += `
+            <button onclick="viewPhotoFromDb('${item.id}', 'foto2')" class="px-3 py-1.5 bg-purple-pastel hover:bg-opacity-95 text-white font-bold rounded-xl transition-all shadow-sm">
+              Foto 2 📸
+            </button>
+          `;
+        }
+
+        const targetUser = users.find(u => u.username === item.pemilik) || { nama: item.pemilik };
+        const detailText = item.detail && item.detail !== '-' ? `(${item.detail})` : '';
+
+        // Hitung sisa jam sebelum notifikasi hilang
+        const times = [];
+        if (item.foto1 && item._showFoto1) times.push(item.foto1Time ? Number(item.foto1Time) : new Date(item.tanggalUpdate).getTime());
+        if (item.foto2 && item._showFoto2) times.push(item.foto2Time ? Number(item.foto2Time) : new Date(item.tanggalUpdate).getTime());
+        const latestTime = Math.max(...times);
+        const elapsed = now - latestTime;
+        const remainingMs = Math.max(0, fortyEightHours - elapsed);
+        const remainingHours = Math.ceil(remainingMs / (1000 * 60 * 60));
+        const remainingText = remainingHours > 0 ? ` (Sisa waktu tampil: ${remainingHours} jam)` : '';
+
+        wrapper.innerHTML = `
+          <div class="space-y-0.5">
+            <p class="text-slate-700 font-bold">
+              Resi <span class="text-pink-pastel">${item.resi}</span> ${detailText} 
+              ${currentUser.role !== 'pengguna' ? `milik <span class="text-purple-700">@${item.pemilik} (${targetUser.nama})</span>` : ''}
+            </p>
+            <p class="text-[10px] text-slate-400 font-medium">Foto barang telah berhasil diupdate pada ${item.tanggalUpdate || '-'}<span class="text-pink-pastel font-semibold">${remainingText}</span></p>
+          </div>
+          <div class="flex gap-2 shrink-0">
+            ${photoButtons}
+          </div>
+        `;
+        notifList.appendChild(wrapper);
+      });
+      lucide.createIcons();
+    }
+
     // REFRESH STATS AT DASHBOARD
     function refreshDashboardStats() {
       let currentBarang = (currentUser.role === 'pengguna') 
@@ -1035,6 +1173,9 @@
       document.getElementById('stat-korea').innerText = currentBarang.filter(b => b.negara === 'Korea').length;
       document.getElementById('stat-china').innerText = currentBarang.filter(b => b.negara === 'China').length;
       document.getElementById('stat-thailand').innerText = currentBarang.filter(b => b.negara === 'Thailand').length;
+
+      // Render notifikasi update foto real-time
+      renderDashboardNotifications();
     }
 
 
@@ -1244,7 +1385,7 @@
       }
     }
 
-    // Image upload handlers
+    // Image upload handlers dengan recording timestamp presisi untuk notifikasi 48 jam
     function uploadPhoto(id, field, input) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
@@ -1254,9 +1395,13 @@
           const idx = barang.findIndex(b => b.id === id);
           if (idx !== -1) {
             barang[idx][field] = base64Data;
+            barang[idx][field + 'Time'] = Date.now(); // Catat timestamp unggah foto
+            barang[idx].tanggalUpdate = new Date().toISOString().split('T')[0];
             localStorage.setItem('bs_barang', JSON.stringify(barang));
             showToast("Foto berhasil diunggah dengan resolusi penuh!", "success");
             renderDaftarBarang();
+            // Refresh notifikasi foto di dashboard real-time
+            renderDashboardNotifications();
           }
         };
         reader.readAsDataURL(file);
@@ -1272,6 +1417,7 @@
           localStorage.setItem('bs_barang', JSON.stringify(barang));
           showToast("Barang berhasil dihapus.", "success");
           renderDaftarBarang();
+          renderDashboardNotifications();
         }
       );
     }
@@ -1700,6 +1846,7 @@
       toggleImportPanel(); 
       syncShippingBatchDropdown();
       renderInvoice();
+      renderDashboardNotifications();
     }
 
     // Tambah item manual dengan Dropdown Pemilik Akun terdaftar & SINKRON KE BARANG
@@ -1766,6 +1913,7 @@
       
       syncShippingBatchDropdown();
       renderInvoice();
+      renderDashboardNotifications();
     }
 
     function updateInvoiceField(id, field, value) {
@@ -2070,6 +2218,7 @@
       }
     }
 
+    // Ubah status dan update notifikasi jika diperlukan
     function toggleRefundStatus(id, newStatus) {
       const idx = refunds.findIndex(r => r.id === id);
       if (idx !== -1) {
@@ -2311,7 +2460,7 @@
         itemsListText += `${index + 1}. Resi: *${item.resi}*\n   📦 ${item.detail}\n   ⚖️ Qty: ${item.qty} | Fee WH: Rp ${item.feeWh.toLocaleString('id-ID')} | Total: *Rp ${itemTotal.toLocaleString('id-ID')}*\n\n`;
       });
 
-      const waMessage = `Halo kak *${uProfile.nama}*,\n\nTagihan Invoice dari *Bonin Store* untuk pengiriman *${batchName}* sudah siap! Berikut rincian barang kakak:\n\n${itemsListText}*GRAND TOTAL TAGIHAN: Rp ${amount.toLocaleString('id-ID')}*\n\nSilakan lakukan pembayaran dan konfirmasi kepada Admin Bonin Store. Terima kasih atas kepercayaan Anda! 🌸✨`;
+      const waMessage = `Halo kak *${uProfile.nama}*,\n\nTagihan Invoice dari *Bonin Store* untuk pengiriman *${batchName}* sudah siap! Berikut rincian barang kakak:\n\n${itemsListText}*GRAND TOTAL TAGIHAN: Rp ${amount.toLocaleString('id-ID')}*\n\nSilakan lakukan pembayaran dan konfirmasi kepada Admin Gudang Bonin Store. Terima kasih atas kepercayaan Anda! 🌸✨`;
 
       const formData = new FormData();
       formData.append('target', uProfile.phone);
