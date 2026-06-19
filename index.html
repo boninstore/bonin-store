@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -31,7 +30,6 @@
     .bg-pink-pastel { background-color: #d45575; }
     .text-pink-pastel { color: #d45575; }
     
-    /* REVISI: Definisi warna border kustom agar terlihat sangat jelas, tajam, dan tidak pudar */
     .border-pink-pastel { border-color: #d45575 !important; }
     .border-yellow-pastel { border-color: #ffcb5e !important; }
     .border-purple-pastel { border-color: #b1b0d8 !important; }
@@ -40,7 +38,6 @@
     .bg-purple-pastel { background-color: #b1b0d8; }
     .text-purple-pastel { color: #b1b0d8; }
     
-    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -56,6 +53,7 @@
 </head>
 <body class="min-h-screen flex flex-col text-slate-800">
 
+  <!-- Sistem Notifikasi Toast -->
   <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-white border-2 border-pink-pastel px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-3 max-w-sm">
     <span class="p-1 rounded-full bg-yellow-pastel text-pink-pastel" id="toast-icon">
       <i data-lucide="bell" class="w-4 h-4"></i>
@@ -63,6 +61,7 @@
     <p id="toast-message" class="text-sm font-semibold text-slate-700"></p>
   </div>
 
+  <!-- Dialog Konfirmasi Kustom -->
   <div id="custom-confirm-modal" class="fixed inset-0 bg-slate-900 bg-opacity-60 z-50 hidden flex justify-center items-center p-4">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center border-t-8 border-pink-pastel space-y-4 shadow-2xl transform scale-95 transition-all">
       <div class="p-3 bg-red-100 text-pink-pastel rounded-full w-14 h-14 mx-auto flex items-center justify-center">
@@ -106,6 +105,7 @@
     </div>
   </header>
 
+  <!-- Sidebar Navigasi -->
   <div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-80 bg-white border-r-4 border-yellow-pastel shadow-2xl transform -translate-x-full transition-transform duration-300 flex flex-col">
     <div class="p-5 border-b border-cream flex justify-between items-center bg-cream">
       <div class="flex items-center space-x-2">
@@ -117,11 +117,24 @@
       </button>
     </div>
     
-    <div class="flex-1 p-5 space-y-3 overflow-y-auto" id="nav-links">
-      </div>
+    <div class="flex-1 p-5 space-y-3 overflow-y-auto" id="nav-links"></div>
 
-    <div id="fonnte-config-box" class="p-4 bg-yellow-pastel bg-opacity-20 m-4 rounded-2xl border border-dashed border-yellow-pastel hidden">
-      <h4 class="text-xs font-bold text-slate-700 flex items-center gap-1 mb-2">
+    <!-- PENGATURAN DATABASE GOOGLE SPREADSHEET -->
+    <div class="p-4 bg-purple-50 m-4 rounded-2xl border border-dashed border-purple-pastel space-y-3">
+      <h4 class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+        <i data-lucide="database" class="w-4 h-4 text-purple-pastel"></i> Setup Google Sheets URL
+      </h4>
+      <input type="text" id="sheet-url-input" placeholder="Tempel URL Web App Apps Script di sini" class="w-full text-xs p-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-pastel bg-white font-medium">
+      <div class="flex gap-1.5">
+        <button onclick="saveAndSyncUrlExplicitly()" class="flex-1 py-1.5 bg-purple-pastel text-white font-bold rounded-lg text-[10px] shadow transition-all hover:bg-opacity-95">Simpan & Ambil Data 🔄</button>
+        <button onclick="openAppsScriptTutorial()" class="py-1.5 px-2 bg-yellow-pastel text-slate-800 font-bold rounded-lg text-[10px] shadow transition-all">Cara Setup 📄</button>
+      </div>
+      <p class="text-[9px] text-slate-400 leading-tight">Data akan otomatis dikirim ke Google Sheets setiap kali Anda mengedit halaman ini.</p>
+    </div>
+
+    <!-- PENGATURAN FONNTE -->
+    <div id="fonnte-config-box" class="p-4 bg-yellow-pastel bg-opacity-20 mx-4 mb-4 rounded-2xl border border-dashed border-yellow-pastel hidden">
+      <h4 class="text-xs font-bold text-slate-700 flex items-center gap-1.5 mb-2">
         <i data-lucide="settings" class="w-3.5 h-3.5 text-pink-pastel"></i> Pengaturan Fonnte API
       </h4>
       <input type="text" id="fonnte-token-input" placeholder="Masukkan Token Fonnte Anda" class="w-full text-xs p-2 rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel">
@@ -136,6 +149,7 @@
     </div>
   </div>
 
+  <!-- CONTAINER FORM LOGIN -->
   <main id="login-container" class="flex-1 flex flex-col justify-center items-center px-4 py-12">
     <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border-4 border-yellow-pastel overflow-hidden">
       <div class="p-8 text-center bg-rose-50 bg-opacity-60 border-b border-slate-100">
@@ -143,7 +157,8 @@
              alt="Bonin Store Logo" 
              class="w-24 h-24 mx-auto rounded-full object-cover border-4 border-pink-pastel shadow-md mb-4">
         <h2 class="text-lg font-bold text-pink-pastel leading-tight">BONIN STORE</h2>
-        <p class="text-xs text-slate-400 font-medium mt-1">Data Barang Warehouse</p>
+        <p class="text-xs text-slate-400 font-medium mt-1">Data Barang Warehouse (Auto-Sync Cloud)</p>
+        <div id="login-loading-text" class="text-[10px] text-purple-pastel font-bold mt-2 hidden animate-pulse">Menghubungkan & Memuat Database Cloud Google Sheets...</div>
       </div>
       
       <form id="login-form" class="p-8 space-y-5">
@@ -184,14 +199,24 @@
     </div>
   </main>
 
+  <!-- CONTAINER DASHBOARD UTAMA -->
   <main id="app-container" class="hidden flex-1 container mx-auto px-4 py-6 space-y-6">
     
     <section id="menu-dashboard" class="menu-section space-y-6">
-      <div class="bg-white border-2 border-pink-pastel p-5 sm:p-6 rounded-3xl shadow-sm text-slate-700 flex justify-between items-center gap-4 relative overflow-hidden">
+      <div class="bg-white border-2 border-pink-pastel p-5 sm:p-6 rounded-3xl shadow-sm text-slate-700 flex flex-col md:flex-row justify-between items-center gap-4 relative overflow-hidden">
         <div class="relative z-10 space-y-2 flex-1 min-w-0">
           <span class="px-2.5 py-0.5 bg-pink-pastel text-white rounded-full text-[9px] font-bold uppercase tracking-wider">Dashboard</span>
           <h2 class="text-base sm:text-lg md:text-xl font-bold text-pink-pastel leading-tight truncate" id="welcome-message">Halo, Selamat Datang!</h2>
           <p class="text-xs text-slate-500 line-clamp-2 sm:line-clamp-none max-w-xl">Pantau barang, pengiriman, invoice, refund barang kalian dalam satu aplikasi.</p>
+          
+          <!-- STATUS SYNC DI DASHBOARD -->
+          <div class="flex items-center space-x-2 pt-1">
+            <span id="sync-dot" class="w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse"></span>
+            <span id="sync-status-text" class="text-[10px] font-bold text-slate-500">Database Lokal</span>
+            <button onclick="fetchAndSyncAllData(true)" class="p-1 rounded bg-slate-100 hover:bg-slate-200 transition-all text-slate-600" title="Sinkronkan Sekarang">
+              <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+            </button>
+          </div>
         </div>
         <div class="relative shrink-0 z-10">
           <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" 
@@ -210,14 +235,10 @@
           <span>Notifikasi Update Barang 📸 (notifikasi akan hilang dalam 2x24 jam)</span>
         </h3>
         <div id="dashboard-notifications-list" class="space-y-3 max-h-60 overflow-y-auto pr-1">
-          <!-- Diisi otomatis melalui Javascript -->
         </div>
       </div>
 
-      <!-- REVISI KARTU STATISTIK: Seluruh border kustom diatur tebal dan solid (terutama Total Resi dan Thailand) -->
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        
-        <!-- Panel 1: Total Resi (Pink Pastel Border Tebal & Sangat Jelas) -->
         <div class="bg-white p-5 rounded-3xl shadow-sm border-2 border-pink-pastel flex items-center space-x-3">
           <div class="w-10 h-10 bg-pink-100 text-pink-pastel rounded-xl flex items-center justify-center shadow-inner">
             <i data-lucide="clipboard-list" class="w-5 h-5"></i>
@@ -228,7 +249,6 @@
           </div>
         </div>
 
-        <!-- Panel 2: Korea (Kuning Pastel Border Tebal) -->
         <div class="bg-white p-5 rounded-3xl shadow-sm border-2 border-yellow-pastel flex items-center space-x-3">
           <div class="w-10 h-10 bg-yellow-50 rounded-xl flex items-center justify-center shadow-inner p-1">
             <img src="https://img.icons8.com/?size=100&id=SnmJf31KPyXW&format=png&color=000000" alt="Korea Icon" class="w-8 h-8 object-contain">
@@ -239,7 +259,6 @@
           </div>
         </div>
 
-        <!-- Panel 3: China (Urgu Pastel Border Tebal) -->
         <div class="bg-white p-5 rounded-3xl shadow-sm border-2 border-purple-pastel flex items-center space-x-3">
           <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center shadow-inner p-1">
             <img src="https://img.icons8.com/?size=100&id=G_yNTaQiMVgQ&format=png&color=000000" alt="China Icon" class="w-8 h-8 object-contain">
@@ -250,7 +269,6 @@
           </div>
         </div>
 
-        <!-- Panel 4: Thailand (Pink Pastel Border Tebal & Sangat Jelas) -->
         <div class="bg-white p-5 rounded-3xl shadow-sm border-2 border-pink-pastel flex items-center space-x-3">
           <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center shadow-inner p-1">
             <img src="https://img.icons8.com/?size=100&id=IrLX4C3vtDRK&format=png&color=000000" alt="Thailand Icon" class="w-8 h-8 object-contain">
@@ -267,10 +285,11 @@
           <i data-lucide="layout-grid" class="text-pink-pastel w-4 h-4"></i> Menu Navigasi Cepat
         </h3>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-4" id="dashboard-shortcuts">
-          </div>
+        </div>
       </div>
     </section>
 
+    <!-- FORM INPUT RESI BARANG -->
     <section id="menu-form-resi" class="menu-section hidden space-y-4">
       <button onclick="switchSection('dashboard')" class="flex items-center space-x-1 text-xs font-bold text-pink-pastel hover:text-purple-pastel transition-colors mb-2 bg-white px-3 py-1.5 rounded-xl border border-cream shadow-sm w-fit font-medium">
         <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -285,7 +304,7 @@
       </div>
 
       <div class="bg-white p-6 rounded-3xl shadow-md border-2 border-pink-pastel max-w-2xl">
-        <p class="text-xs text-slate-400 mb-4 font-semibold">Isi form resi paket kalian disini dan data akan otomatis sinkron ke daftar barang kalian.</p>
+        <p class="text-xs text-slate-400 mb-4 font-semibold">Isi form resi paket kalian disini dan data akan otomatis sinkron ke Google Sheet database.</p>
         
         <form id="resi-form" class="space-y-4">
           <div>
@@ -307,7 +326,7 @@
             </select>
           </div>
 
-          <button type="submit" class="w-full py-2 px-4 rounded-xl bg-pink-pastel hover:bg-opacity-90 text-white font-bold transition-all shadow-md flex items-center justify-center space-x-2 text-xs font-medium">
+          <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-pink-pastel hover:bg-opacity-90 text-white font-bold transition-all shadow-md flex items-center justify-center space-x-2 text-xs font-medium">
             <i data-lucide="plus-circle" class="w-4 h-4"></i>
             <span>Simpan Data</span>
           </button>
@@ -315,6 +334,7 @@
       </div>
     </section>
 
+    <!-- DAFTAR BARANG -->
     <section id="menu-daftar-barang" class="menu-section hidden space-y-4">
       <button onclick="switchSection('dashboard')" class="flex items-center space-x-1 text-xs font-bold text-pink-pastel hover:text-purple-pastel transition-colors mb-2 bg-white px-3 py-1.5 rounded-xl border border-cream shadow-sm w-fit font-medium">
         <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -370,13 +390,14 @@
                 <th class="p-4 border-b border-cream text-center font-medium">Aksi</th>
               </tr>
             </thead>
-            <tbody id="barang-table-body" class="divide-y divide-slate-100 text-xs">
-              </tbody>
+            <tbody id="barang-table-body" class="divide-y divide-slate-100 text-xs text-slate-700">
+            </tbody>
           </table>
         </div>
       </div>
     </section>
 
+    <!-- INVOICE & SPREADSHEET BATCH -->
     <section id="menu-invoice" class="menu-section hidden space-y-4">
       <button onclick="switchSection('dashboard')" class="flex items-center space-x-1 text-xs font-bold text-pink-pastel hover:text-purple-pastel transition-colors mb-2 bg-white px-3 py-1.5 rounded-xl border border-cream shadow-sm w-fit font-medium">
         <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -390,7 +411,7 @@
           </div>
           <div>
             <h2 class="text-md font-bold text-pink-pastel">Tagihan & Invoice</h2>
-            <p class="text-xs text-slate-400">Cek tagihan berdasarkan Batch & Negara. Untuk transfer manual harap dikurangin nominal co shopee ya!</p>
+            <p class="text-xs text-slate-400">Cek tagihan berdasarkan Batch & Negara awal, kalian bisa mencari berdasarkan nomer resi juga.</p>
           </div>
         </div>
 
@@ -441,14 +462,13 @@
           <input type="text" id="manual-resi" placeholder="No Resi" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel font-medium">
           
           <select id="manual-user" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel bg-white font-medium">
-            </select>
+          </select>
           
           <input type="text" id="manual-detail" placeholder="Detail Barang" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel col-span-1 sm:col-span-2 font-medium">
           <button onclick="addManualInvoice()" class="py-2 px-4 rounded-xl bg-pink-pastel text-white font-bold text-xs shadow-sm hover:bg-opacity-90 font-medium">Tambah</button>
         </div>
       </div>
 
-      <!-- SPREADSHEET ONLY IMPORT PANEL -->
       <div id="admin-mass-import-panel" class="bg-white p-6 rounded-3xl shadow-md border-2 border-emerald-400 hidden space-y-5">
         <div class="flex justify-between items-center border-b border-slate-100 pb-3">
           <h3 class="text-sm text-slate-700 font-bold flex items-center gap-2">
@@ -461,39 +481,25 @@
         </div>
 
         <div class="space-y-4">
-          <div class="text-xs text-slate-500 space-y-1.5 leading-relaxed">
-            <p>📋 <strong>Cara Penggunaan Import Spreadsheet:</strong></p>
-            <ol class="list-decimal list-inside space-y-1">
-              <li>Salin/Copy baris data dari Excel atau Google Sheets Anda.</li>
-              <li>Pastikan urulan kolom sesuai standar berikut: <br>
-                <code class="bg-slate-100 text-pink-pastel px-1.5 py-0.5 rounded font-mono font-bold text-[10px]">Shipping Batch [Tab] No Resi [Tab] Username Pemilik [Tab] Detail Barang [Tab] Qty/Berat [Tab] Rate Sharing [Tab] Fee Warehouse</code>
-              </li>
-              <li>Tempelkan langsung pada kotak teks di bawah ini lalu klik tombol <strong>"Proses Data"</strong>.</li>
-            </ol>
-          </div>
-
           <textarea id="import-textarea" rows="5" placeholder="Tempel/Paste kolom spreadsheet di sini..." class="w-full p-4 rounded-2xl border-2 border-slate-100 focus:border-emerald-500 focus:outline-none text-xs font-mono"></textarea>
-
           <div class="flex flex-wrap items-center justify-between gap-4 bg-slate-50 p-4 rounded-2xl">
             <div class="flex items-center space-x-6">
-              <span class="text-xs font-bold text-slate-600">Metode Penyimpanan:</span>
+              <span class="text-xs font-bold text-slate-600">Metode:</span>
               <label class="inline-flex items-center space-x-2 text-xs cursor-pointer">
                 <input type="radio" name="import-mode" value="append" checked class="accent-emerald-500 cursor-pointer">
-                <span class="font-semibold text-slate-700">Append (Tambahkan ke data lama)</span>
+                <span class="font-semibold text-slate-700">Append</span>
               </label>
               <label class="inline-flex items-center space-x-2 text-xs cursor-pointer">
                 <input type="radio" name="import-mode" value="replace" class="accent-emerald-500 cursor-pointer">
-                <span class="font-semibold text-slate-700">Replace (Timpa seluruh Batch terkait)</span>
+                <span class="font-semibold text-slate-700">Replace</span>
               </label>
             </div>
-            <button onclick="processSpreadsheetData()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md flex items-center space-x-1 transition-all">
-              <i data-lucide="activity" class="w-4 h-4"></i>
+            <button onclick="processSpreadsheetData()" class="px-5 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs shadow-md flex items-center space-x-1">
               <span>Proses Data</span>
             </button>
           </div>
 
           <div id="import-preview-box" class="hidden space-y-3">
-            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Pratinjau Hasil Pembacaan Data</h4>
             <div class="overflow-x-auto rounded-2xl border border-slate-200">
               <table class="w-full text-left border-collapse text-xs">
                 <thead>
@@ -502,29 +508,26 @@
                     <th class="p-3 border-b">No. Resi</th>
                     <th class="p-3 border-b">Username</th>
                     <th class="p-3 border-b">Detail Barang</th>
-                    <th class="p-3 border-b text-right">Qty/Berat</th>
-                    <th class="p-3 border-b text-right">Rate</th>
-                    <th class="p-3 border-b text-right">Fee WH</th>
-                    <th class="p-3 border-b text-right">Total Tagihan</th>
-                    <th class="p-3 border-b text-center">Status User</th>
+                    <th class="p-3 border-b text-right">Qty</th>
+                    <th class="p-3 border-b text-right">Total</th>
+                    <th class="p-3 border-b text-center">Status</th>
                   </tr>
                 </thead>
-                <tbody id="import-preview-tbody" class="divide-y divide-slate-100 bg-white">
-                  </tbody>
+                <tbody id="import-preview-tbody" class="divide-y divide-slate-100 bg-white"></tbody>
               </table>
             </div>
             <div class="flex justify-end space-x-3 pt-2">
-              <button onclick="cancelImportPreview()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-bold transition-all">Batal</button>
-              <button onclick="saveMassImportedData()" id="btn-save-mass-import" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-md">Simpan Massal Data</button>
+              <button onclick="cancelImportPreview()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs font-bold">Batal</button>
+              <button onclick="saveMassImportedData()" class="px-5 py-2 bg-emerald-500 text-white rounded-xl text-xs font-bold shadow-md">Simpan Massal</button>
             </div>
           </div>
         </div>
       </div>
 
-      <div id="invoice-batch-wrapper" class="space-y-6">
-        </div>
+      <div id="invoice-batch-wrapper" class="space-y-6"></div>
     </section>
 
+    <!-- FORM REFUND SHOPEE -->
     <section id="menu-refund-shopee" class="menu-section hidden space-y-4">
       <button onclick="switchSection('dashboard')" class="flex items-center space-x-1 text-xs font-bold text-pink-pastel hover:text-purple-pastel transition-colors mb-2 bg-white px-3 py-1.5 rounded-xl border border-cream shadow-sm w-fit font-medium">
         <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -541,15 +544,7 @@
             <p class="text-xs text-slate-400">Hanya untuk user yang mempunyai lebihan nominal untuk check out Shopee.</p>
           </div>
         </div>
-
-        <div class="flex items-center space-x-2">
-          <div class="relative w-full md:w-64">
-            <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400">
-              <i data-lucide="search" class="w-3.5 h-3.5"></i>
-            </span>
-            <input type="text" id="refund-search-input" oninput="renderRefundTable()" placeholder="Cari nomor order..." class="w-full pl-9 pr-4 py-2 rounded-full border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel text-xs font-medium">
-          </div>
-        </div>
+        <input type="text" id="refund-search-input" oninput="renderRefundTable()" placeholder="Cari nomor order..." class="w-full md:w-64 pl-4 pr-4 py-2 rounded-full border border-slate-200 text-xs font-medium">
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -559,71 +554,53 @@
           </h3>
           <form id="refund-form" class="space-y-3 text-xs" onsubmit="saveRefundItem(event)">
             <div>
-              <label class="block text-slate-500 font-bold mb-1 uppercase tracking-wider">Pemilik Akun</label>
-              <select id="refund-user" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:border-pink-pastel font-medium">
-                </select>
+              <label class="block text-slate-500 font-bold mb-1">Pemilik Akun</label>
+              <select id="refund-user" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium"></select>
             </div>
-
             <div>
-              <label class="block text-slate-500 font-bold mb-1 uppercase tracking-wider">Shipping Batch</label>
-              <select id="refund-batch" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:border-pink-pastel font-medium">
-                </select>
+              <label class="block text-slate-500 font-bold mb-1">Shipping Batch</label>
+              <select id="refund-batch" required class="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white font-medium"></select>
             </div>
-
             <div>
-              <label class="block text-slate-500 font-bold mb-1 uppercase tracking-wider">No Order Checkout Shopee</label>
-              <input type="text" id="refund-no-order" required placeholder="Contoh: 260515KSPX819Z" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
+              <label class="block text-slate-500 font-bold mb-1">No Order Checkout Shopee</label>
+              <input type="text" id="refund-no-order" required placeholder="Contoh: 260515KSPX819Z" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
             </div>
-
             <div class="grid grid-cols-2 gap-2">
               <div>
-                <label class="block text-slate-500 font-bold mb-1 uppercase tracking-wider">Manual Transfer (Rp)</label>
-                <input type="number" id="refund-nominal-transfer" required placeholder="250000" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
+                <label class="block text-slate-500 font-bold mb-1">Transfer (Rp)</label>
+                <input type="number" id="refund-nominal-transfer" required placeholder="250000" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
               </div>
               <div>
-                <label class="block text-slate-500 font-bold mb-1 uppercase tracking-wider">Checkout Shopee (Rp)</label>
-                <input type="number" id="refund-nominal-shopee" required placeholder="200000" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
+                <label class="block text-slate-500 font-bold mb-1">Shopee (Rp)</label>
+                <input type="number" id="refund-nominal-shopee" required placeholder="200000" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium">
               </div>
             </div>
-
             <div>
-              <label class="block text-slate-500 font-bold mb-1 uppercase tracking-wider">Total Refund (Rp)</label>
-              <input type="number" id="refund-total-amount" required placeholder="50000" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel font-medium font-mono text-pink-pastel font-bold bg-white">
+              <label class="block text-slate-500 font-bold mb-1">Total Refund (Rp)</label>
+              <input type="number" id="refund-total-amount" required placeholder="50000" class="w-full px-3 py-2 border text-pink-pastel font-bold bg-white focus:outline-none">
             </div>
-
             <div>
-              <label class="block text-slate-500 font-bold mb-1 uppercase tracking-wider">Note / Keterangan</label>
-              <textarea id="refund-note" rows="2" placeholder="Contoh: Refund barang kosong / kelebihan transfer" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium" style="resize: none;"></textarea>
-              <p class="text-[9px] text-slate-400 mt-1">*Masukkan catatan khusus untuk transaksi refund ini, misal batch gabungan atau lainnya.</p>
+              <label class="block text-slate-500 font-bold mb-1">Keterangan</label>
+              <textarea id="refund-note" rows="2" class="w-full px-3 py-2 rounded-xl border border-slate-200 font-medium" style="resize: none;"></textarea>
             </div>
-
-            <button type="submit" class="w-full py-2.5 bg-pink-pastel text-white font-bold rounded-xl hover:bg-opacity-95 transition-all shadow-md flex items-center justify-center space-x-1">
-              <i data-lucide="save" class="w-4 h-4"></i>
-              <span>Simpan Refund</span>
-            </button>
+            <button type="submit" class="w-full py-2.5 bg-pink-pastel text-white font-bold rounded-xl shadow-md">Simpan Refund</button>
           </form>
         </div>
 
         <div class="lg:col-span-2 bg-white p-6 rounded-3xl shadow-sm border border-slate-100 space-y-4">
           <div class="flex justify-between items-center flex-wrap gap-2">
-            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">
-              Data Refund Shopee
-            </h3>
-            
-            <div class="flex items-center space-x-2">
-              <select id="refund-status-filter" onchange="renderRefundTable()" class="px-2.5 py-1 rounded-xl border border-slate-200 text-xs focus:outline-none bg-white font-medium">
-                <option value="semua">Semua Status 📋</option>
-                <option value="pending">Belum Refund (Pending) ⏳</option>
-                <option value="done">Done Refund (Selesai) ✅</option>
-              </select>
-            </div>
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Data Refund Shopee</h3>
+            <select id="refund-status-filter" onchange="renderRefundTable()" class="px-2.5 py-1 rounded-xl border text-xs bg-white font-medium">
+              <option value="semua">Semua Status 📋</option>
+              <option value="pending">Belum Refund (Pending) ⏳</option>
+              <option value="done">Done Refund (Selesai) ✅</option>
+            </select>
           </div>
-
           <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[650px]">
               <thead>
                 <tr class="bg-pink-pastel bg-opacity-10 text-pink-pastel font-bold text-xs">
-                  <th class="p-3 font-medium">No. Order Shopee / Keterangan</th>
+                  <th class="p-3 font-medium">No. Order</th>
                   <th class="p-3 font-medium">Batch</th>
                   <th class="p-3 font-medium">User</th>
                   <th class="p-3 font-medium text-right">Transfer / Shopee</th>
@@ -632,14 +609,14 @@
                   <th class="p-3 font-medium text-center">Aksi</th>
                 </tr>
               </thead>
-              <tbody id="refund-table-body" class="divide-y divide-slate-100 text-xs">
-                </tbody>
+              <tbody id="refund-table-body" class="divide-y divide-slate-100 text-xs text-slate-700"></tbody>
             </table>
           </div>
         </div>
       </div>
     </section>
 
+    <!-- MANAJEMEN PENGGUNA (Hanya Admin) -->
     <section id="menu-user-management" class="menu-section hidden space-y-4">
       <button onclick="switchSection('dashboard')" class="flex items-center space-x-1 text-xs font-bold text-pink-pastel hover:text-purple-pastel transition-colors mb-2 bg-white px-3 py-1.5 rounded-xl border border-cream shadow-sm w-fit font-medium">
         <i data-lucide="arrow-left" class="w-3.5 h-3.5"></i>
@@ -658,24 +635,22 @@
         </div>
       </div>
 
-      <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-150 space-y-4">
+      <div class="bg-white p-5 rounded-3xl shadow-sm border space-y-4">
         <h3 class="text-xs text-slate-700 font-bold flex items-center gap-2 font-medium">
           <i data-lucide="user-plus" class="text-pink-pastel w-4 h-4"></i> Tambah Pengguna Baru
         </h3>
         <form id="add-user-form" class="grid grid-cols-1 sm:grid-cols-5 gap-3">
-          <input type="text" id="new-user-nama" required placeholder="Nama Lengkap" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
-          <input type="text" id="new-user-username" required placeholder="Username" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
-          <input type="text" id="new-user-password" required placeholder="Password" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
-          <input type="tel" id="new-user-phone" required placeholder="No WA (Contoh: 628123456789)" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel font-medium">
-          <select id="new-user-role" class="px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:border-pink-pastel bg-white font-medium">
-            <option value="pengguna">Pengguna (Form Input Sahaja)</option>
-            <option value="admin2">Admin 2 (Daftar Barang Saja)</option>
-            <option value="admin">Super Admin (Semua Akses)</option>
+          <input type="text" id="new-user-nama" required placeholder="Nama Lengkap" class="px-3 py-2 text-xs rounded-xl border focus:border-pink-pastel font-medium">
+          <input type="text" id="new-user-username" required placeholder="Username" class="px-3 py-2 text-xs rounded-xl border focus:border-pink-pastel font-medium">
+          <input type="text" id="new-user-password" required placeholder="Password" class="px-3 py-2 text-xs rounded-xl border focus:border-pink-pastel font-medium">
+          <input type="tel" id="new-user-phone" required placeholder="No WA" class="px-3 py-2 text-xs rounded-xl border focus:border-pink-pastel font-medium">
+          <select id="new-user-role" class="px-3 py-2 text-xs rounded-xl border bg-white font-medium">
+            <option value="pengguna">Pengguna</option>
+            <option value="admin2">Admin 2</option>
+            <option value="admin">Super Admin</option>
           </select>
           <div class="col-span-1 sm:col-span-5 flex justify-end">
-            <button type="submit" class="px-4 py-2 rounded-xl bg-pink-pastel hover:bg-opacity-90 text-white font-bold text-xs shadow-md font-medium">
-              Daftarkan Pengguna
-            </button>
+            <button type="submit" class="px-4 py-2 rounded-xl bg-pink-pastel text-white font-bold text-xs shadow-md">Daftarkan Pengguna</button>
           </div>
         </form>
       </div>
@@ -684,25 +659,45 @@
         <div class="p-4 bg-cream bg-opacity-40 border-b border-cream">
           <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider font-medium">Daftar Akun Pengguna</h4>
         </div>
-        <div class="divide-y divide-slate-100" id="user-list-wrapper">
-          </div>
+        <div class="divide-y divide-slate-100" id="user-list-wrapper"></div>
       </div>
     </section>
 
   </main>
 
+  <!-- APPS SCRIPT TUTORIAL MODAL -->
+  <div id="tutorial-modal" class="fixed inset-0 bg-slate-900 bg-opacity-80 z-50 hidden flex justify-center items-center p-4 overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
+      <button onclick="closeAppsScriptTutorial()" class="absolute top-4 right-4 p-2 bg-slate-100 rounded-full text-slate-600 hover:bg-slate-200">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+      <h3 class="text-sm font-bold text-pink-pastel flex items-center gap-1.5 uppercase">
+        <i data-lucide="file-text"></i> Langkah Menghubungkan Google Sheet (Database)
+      </h3>
+      <div class="text-xs text-slate-600 space-y-3 leading-relaxed">
+        <p>Ikuti langkah ini agar data otomatis tersambung cloud:</p>
+        <ol class="list-decimal list-inside space-y-2 font-medium">
+          <li>Buat Google Sheet baru di Drive Anda.</li>
+          <li>Klik menu **Ekstensi** > **Apps Script**.</li>
+          <li>Hapus seluruh kode bawaan Google, paste kode Apps Script terbaru Anda, klik Save.</li>
+          <li>Klik tombol **Terapkan (Deploy)** > **Penerapan Baru (New Deployment)**.</li>
+          <li>Pilih tipe **Aplikasi Web (Web App)**, setel aksesnya menjadi **Siapa Saja (Anyone)**, lalu klik Deploy.</li>
+          <li>Salin link URL Web App tersebut, dan tempelkan ke kolom samping aplikasi ini!</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Foto Modal -->
   <div id="photo-modal" class="fixed inset-0 bg-slate-900 bg-opacity-80 z-50 hidden flex justify-center items-center p-4">
     <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl relative">
-      <button onclick="closePhotoModal()" class="absolute top-3 right-3 p-2 bg-slate-100 hover:bg-slate-200 rounded-full transition-colors z-10">
+      <button onclick="closePhotoModal()" class="absolute top-3 right-3 p-2 bg-slate-100 rounded-full z-10">
         <i data-lucide="x" class="w-4 h-4 text-slate-700"></i>
       </button>
       <div class="p-5 flex flex-col items-center">
-        <h3 id="photo-modal-title" class="text-slate-700 font-bold mb-4 text-sm font-medium">Preview Foto Update</h3>
-        <img id="photo-modal-img" src="" class="max-h-[60vh] object-contain rounded-2xl w-full border border-slate-100">
-        <a id="photo-download-btn" href="#" download="update-barang.jpg" class="mt-4 px-6 py-2.5 bg-pink-pastel hover:bg-opacity-90 text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow-md font-medium">
-          <i data-lucide="download" class="w-3.5 h-3.5"></i>
-          <span>Unduh Resolusi Asli</span>
-        </a>
+        <h3 id="photo-modal-title" class="text-slate-700 font-bold mb-4 text-sm">Preview Foto Update</h3>
+        <img id="photo-modal-img" src="" class="max-h-[60vh] object-contain rounded-2xl w-full">
+        <a id="photo-download-btn" href="#" download="update-barang.jpg" class="mt-4 px-6 py-2.5 bg-pink-pastel text-white font-bold text-xs rounded-xl flex items-center space-x-2 shadow-md">Unduh Resolusi Asli</a>
       </div>
     </div>
   </div>
@@ -712,48 +707,33 @@
   </footer>
 
   <script>
-    // CORE SYSTEM DATABASE IN LOCAL STORAGE OR HARDCODED DUMMIES
+    // =========================================================================
+    // REVISI CONFIG UTAMA: MASUKKAN LINK APPS SCRIPT ANDA DI SINI AGAR PERMANEN!
+    // =========================================================================
+    const GLOBAL_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxZkLPxKcWdEjc3mpBf4AG-du6tnX7WuKoYNwDtkJhyVqaU_DdKKjrS-_oh6GKftunSlw/exec";
+
+    // Data default cadangan jika internet offline / belum sinkron awal
     const defaultUsers = [
-      { nama: "Super Admin", username: "admin", password: "123", role: "admin", status: "aktif", phone: "6282110002000" },
-      { nama: "Staff Gudang", username: "admin2", password: "123", role: "admin2", status: "aktif", phone: "6282110003000" },
-      { nama: "Ariel Lin", username: "ariel", password: "123", role: "pengguna", status: "aktif", phone: "628123456789" },
-      { nama: "Budi Santoso", username: "budi", password: "123", role: "pengguna", status: "aktif", phone: "628987654321" }
+      { id: "u-1", username: "admin", name: "Super Admin", password: "123", role: "admin", status: "aktif", phone: "6282110002000" },
+      { id: "u-2", username: "admin2", name: "Staff Gudang", password: "123", role: "admin2", status: "aktif", phone: "6282110003000" },
+      { id: "u-3", username: "ariel", name: "Ariel Lin", password: "123", role: "pengguna", status: "aktif", phone: "628123456789" }
     ];
 
-    const defaultBarang = [
-      { id: "1", resi: "1234567", detail: "-", pemilik: "ariel", tanggalUpdate: "2026-06-15", foto1: "", foto2: "", shippingBatch: "Batch 1A", negara: "Korea" },
-      { id: "2", resi: "1234567", detail: "-", pemilik: "budi", tanggalUpdate: "2026-06-14", foto1: "", foto2: "", shippingBatch: "Batch 1A", negara: "China" },
-      { id: "3", resi: "1234567", detail: "-", pemilik: "ariel", tanggalUpdate: "2026-06-15", foto1: "", foto2: "", shippingBatch: "Batch 2B", negara: "Thailand" }
-    ];
-
-    const defaultInvoices = [
-      { id: "inv-1", shippingBatch: "Batch 1A", resi: "1234567", detail: "-", pemilik: "ariel", qty: 2.5, rateSharing: 120000, feeWh: 15000, total: 315000 },
-      { id: "inv-2", shippingBatch: "Batch 1A", resi: "1234567", detail: "-", pemilik: "budi", qty: 5.0, rateSharing: 85000, feeWh: 25000, total: 450000 },
-      { id: "inv-3", shippingBatch: "Batch 2B", resi: "1234567", detail: "-", pemilik: "ariel", qty: 1.2, rateSharing: 95000, feeWh: 10000, total: 124000 }
-    ];
-
-    const defaultRefunds = [
-      { id: "ref-1", pemilik: "ariel", shippingBatch: "Batch 1A", noOrderShopee: "SPX-1029384920", nominalTransfer: 250000, nominalShopee: 200000, totalRefund: 50000, statusRefund: "done", tanggal: "2026-06-15", keterangan: "Kelebihan transfer" },
-      { id: "ref-2", pemilik: "budi", shippingBatch: "Batch 1A", noOrderShopee: "SPX-992384112", nominalTransfer: 150000, nominalShopee: 120000, totalRefund: 30000, statusRefund: "pending", tanggal: "2026-06-14", keterangan: "Barang kosong 2 pcs" }
-    ];
-
-    // Initialize Local Database
+    // Local state variables (Mengambil cache dari memori perangkat)
     let users = JSON.parse(localStorage.getItem('bs_users')) || defaultUsers;
-    let barang = JSON.parse(localStorage.getItem('bs_barang')) || defaultBarang;
-    let invoices = JSON.parse(localStorage.getItem('bs_invoices')) || defaultInvoices;
-    let refunds = JSON.parse(localStorage.getItem('bs_refunds')) || defaultRefunds;
+    let barang = JSON.parse(localStorage.getItem('bs_barang')) || [];
+    let invoices = JSON.parse(localStorage.getItem('bs_invoices')) || [];
+    let refunds = JSON.parse(localStorage.getItem('bs_refunds')) || [];
     let fonnteToken = localStorage.getItem('bs_fonnte_token') || "";
+    let googleSheetUrl = GLOBAL_APPS_SCRIPT_URL.includes("GANTI_DENGAN_URL") ? (localStorage.getItem('bs_sheet_url') || "") : GLOBAL_APPS_SCRIPT_URL;
 
-    // Application state
     let currentUser = null;
     let activeTabNegara = "Semua";
-    const loginAttempts = {}; // Tracks failed logins per username
-    let temporaryParsedImportRows = []; // Temporary storage for mass upload
-
-    // Dynamic confirmation callback store
+    const loginAttempts = {};
+    let temporaryParsedImportRows = [];
     let confirmCallback = null;
 
-    // DOM Elements
+    // DOM Elements References
     const loginContainer = document.getElementById('login-container');
     const appContainer = document.getElementById('app-container');
     const sidebar = document.getElementById('sidebar');
@@ -763,52 +743,61 @@
     const toastMsg = document.getElementById('toast-message');
     const toastIcon = document.getElementById('toast-icon');
     const userBadge = document.getElementById('user-badge');
+    const togglePasswordBtn = document.getElementById('toggle-password-btn');
+    const passwordInput = document.getElementById('password-input');
+    const togglePasswordIcon = document.getElementById('toggle-password-icon');
 
-    // UI Toast Notification helper
+    // ==========================================
+    // NOTIFIKASI TOAST, CONFIRM DIALOG & PASSWORD TOGGLE
+    // ==========================================
     function showToast(message, type = "success") {
-      toastMsg.innerText = message;
+      const toastElement = document.getElementById('toast');
+      const toastMsgElement = document.getElementById('toast-message');
+      const toastIconElement = document.getElementById('toast-icon');
+      if (!toastElement || !toastMsgElement || !toastIconElement) return;
+
+      toastMsgElement.innerText = message;
       if (type === "success") {
-        toast.className = toast.className.replace(/border-[a-z-]+/g, 'border-emerald-400');
-        toastIcon.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>`;
+        toastElement.className = toastElement.className.replace(/border-[a-z-]+/g, 'border-emerald-400');
+        toastIconElement.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 text-emerald-500"></i>`;
       } else {
-        toast.className = toast.className.replace(/border-[a-z-]+/g, 'border-pink-pastel');
-        toastIcon.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 text-pink-pastel"></i>`;
+        toastElement.className = toastElement.className.replace(/border-[a-z-]+/g, 'border-pink-pastel');
+        toastIconElement.innerHTML = `<i data-lucide="alert-triangle" class="w-4 h-4 text-pink-pastel"></i>`;
       }
       lucide.createIcons();
-      toast.classList.remove('translate-y-20', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
-      
-      setTimeout(() => {
-        toast.classList.add('translate-y-20', 'opacity-0');
-        toast.classList.remove('translate-y-0', 'opacity-100');
+      toastElement.classList.remove('translate-y-20', 'opacity-0');
+      toastElement.classList.add('translate-y-0', 'opacity-100');
+
+      if (window.toastTimeout) clearTimeout(window.toastTimeout);
+      window.toastTimeout = setTimeout(() => {
+        toastElement.classList.add('translate-y-20', 'opacity-0');
+        toastElement.classList.remove('translate-y-0', 'opacity-100');
       }, 4000);
     }
 
-    // Custom Confirmation Modal
     function triggerCustomConfirm(title, message, onOkCallback) {
-      document.getElementById('confirm-title').innerText = title;
-      document.getElementById('confirm-message').innerText = message;
-      document.getElementById('custom-confirm-modal').classList.remove('hidden');
+      const confirmModal = document.getElementById('custom-confirm-modal');
+      const confirmTitle = document.getElementById('confirm-title');
+      const confirmMessage = document.getElementById('confirm-message');
+      if (!confirmModal || !confirmTitle || !confirmMessage) return;
+
+      confirmTitle.innerText = title;
+      confirmMessage.innerText = message;
+      confirmModal.classList.remove('hidden');
       confirmCallback = onOkCallback;
     }
 
+    // Event listener konfirmasi & lihat sandi
     document.getElementById('btn-confirm-cancel').addEventListener('click', () => {
       document.getElementById('custom-confirm-modal').classList.add('hidden');
       confirmCallback = null;
     });
 
     document.getElementById('btn-confirm-ok').addEventListener('click', () => {
-      if (confirmCallback) {
-        confirmCallback();
-      }
+      if (confirmCallback) confirmCallback();
       document.getElementById('custom-confirm-modal').classList.add('hidden');
       confirmCallback = null;
     });
-
-    // PASSWORD VISIBILITY TOGGLE
-    const togglePasswordBtn = document.getElementById('toggle-password-btn');
-    const passwordInput = document.getElementById('password-input');
-    const togglePasswordIcon = document.getElementById('toggle-password-icon');
 
     togglePasswordBtn.addEventListener('click', () => {
       if (passwordInput.type === 'password') {
@@ -821,12 +810,137 @@
       lucide.createIcons();
     });
 
-    // AUTH ACTIONS
-    document.getElementById('login-form').addEventListener('submit', function(e) {
+    // ==========================================
+    // SINKRONISASI REAL-TIME GOOGLE SPREADSHEET
+    // ==========================================
+    function updateSyncUIStatus(isConnected, lastSyncTime = "") {
+      const dot = document.getElementById('sync-dot');
+      const text = document.getElementById('sync-status-text');
+      if(!dot || !text) return;
+      
+      if (isConnected) {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500";
+        text.innerHTML = `Terhubung ke Google Sheet ${lastSyncTime ? `<br><span class="text-[9px] text-slate-400">Sync: ${lastSyncTime}</span>` : ""}`;
+      } else {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-red-500 animate-pulse";
+        text.innerHTML = `Database Lokal / Offline`;
+      }
+    }
+
+    // Mengambil data secara otomatis dari Google Spreadsheet (Dipanggil saat login & muat awal)
+    async function fetchAndSyncAllData(showSuccessToast = false) {
+      if (!googleSheetUrl) {
+        updateSyncUIStatus(false);
+        return false;
+      }
+
+      try {
+        const response = await fetch(`${googleSheetUrl}?op=getAll`);
+        if (!response.ok) throw new Error();
+        const cloudData = await response.json();
+        
+        if (cloudData && cloudData.status) {
+          if (cloudData.users && cloudData.users.length > 0) {
+            users = cloudData.users;
+            localStorage.setItem('bs_users', JSON.stringify(users));
+          }
+          if (cloudData.barang) {
+            barang = cloudData.barang;
+            localStorage.setItem('bs_barang', JSON.stringify(barang));
+          }
+          if (cloudData.invoices) {
+            invoices = cloudData.invoices;
+            localStorage.setItem('bs_invoices', JSON.stringify(invoices));
+          }
+          if (cloudData.refunds) {
+            refunds = cloudData.refunds;
+            localStorage.setItem('bs_refunds', JSON.stringify(refunds));
+          }
+          if (cloudData.fonnteToken !== undefined) {
+            fonnteToken = cloudData.fonnteToken;
+            localStorage.setItem('bs_fonnte_token', fonnteToken);
+            const fi = document.getElementById('fonnte-token-input');
+            if(fi) fi.value = fonnteToken;
+          }
+
+          const now = new Date().toLocaleTimeString('id-ID');
+          updateSyncUIStatus(true, now);
+          
+          // Re-render UI yang aktif agar HP & Laptop langsung terupdate datanya
+          refreshDashboardStats();
+          renderDaftarBarang();
+          renderInvoice();
+          renderRefundTable();
+          if (currentUser && currentUser.role === 'admin') renderUserManagement();
+          
+          if(showSuccessToast) showToast("Database Cloud berhasil disinkronkan!", "success");
+          return true;
+        }
+      } catch (error) {
+        console.error("Gagal sync:", error);
+        updateSyncUIStatus(false);
+      }
+      return false;
+    }
+
+    // Mengirim data secara otomatis ke Google Spreadsheet (Auto-Save Backend)
+    async function pushAllDataToSheet() {
+      if (!googleSheetUrl) return;
+
+      const payload = {
+        op: "saveAll",
+        users: users,
+        barang: barang,
+        invoices: invoices,
+        refunds: refunds,
+        fonnteToken: fonnteToken
+      };
+
+      try {
+        await fetch(googleSheetUrl, {
+          method: "POST",
+          mode: "no-cors",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        const now = new Date().toLocaleTimeString('id-ID');
+        updateSyncUIStatus(true, now);
+      } catch (error) {
+        console.error("Gagal push data:", error);
+        updateSyncUIStatus(false);
+      }
+    }
+
+    async function saveAndSyncUrlExplicitly() {
+      const urlInput = document.getElementById('sheet-url-input').value.trim();
+      if (!urlInput) {
+        showToast("Masukkan URL Apps Script Anda!", "error");
+        return;
+      }
+      googleSheetUrl = urlInput;
+      localStorage.setItem('bs_sheet_url', googleSheetUrl);
+      const success = await fetchAndSyncAllData(true);
+      if(!success) showToast("Koneksi gagal! Cek kembali settingan Deployment Google Sheets Anda.", "error");
+    }
+
+    // ==========================================
+    // LOGIN DENGAN PULL DATABASE OTOMATIS
+    // ==========================================
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
       e.preventDefault();
       const usernameVal = document.getElementById('username-input').value.trim().toLowerCase();
       const passwordVal = document.getElementById('password-input').value;
       const rememberMeChecked = document.getElementById('remember-me').checked;
+      const loadingText = document.getElementById('login-loading-text');
+
+      if (loadingText) loadingText.classList.remove('hidden');
+
+      // Ambil data terbaru dari cloud spreadsheet dulu sebelum verifikasi login agar sinkron
+      if (googleSheetUrl) {
+        await fetchAndSyncAllData();
+      }
+
+      if (loadingText) loadingText.classList.add('hidden');
 
       const matchedUser = users.find(u => u.username === usernameVal);
 
@@ -835,136 +949,68 @@
         return;
       }
 
-      // Check wrong password
       if (matchedUser.password !== passwordVal) {
-        if (!loginAttempts[usernameVal]) {
-          loginAttempts[usernameVal] = 0;
-        }
+        if (!loginAttempts[usernameVal]) loginAttempts[usernameVal] = 0;
         loginAttempts[usernameVal]++;
-
-        const sisaPercobaan = 3 - loginAttempts[usernameVal];
-
         if (loginAttempts[usernameVal] >= 3) {
-          // Reset password to "123"
           matchedUser.password = "123";
           localStorage.setItem('bs_users', JSON.stringify(users));
-          loginAttempts[usernameVal] = 0; // reset attempts counter
-
-          // Pop-up warning informing reset
-          triggerCustomConfirm(
-            "Sandi Otomatis Di-Reset!",
-            `Anda telah salah memasukkan password sebanyak 3 kali berturut-turut. Password akun @${usernameVal} telah di-reset otomatis ke pengaturan awal: "123".`,
-            () => {
-              // Restore modal button text state when closed
-              document.getElementById('btn-confirm-cancel').classList.remove('hidden');
-              document.getElementById('btn-confirm-ok').innerText = "Ya, Hapus";
-            }
-          );
-          // Customize modal temporarily to show single acknowledge button
-          document.getElementById('btn-confirm-cancel').classList.add('hidden');
-          document.getElementById('btn-confirm-ok').innerText = "Saya Mengerti";
-
-          // Clear password input
+          await pushAllDataToSheet();
+          loginAttempts[usernameVal] = 0;
+          triggerCustomConfirm("Sandi Di-Reset!", `Password otomatis dikembalikan ke "123".`, () => {});
           passwordInput.value = "";
         } else {
-          showToast(`Password salah! Sisa percobaan: ${sisaPercobaan}x sebelum reset otomatis ke "123".`, "error");
+          showToast(`Password salah! Sisa percobaan: ${3 - loginAttempts[usernameVal]}x`, "error");
         }
         return;
       }
 
       if (matchedUser.status !== "aktif") {
-        showToast("Akun Anda telah dinonaktifkan oleh administrator.", "error");
+        showToast("Akun Anda telah dinonaktifkan.", "error");
         return;
       }
 
-      // Handle "Remember Me" credentials saving
       if (rememberMeChecked) {
         localStorage.setItem('bs_remembered_username', usernameVal);
         localStorage.setItem('bs_remembered_password', passwordVal);
-        localStorage.setItem('bs_remember_me_checked', 'true');
       } else {
         localStorage.removeItem('bs_remembered_username');
         localStorage.removeItem('bs_remembered_password');
-        localStorage.removeItem('bs_remember_me_checked');
       }
 
-      // Reset attempts on successful login
-      loginAttempts[usernameVal] = 0;
-
       currentUser = matchedUser;
-      showToast(`Selamat datang kembali, ${currentUser.nama}!`, "success");
+      showToast(`Selamat datang, ${currentUser.name}! Data otomatis disinkronkan.`, "success");
       enterDashboard();
     });
 
-    // GLOBAL LOGOUT FUNCTION
     function logoutUser() {
       currentUser = null;
-      
-      // Hide Top Header completely
-      const header = document.getElementById('app-header');
-      header.classList.remove('flex');
-      header.classList.add('hidden');
-
+      document.getElementById('app-header').classList.replace('flex', 'hidden');
       userBadge.classList.add('hidden');
-      userBadge.classList.remove('flex');
       appContainer.classList.add('hidden');
       loginContainer.classList.remove('hidden');
       sidebar.classList.add('-translate-x-full');
-      
-      // Reset password field to blank unless remember-me fills it back
-      const rememberedUser = localStorage.getItem('bs_remembered_username');
-      const rememberedPass = localStorage.getItem('bs_remembered_password');
-      const rememberChecked = localStorage.getItem('bs_remember_me_checked') === 'true';
-
-      if (rememberChecked && rememberedUser && rememberedPass) {
-        document.getElementById('username-input').value = rememberedUser;
-        passwordInput.value = rememberedPass;
-        document.getElementById('remember-me').checked = true;
-      } else {
-        document.getElementById('username-input').value = "";
-        passwordInput.value = "";
-        document.getElementById('remember-me').checked = false;
-      }
-
-      passwordInput.type = "password";
-      togglePasswordIcon.setAttribute('data-lucide', 'eye');
-      lucide.createIcons();
-
-      showToast("Berhasil keluar dari akun.", "success");
+      showToast("Berhasil keluar.", "success");
     }
 
     document.getElementById('logout-btn').addEventListener('click', logoutUser);
     document.getElementById('logout-btn-top').addEventListener('click', logoutUser);
+    menuBtn.addEventListener('click', () => sidebar.classList.toggle('-translate-x-full'));
+    closeSidebarBtn.addEventListener('click', () => sidebar.classList.add('-translate-x-full'));
 
-    // Toggle Sidebar Menu
-    menuBtn.addEventListener('click', () => {
-      sidebar.classList.toggle('-translate-x-full');
-    });
-    closeSidebarBtn.addEventListener('click', () => {
-      sidebar.classList.add('-translate-x-full');
-    });
-
-    // Navigation injection and rendering based on roles
     function enterDashboard() {
       loginContainer.classList.add('hidden');
       appContainer.classList.remove('hidden');
+      document.getElementById('app-header').classList.replace('hidden', 'flex');
+      userBadge.classList.replace('hidden', 'flex');
       
-      // Show Top Header (flex layout)
-      const header = document.getElementById('app-header');
-      header.classList.remove('hidden');
-      header.classList.add('flex');
-
-      // Update User Badge header (Flex Layout on top-right)
-      userBadge.classList.remove('hidden');
-      userBadge.classList.add('flex');
       document.getElementById('current-user-role').innerText = currentUser.role.toUpperCase();
-      document.getElementById('current-user-name').innerText = currentUser.nama;
-      document.getElementById('welcome-message').innerText = `Halo, Selamat Datang ${currentUser.nama}!`;
+      document.getElementById('current-user-name').innerText = currentUser.name;
+      document.getElementById('welcome-message').innerText = `Halo, Selamat Datang ${currentUser.name}!`;
+      document.getElementById('sheet-url-input').value = googleSheetUrl;
 
-      // Update configuration for Fonnte box
       if (currentUser.role === 'admin') {
         document.getElementById('fonnte-config-box').classList.remove('hidden');
-        document.getElementById('fonnte-token-input').value = fonnteToken;
         document.getElementById('admin-import-toggle-btn-container').classList.remove('hidden');
       } else {
         document.getElementById('fonnte-config-box').classList.add('hidden');
@@ -973,39 +1019,20 @@
 
       renderMenuLinks();
       switchSection('dashboard');
-      refreshDashboardStats();
     }
 
-    // Save Fonnte Token Realtime
-    document.getElementById('fonnte-token-input').addEventListener('input', function(e) {
-      fonnteToken = e.target.value.trim();
-      localStorage.setItem('bs_fonnte_token', fonnteToken);
-    });
-
-    // Tab switcher logic
     function switchSection(sectionId) {
-      document.querySelectorAll('.menu-section').forEach(section => {
-        section.classList.add('hidden');
-      });
+      document.querySelectorAll('.menu-section').forEach(section => section.classList.add('hidden'));
       document.getElementById(`menu-${sectionId}`).classList.remove('hidden');
-      sidebar.classList.add('-translate-x-full'); // Auto close menu after click
+      sidebar.classList.add('-translate-x-full');
 
-      // Refresh corresponding tab render
-      if (sectionId === 'daftar-barang') {
-        renderDaftarBarang();
-      } else if (sectionId === 'invoice') {
-        syncShippingBatchDropdown();
-        renderInvoice();
-      } else if (sectionId === 'refund-shopee') {
-        initRefundMenu();
-      } else if (sectionId === 'user-management') {
-        renderUserManagement();
-      } else if (sectionId === 'dashboard') {
-        refreshDashboardStats();
-      }
+      if (sectionId === 'daftar-barang') renderDaftarBarang();
+      else if (sectionId === 'invoice') { syncShippingBatchDropdown(); renderInvoice(); }
+      else if (sectionId === 'refund-shopee') initRefundMenu();
+      else if (sectionId === 'user-management') renderUserManagement();
+      else if (sectionId === 'dashboard') refreshDashboardStats();
     }
 
-    // Build responsive Menu Links inside sidebar and homepage quick links
     function renderMenuLinks() {
       const linksContainer = document.getElementById('nav-links');
       const shortcutsContainer = document.getElementById('dashboard-shortcuts');
@@ -1019,158 +1046,32 @@
         { id: 'user-management', name: 'User Management', icon: 'users', roles: ['admin'] }
       ];
 
-      // Filter based on active role
       const userItems = items.filter(i => i.roles.includes(currentUser.role));
-
-      // 1. Injeksi Sidebar links
       linksContainer.innerHTML = '';
       userItems.forEach(item => {
         const link = document.createElement('button');
         link.className = "w-full flex items-center space-x-3 p-3.5 rounded-2xl text-left font-bold transition-all hover:bg-cream hover:text-pink-pastel text-slate-600 text-xs font-medium";
         link.onclick = () => switchSection(item.id);
-        link.innerHTML = `
-          <i data-lucide="${item.icon}" class="w-4 h-4 text-pink-pastel"></i>
-          <span>${item.name}</span>
-        `;
+        link.innerHTML = `<i data-lucide="${item.icon}" class="w-4 h-4 text-pink-pastel"></i><span>${item.name}</span>`;
         linksContainer.appendChild(link);
       });
 
-      // 2. Injeksi Quick Dashboard Shortcuts
       shortcutsContainer.innerHTML = '';
       userItems.filter(i => i.id !== 'dashboard').forEach(item => {
         const shortcut = document.createElement('button');
         shortcut.onclick = () => switchSection(item.id);
         shortcut.className = "p-5 rounded-2xl bg-cream bg-opacity-40 hover:bg-opacity-100 border border-yellow-pastel text-center transition-all flex flex-col items-center justify-center space-y-2 group";
-        shortcut.innerHTML = `
-          <div class="p-2.5 bg-pink-pastel text-white rounded-xl group-hover:scale-105 transition-transform">
-            <i data-lucide="${item.icon}" class="w-5 h-5"></i>
-          </div>
-          <span class="text-[11px] font-bold text-slate-700">${item.name}</span>
-        `;
+        shortcut.innerHTML = `<div class="p-2.5 bg-pink-pastel text-white rounded-xl"><i data-lucide="${item.icon}" class="w-5 h-5"></i></div><span class="text-[11px] font-bold text-slate-700">${item.name}</span>`;
         shortcutsContainer.appendChild(shortcut);
       });
-
       lucide.createIcons();
     }
 
-    // REVISI NOTIFIKASI: Notifikasi kedaluwarsa & hilang otomatis dalam 48 jam (2x24 jam)
-    function renderDashboardNotifications() {
-      const notifPanel = document.getElementById('dashboard-notifications-panel');
-      const notifList = document.getElementById('dashboard-notifications-list');
-      if (!notifPanel || !notifList) return;
-
-      notifPanel.classList.remove('hidden');
-
-      const now = Date.now();
-      const fortyEightHours = 2 * 24 * 60 * 60 * 1000; // 172800000 ms
-
-      let itemsWithPhotos = [];
-
-      itemsWithPhotos = barang.filter(b => {
-        // Harus ada setidaknya salah satu foto
-        if (!b.foto1 && !b.foto2) return false;
-
-        // Filter berdasarkan hak akses kepemilikan akun jika dia level pengguna biasa
-        if (currentUser.role === 'pengguna' && b.pemilik !== currentUser.username) {
-          return false;
-        }
-
-        // Cek kedaluwarsa foto 1 (Jika tidak ada timestamp rujukan detail, fallback ke aslinya)
-        let showFoto1 = false;
-        if (b.foto1) {
-          const uploadTime = b.foto1Time ? Number(b.foto1Time) : (b.tanggalUpdate ? new Date(b.tanggalUpdate).getTime() : 0);
-          if (now - uploadTime < fortyEightHours) {
-            showFoto1 = true;
-          }
-        }
-
-        // Cek kedaluwarsa foto 2
-        let showFoto2 = false;
-        if (b.foto2) {
-          const uploadTime = b.foto2Time ? Number(b.foto2Time) : (b.tanggalUpdate ? new Date(b.tanggalUpdate).getTime() : 0);
-          if (now - uploadTime < fortyEightHours) {
-            showFoto2 = true;
-          }
-        }
-
-        // Simpan properti status tampilan temporer untuk tombol rendering list
-        b._showFoto1 = showFoto1;
-        b._showFoto2 = showFoto2;
-
-        return showFoto1 || showFoto2;
-      });
-
-      notifList.innerHTML = '';
-
-      if (itemsWithPhotos.length === 0) {
-        notifList.innerHTML = `
-          <div class="p-4 bg-slate-50 rounded-2xl text-center border border-dashed border-slate-200">
-            <p class="text-xs text-slate-400 font-semibold">Belum ada update foto paket terbaru. Mohon ditunggu ya! 🌸</p>
-          </div>
-        `;
-        return;
-      }
-
-      // Urutkan berdasarkan waktu unggah foto paling baru
-      itemsWithPhotos.sort((a, b) => {
-        const timeA = Math.max(a.foto1Time || 0, a.foto2Time || 0);
-        const timeB = Math.max(b.foto1Time || 0, b.foto2Time || 0);
-        return timeB - timeA;
-      });
-
-      itemsWithPhotos.forEach(item => {
-        const wrapper = document.createElement('div');
-        wrapper.className = "p-3.5 bg-yellow-pastel bg-opacity-10 border border-yellow-pastel border-opacity-40 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs";
-        
-        let photoButtons = '';
-        if (item.foto1 && item._showFoto1) {
-          photoButtons += `
-            <button onclick="viewPhotoFromDb('${item.id}', 'foto1')" class="px-3 py-1.5 bg-pink-pastel hover:bg-opacity-95 text-white font-bold rounded-xl transition-all shadow-sm">
-              Foto 1 📸
-            </button>
-          `;
-        }
-        if (item.foto2 && item._showFoto2) {
-          photoButtons += `
-            <button onclick="viewPhotoFromDb('${item.id}', 'foto2')" class="px-3 py-1.5 bg-purple-pastel hover:bg-opacity-95 text-white font-bold rounded-xl transition-all shadow-sm">
-              Foto 2 📸
-            </button>
-          `;
-        }
-
-        const targetUser = users.find(u => u.username === item.pemilik) || { nama: item.pemilik };
-        const detailText = item.detail && item.detail !== '-' ? `(${item.detail})` : '';
-
-        // Hitung sisa jam sebelum notifikasi hilang
-        const times = [];
-        if (item.foto1 && item._showFoto1) times.push(item.foto1Time ? Number(item.foto1Time) : new Date(item.tanggalUpdate).getTime());
-        if (item.foto2 && item._showFoto2) times.push(item.foto2Time ? Number(item.foto2Time) : new Date(item.tanggalUpdate).getTime());
-        const latestTime = Math.max(...times);
-        const elapsed = now - latestTime;
-        const remainingMs = Math.max(0, fortyEightHours - elapsed);
-        const remainingHours = Math.ceil(remainingMs / (1000 * 60 * 60));
-        const remainingText = remainingHours > 0 ? ` (Sisa waktu tampil: ${remainingHours} jam)` : '';
-
-        wrapper.innerHTML = `
-          <div class="space-y-0.5">
-            <p class="text-slate-700 font-bold">
-              Resi <span class="text-pink-pastel">${item.resi}</span> ${detailText} 
-              ${currentUser.role !== 'pengguna' ? `milik <span class="text-purple-700">@${item.pemilik} (${targetUser.nama})</span>` : ''}
-            </p>
-            <p class="text-[10px] text-slate-400 font-medium">Foto barang telah berhasil diupdate pada ${item.tanggalUpdate || '-'}<span class="text-pink-pastel font-semibold">${remainingText}</span></p>
-          </div>
-          <div class="flex gap-2 shrink-0">
-            ${photoButtons}
-          </div>
-        `;
-        notifList.appendChild(wrapper);
-      });
-      lucide.createIcons();
-    }
-
-    // REFRESH STATS AT DASHBOARD
+    // ==========================================
+    // DASHBOARD & NOTIFIKASI FOTO
+    // ==========================================
     function refreshDashboardStats() {
-      let currentBarang = (currentUser.role === 'pengguna') 
+      let currentBarang = (currentUser && currentUser.role === 'pengguna') 
         ? barang.filter(b => b.pemilik === currentUser.username)
         : barang;
 
@@ -1179,1345 +1080,434 @@
       document.getElementById('stat-china').innerText = currentBarang.filter(b => b.negara === 'China').length;
       document.getElementById('stat-thailand').innerText = currentBarang.filter(b => b.negara === 'Thailand').length;
 
-      // Render notifikasi update foto real-time
       renderDashboardNotifications();
     }
 
+    function renderDashboardNotifications() {
+      const notifPanel = document.getElementById('dashboard-notifications-panel');
+      const notifList = document.getElementById('dashboard-notifications-list');
+      if (!notifPanel || !notifList || !currentUser) return;
+
+      notifPanel.classList.remove('hidden');
+      const now = Date.now();
+      const fortyEightHours = 2 * 24 * 60 * 60 * 1000;
+
+      let itemsWithPhotos = barang.filter(b => {
+        if (!b.foto1 && !b.foto2) return false;
+        if (currentUser.role === 'pengguna' && b.pemilik !== currentUser.username) return false;
+
+        let f1Valid = b.foto1 && (now - (b.foto1Time || 0) < fortyEightHours);
+        let f2Valid = b.foto2 && (now - (b.foto2Time || 0) < fortyEightHours);
+        b._showFoto1 = f1Valid;
+        b._showFoto2 = f2Valid;
+
+        return f1Valid || f2Valid;
+      });
+
+      notifList.innerHTML = '';
+      if (itemsWithPhotos.length === 0) {
+        notifList.innerHTML = `<div class="p-4 text-center text-xs text-slate-400 font-semibold">Belum ada update foto terbaru (2x24 jam).</div>`;
+        return;
+      }
+
+      itemsWithPhotos.forEach(item => {
+        const wrapper = document.createElement('div');
+        wrapper.className = "p-3.5 bg-yellow-pastel bg-opacity-10 border border-yellow-pastel border-opacity-40 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs";
+        let btns = '';
+        if (item._showFoto1) btns += `<button onclick="viewPhotoFromDb('${item.id}', 'foto1')" class="px-3 py-1.5 bg-pink-pastel text-white font-bold rounded-xl shadow-sm">Foto 1 📸</button>`;
+        if (item._showFoto2) btns += `<button onclick="viewPhotoFromDb('${item.id}', 'foto2')" class="px-3 py-1.5 bg-purple-pastel text-white font-bold rounded-xl shadow-sm">Foto 2 📸</button>`;
+
+        wrapper.innerHTML = `<div><p class="text-slate-700 font-bold">Resi <span class="text-pink-pastel">${item.resi}</span> telah diperbarui!</p></div><div class="flex gap-2">${btns}</div>`;
+        notifList.appendChild(wrapper);
+      });
+    }
 
     // ==========================================
-    // MODULE 1: FORM RESI BARANG (USER INPUT)
+    // LOGISTIK WAREHOUSE
     // ==========================================
     document.getElementById('resi-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const resiNomer = document.getElementById('resi-nomer').value.trim();
       const resiDetail = document.getElementById('resi-detail').value.trim();
       const resiNegara = document.getElementById('resi-negara').value;
-
       const dateString = new Date().toISOString().split('T')[0];
+
       const newItem = {
         id: "brg-" + Date.now(),
         resi: resiNomer,
         detail: resiDetail,
         pemilik: currentUser.username, 
         tanggalUpdate: dateString,
-        foto1: "",
-        foto2: "",
+        foto1: "", foto2: "",
+        foto1Time: 0, foto2Time: 0,
         shippingBatch: "", 
         negara: resiNegara
       };
 
       barang.push(newItem);
       localStorage.setItem('bs_barang', JSON.stringify(barang));
+      
+      // Auto-Save ke Google Sheets
+      pushAllDataToSheet();
 
       showToast(`Sukses mendaftarkan resi: ${resiNomer}!`, "success");
       document.getElementById('resi-form').reset();
       switchSection('daftar-barang');
     });
 
-
-    // ==========================================
-    // MODULE 2: DAFTAR BARANG (COLUMNAR VIEW & PHOTO ACCESS LEVEL)
-    // ==========================================
-    function filterNegara(country) {
-      activeTabNegara = country;
-      document.querySelectorAll('.tab-negara').forEach(btn => {
-        btn.className = "tab-negara px-4 py-2 text-xs font-bold rounded-xl transition-all bg-white text-slate-600 border border-slate-200 font-medium";
-      });
-      document.getElementById(`tab-negara-${country}`).className = "tab-negara px-4 py-2 text-xs font-bold rounded-xl transition-all bg-pink-pastel text-white shadow-sm font-medium";
-      renderDaftarBarang();
-    }
-
-    document.getElementById('barang-search-input').addEventListener('input', renderDaftarBarang);
-
     function renderDaftarBarang() {
       const searchVal = document.getElementById('barang-search-input').value.trim().toLowerCase();
       const tbody = document.getElementById('barang-table-body');
       tbody.innerHTML = '';
 
-      let filtered = (currentUser.role === 'pengguna') 
+      let filtered = (currentUser && currentUser.role === 'pengguna') 
         ? barang.filter(b => b.pemilik === currentUser.username)
         : barang;
 
-      if (activeTabNegara !== "Semua") {
-        filtered = filtered.filter(b => b.negara === activeTabNegara);
-      }
-
-      if (searchVal) {
-        filtered = filtered.filter(b => b.resi.toLowerCase().includes(searchVal));
-      }
+      if (activeTabNegara !== "Semua") filtered = filtered.filter(b => b.negara === activeTabNegara);
+      if (searchVal) filtered = filtered.filter(b => b.resi.toLowerCase().includes(searchVal));
 
       if (filtered.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="8" class="p-12 text-center">
-              <i data-lucide="package-open" class="w-12 h-12 text-slate-300 mx-auto mb-2"></i>
-              <p class="text-xs font-bold text-slate-400">Tidak ada data barang ditemukan.</p>
-            </td>
-          </tr>
-        `;
-        lucide.createIcons();
+        tbody.innerHTML = `<tr><td colspan="8" class="p-12 text-center text-xs font-bold text-slate-400">Tidak ada data.</td></tr>`;
         return;
       }
 
       filtered.forEach(item => {
-        const isUserRole = currentUser.role === 'pengguna';
-        const isEditable = !isUserRole;
-
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-cream hover:bg-opacity-20 transition-all font-semibold text-slate-700";
+        tr.className = "hover:bg-cream hover:bg-opacity-20 transition-all text-xs font-semibold text-slate-700";
         tr.innerHTML = `
-          <td class="p-3 min-w-[120px]">
-            <input type="text" value="${item.resi}" onchange="updateBarangField('${item.id}', 'resi', this.value)" 
-              class="w-full bg-cream bg-opacity-20 hover:bg-opacity-50 focus:bg-white px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel font-medium"
-              ${isUserRole ? 'disabled' : ''}>
-          </td>
-
-          <td class="p-3 w-1/3 min-w-[250px]">
-            <textarea rows="2" onchange="updateBarangField('${item.id}', 'detail', this.value)" 
-              class="w-full bg-cream bg-opacity-20 hover:bg-opacity-50 focus:bg-white px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel resize-y min-h-[55px] font-medium"
-              ${isUserRole ? 'disabled' : ''}>${item.detail}</textarea>
-          </td>
-
-          <td class="p-3 min-w-[110px]">
-            <select onchange="updateBarangField('${item.id}', 'negara', this.value)" 
-              class="w-full bg-cream bg-opacity-20 px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel bg-white font-medium"
-              ${isUserRole ? 'disabled' : ''}>
-              <option value="Korea" ${item.negara === 'Korea' ? 'selected' : ''}>Korea 🇰🇷</option>
-              <option value="China" ${item.negara === 'China' ? 'selected' : ''}>China 🇨🇳</option>
-              <option value="Thailand" ${item.negara === 'Thailand' ? 'selected' : ''}>Thailand 🇹🇭</option>
-            </select>
-          </td>
-
-          <td class="p-3 min-w-[110px]">
-            <input type="text" value="${item.shippingBatch || ''}" ${!isEditable ? 'disabled' : ''} 
-              placeholder="cth: Batch 1A" onchange="updateBarangField('${item.id}', 'shippingBatch', this.value)" 
-              class="w-full bg-cream bg-opacity-20 hover:bg-opacity-50 focus:bg-white px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel disabled:bg-slate-50 disabled:text-slate-400 font-medium">
-          </td>
-
-          <td class="p-3 min-w-[120px]">
-            <input type="date" value="${item.tanggalUpdate || ''}" ${!isEditable ? 'disabled' : ''} 
-              onchange="updateBarangField('${item.id}', 'tanggalUpdate', this.value)" 
-              class="w-full bg-cream bg-opacity-20 px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel disabled:bg-slate-50 disabled:text-slate-400 font-medium">
-          </td>
-
-          <td class="p-3 min-w-[150px]">
-            <select ${!isEditable ? 'disabled' : ''} onchange="updateBarangField('${item.id}', 'pemilik', this.value)" 
-              class="w-full bg-cream bg-opacity-20 px-2 py-1.5 rounded-xl text-xs border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel bg-white disabled:bg-slate-50 disabled:text-slate-400 font-medium">
-              ${users.map(u => `
-                <option value="${u.username}" ${item.pemilik === u.username ? 'selected' : ''}>${u.nama} (@${u.username})</option>
-              `).join('')}
-            </select>
-          </td>
-
-          <td class="p-3 text-center min-w-[160px]">
-            <div class="flex flex-col gap-1.5 items-center justify-center font-medium">
-              <div class="flex items-center space-x-1 justify-between w-full max-w-[140px]">
-                <span class="text-[9px] text-slate-400 font-bold">F1:</span>
-                <div class="flex items-center space-x-1">
-                  ${item.foto1 ? `
-                    <button onclick="viewPhotoFromDb('${item.id}', 'foto1')" class="px-2 py-0.5 bg-yellow-pastel hover:bg-opacity-90 text-slate-800 rounded-lg text-[9px] font-bold transition-all shadow-sm">
-                      Lihat
-                    </button>
-                  ` : `<span class="text-[9px] text-slate-300">Belum Ada</span>`}
-                  ${isEditable ? `
-                    <label class="cursor-pointer bg-purple-pastel hover:bg-opacity-90 text-white text-[9px] font-bold px-2 py-0.5 rounded-lg transition-all shadow-sm">
-                      Upload
-                      <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto('${item.id}', 'foto1', this)">
-                    </label>
-                  ` : ''}
-                </div>
+          <td class="p-3"><input type="text" value="${item.resi}" onchange="updateBarangField('${item.id}', 'resi', this.value)" class="w-full bg-transparent border px-2 py-1 rounded-xl focus:outline-none focus:ring-1 focus:ring-pink-pastel" ${currentUser.role === 'pengguna' ? 'disabled' : ''}></td>
+          <td class="p-3"><textarea onchange="updateBarangField('${item.id}', 'detail', this.value)" class="w-full bg-transparent border px-2 py-1 rounded-xl focus:outline-none focus:ring-1 focus:ring-pink-pastel">${item.detail}</textarea></td>
+          <td class="p-3">${item.negara}</td>
+          <td class="p-3"><input type="text" value="${item.shippingBatch || ''}" onchange="updateBarangField('${item.id}', 'shippingBatch', this.value)" class="w-full bg-transparent border px-2 py-1 rounded-xl focus:outline-none focus:ring-1 focus:ring-pink-pastel" ${currentUser.role === 'pengguna' ? 'disabled' : ''}></td>
+          <td class="p-3">${item.tanggalUpdate}</td>
+          <td class="p-3">@${item.pemilik}</td>
+          <td class="p-3 text-center">
+            <div class="flex flex-col gap-1 items-center justify-center">
+              <div class="flex gap-1.5 mb-1">
+                <button onclick="viewPhotoFromDb('${item.id}', 'foto1')" class="px-2 py-0.5 bg-yellow-pastel text-[10px] font-bold rounded-lg ${item.foto1 ? '' : 'hidden'}">F1 📸</button>
+                <button onclick="viewPhotoFromDb('${item.id}', 'foto2')" class="px-2 py-0.5 bg-purple-pastel text-white text-[10px] font-bold rounded-lg ${item.foto2 ? '' : 'hidden'}">F2 📸</button>
               </div>
-
-              <div class="flex items-center space-x-1 justify-between w-full max-w-[140px]">
-                <span class="text-[9px] text-slate-400 font-bold">F2:</span>
-                <div class="flex items-center space-x-1">
-                  ${item.foto2 ? `
-                    <button onclick="viewPhotoFromDb('${item.id}', 'foto2')" class="px-2 py-0.5 bg-yellow-pastel hover:bg-opacity-90 text-slate-800 rounded-lg text-[9px] font-bold transition-all shadow-sm">
-                      Lihat
-                    </button>
-                  ` : `<span class="text-[9px] text-slate-300">Belum Ada</span>`}
-                  ${isEditable ? `
-                    <label class="cursor-pointer bg-purple-pastel hover:bg-opacity-90 text-white text-[9px] font-bold px-2 py-0.5 rounded-lg transition-all shadow-sm">
-                      Upload
-                      <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto('${item.id}', 'foto2', this)">
-                    </label>
-                  ` : ''}
-                </div>
-              </div>
+              <label class="cursor-pointer text-[9px] bg-slate-200 px-1.5 py-1 rounded-lg hover:bg-slate-300 transition-colors ${currentUser.role === 'pengguna' ? 'hidden' : ''}">
+                Upload F1
+                <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto('${item.id}', 'foto1', this)">
+              </label>
+              <label class="cursor-pointer text-[9px] bg-slate-200 px-1.5 py-1 rounded-lg hover:bg-slate-300 transition-colors ${currentUser.role === 'pengguna' ? 'hidden' : ''}">
+                Upload F2
+                <input type="file" accept="image/*" class="hidden" onchange="uploadPhoto('${item.id}', 'foto2', this)">
+              </label>
             </div>
           </td>
-
-          <td class="p-3 text-center min-w-[60px]">
-            ${currentUser.role === 'admin' ? `
-              <button onclick="deleteBarang('${item.id}')" class="p-1.5 text-slate-300 hover:text-pink-pastel transition-colors">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            ` : `<span class="text-slate-300">-</span>`}
-          </td>
+          <td class="p-3 text-center"><button onclick="deleteBarang('${item.id}')" class="text-pink-pastel ${currentUser.role === 'admin' ? '' : 'hidden'}">Hapus</button></td>
         `;
         tbody.appendChild(tr);
       });
-
-      lucide.createIcons();
-    }
-
-    // Dynamic Photo Viewer from Local Database by Item ID
-    function viewPhotoFromDb(itemId, field) {
-      const item = barang.find(b => b.id === itemId);
-      if (item && item[field]) {
-        viewPhoto(item[field], `${item.resi} - ${field === 'foto1' ? 'Foto 1' : 'Foto 2'}`);
-      } else {
-        showToast("Foto tidak ditemukan.", "error");
-      }
     }
 
     function updateBarangField(id, field, value) {
       const idx = barang.findIndex(b => b.id === id);
       if (idx !== -1) {
-        const oldValue = barang[idx][field];
         barang[idx][field] = value;
         localStorage.setItem('bs_barang', JSON.stringify(barang));
-
-        if (field === 'shippingBatch' && value !== oldValue) {
-          syncInvoiceFromBarang(barang[idx]);
-        }
-        
-        if (['resi', 'detail', 'pemilik'].includes(field)) {
-          syncInvoiceDetails(id, field, value);
-        }
-
-        showToast("Perubahan data barang disimpan!", "success");
+        pushAllDataToSheet(); // Auto Save
+        showToast("Logistik berhasil disimpan ke cloud!", "success");
       }
     }
 
-    // Image upload handlers dengan recording timestamp presisi untuk notifikasi 48 jam
+    // Menangani pengunggahan foto logistik
     function uploadPhoto(id, field, input) {
       if (input.files && input.files[0]) {
-        const file = input.files[0];
         const reader = new FileReader();
         reader.onload = function(e) {
-          const base64Data = e.target.result;
           const idx = barang.findIndex(b => b.id === id);
           if (idx !== -1) {
-            barang[idx][field] = base64Data;
-            barang[idx][field + 'Time'] = Date.now(); // Catat timestamp unggah foto
+            barang[idx][field] = e.target.result;
+            barang[idx][field + 'Time'] = Date.now();
             barang[idx].tanggalUpdate = new Date().toISOString().split('T')[0];
             localStorage.setItem('bs_barang', JSON.stringify(barang));
-            showToast("Foto berhasil diunggah dengan resolusi penuh!", "success");
+            pushAllDataToSheet(); // Auto Save
+            showToast("Foto otomatis terupload ke Sheet!", "success");
             renderDaftarBarang();
-            // Refresh notifikasi foto di dashboard real-time
             renderDashboardNotifications();
           }
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(input.files[0]);
       }
     }
 
     function deleteBarang(id) {
-      triggerCustomConfirm(
-        "Hapus Data Barang?",
-        "Tindakan ini akan menghapus data barang serta seluruh status logistiknya secara permanen.",
-        () => {
-          barang = barang.filter(b => b.id !== id);
-          localStorage.setItem('bs_barang', JSON.stringify(barang));
-          showToast("Barang berhasil dihapus.", "success");
-          renderDaftarBarang();
-          renderDashboardNotifications();
-        }
-      );
+      triggerCustomConfirm("Hapus Barang?", "Hapus dari database cloud?", () => {
+        barang = barang.filter(b => b.id !== id);
+        localStorage.setItem('bs_barang', JSON.stringify(barang));
+        pushAllDataToSheet(); // Auto Save
+        showToast("Barang dihapus.", "success");
+        renderDaftarBarang();
+      });
     }
 
-    // Lightbox viewer
-    function viewPhoto(base64Str, title) {
-      document.getElementById('photo-modal-title').innerText = title;
-      document.getElementById('photo-modal-img').src = base64Str;
-      document.getElementById('photo-download-btn').href = base64Str;
-      document.getElementById('photo-download-btn').download = `${title.replace(/\s+/g, '-')}.jpg`;
-      document.getElementById('photo-modal').classList.remove('hidden');
+    function filterNegara(country) {
+      activeTabNegara = country;
+      renderDaftarBarang();
     }
 
-    function closePhotoModal() {
-      document.getElementById('photo-modal').classList.add('hidden');
+    function viewPhotoFromDb(id, field) {
+      const item = barang.find(b => b.id === id);
+      if (item && item[field]) {
+        document.getElementById('photo-modal-title').innerText = item.resi;
+        document.getElementById('photo-modal-img').src = item[field];
+        document.getElementById('photo-modal').classList.remove('hidden');
+      }
     }
-
+    function closePhotoModal() { document.getElementById('photo-modal').classList.add('hidden'); }
 
     // ==========================================
-    // MODULE 3: INVOICE & SINKRONISASI BATCH SESUAI NEGARA
+    // INVOICE MULTI-BATCH
     // ==========================================
     function syncShippingBatchDropdown() {
       const selectFilter = document.getElementById('filter-invoice-batch');
-      const negaraFilterVal = document.getElementById('filter-invoice-negara').value;
-      const currentSelected = selectFilter.value;
-
-      let filteredBarang = barang;
-      if (negaraFilterVal !== "Semua") {
-        filteredBarang = barang.filter(b => b.negara === negaraFilterVal);
-      }
-
-      const uniqueBatches = [...new Set(filteredBarang.map(b => b.shippingBatch).filter(Boolean))];
-
+      const uniqueBatches = [...new Set(barang.map(b => b.shippingBatch).filter(Boolean))];
       selectFilter.innerHTML = '<option value="Semua">Semua Batch 📦</option>';
-      uniqueBatches.forEach(batch => {
-        const opt = document.createElement('option');
-        opt.value = batch;
-        opt.innerText = batch;
-        selectFilter.appendChild(opt);
+      uniqueBatches.forEach(b => {
+        selectFilter.innerHTML += `<option value="${b}">${b}</option>`;
       });
-
-      if (uniqueBatches.includes(currentSelected)) {
-        selectFilter.value = currentSelected;
-      } else {
-        selectFilter.value = "Semua";
-      }
-
-      // Populate manual invoice user dropdown
       const selectUser = document.getElementById('manual-user');
       if (selectUser) {
-        selectUser.innerHTML = users.map(u => `
-          <option value="${u.username}">${u.nama} (@${u.username})</option>
-        `).join('');
+        selectUser.innerHTML = users.map(u => `<option value="${u.username}">${u.name}</option>`).join('');
       }
     }
 
-    document.getElementById('invoice-search-input').addEventListener('input', renderInvoice);
-
     function renderInvoice() {
-      const searchVal = document.getElementById('invoice-search-input').value.trim().toLowerCase();
-      const filterBatchVal = document.getElementById('filter-invoice-batch').value;
-      const filterNegaraVal = document.getElementById('filter-invoice-negara').value;
       const wrapper = document.getElementById('invoice-batch-wrapper');
       wrapper.innerHTML = '';
+      if (!currentUser) return;
 
-      if (currentUser.role === 'admin') {
-        document.getElementById('admin-manual-invoice').classList.remove('hidden');
-      } else {
-        document.getElementById('admin-manual-invoice').classList.add('hidden');
-      }
+      const filterBatchVal = document.getElementById('filter-invoice-batch').value;
+      let viewInvoices = invoices;
 
-      let viewInvoices = (currentUser.role === 'pengguna') 
-        ? invoices.filter(inv => inv.pemilik === currentUser.username)
-        : invoices;
+      if (currentUser.role === 'pengguna') viewInvoices = invoices.filter(i => i.pemilik === currentUser.username);
+      if (filterBatchVal !== "Semua") viewInvoices = viewInvoices.filter(i => i.shippingBatch === filterBatchVal);
 
-      if (searchVal) {
-        viewInvoices = viewInvoices.filter(inv => inv.resi.toLowerCase().includes(searchVal));
-      }
-
-      if (filterBatchVal !== "Semua") {
-        viewInvoices = viewInvoices.filter(inv => inv.shippingBatch === filterBatchVal);
-      }
-
-      if (filterNegaraVal !== "Semua") {
-        viewInvoices = viewInvoices.filter(inv => {
-          const matchingBarang = barang.find(b => b.resi === inv.resi);
-          return matchingBarang && matchingBarang.negara === filterNegaraVal;
-        });
-      }
-
-      const batches = {};
-      viewInvoices.forEach(inv => {
-        const batchName = inv.shippingBatch || "Tanpa Batch";
-        if (!batches[batchName]) {
-          batches[batchName] = [];
-        }
-        batches[batchName].push(inv);
-      });
-
-      const batchKeys = Object.keys(batches);
-
-      if (batchKeys.length === 0) {
-        wrapper.innerHTML = `
-          <div class="bg-white p-12 rounded-3xl text-center border-2 border-dashed border-cream">
-            <i data-lucide="file-text" class="w-12 h-12 text-slate-300 mx-auto mb-2"></i>
-            <p class="text-xs font-bold text-slate-400">Tidak ada tagihan invoice yang sesuai dengan kriteria filter.</p>
-          </div>
-        `;
-        lucide.createIcons();
+      if (viewInvoices.length === 0) {
+        wrapper.innerHTML = `<div class="bg-white p-6 rounded-3xl text-center text-xs font-bold text-slate-400 border border-dashed">Belum ada invoice.</div>`;
         return;
       }
 
-      batchKeys.forEach(batchName => {
-        let batchItems = batches[batchName];
-        batchItems.sort((a, b) => a.pemilik.localeCompare(b.pemilik));
-
-        const userGroups = {};
-        batchItems.forEach(item => {
-          if (!userGroups[item.pemilik]) {
-            userGroups[item.pemilik] = [];
-          }
-          userGroups[item.pemilik].push(item);
-        });
-
-        const batchContainer = document.createElement('div');
-        batchContainer.className = "bg-white p-6 rounded-3xl shadow-md border-t-8 border-yellow-pastel space-y-4";
-        
-        batchContainer.innerHTML = `
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-cream pb-4 gap-4">
-            <div>
-              <span class="text-[10px] font-bold text-purple-pastel uppercase tracking-wider block">Shipping Batch</span>
-              <div class="flex items-center space-x-2">
-                <i data-lucide="box" class="w-4 h-4 text-pink-pastel"></i>
-                <input type="text" value="${batchName}" ${currentUser.role !== 'admin' ? 'disabled' : ''} 
-                  onchange="renameShippingBatch('${batchName}', this.value)" 
-                  class="text-slate-700 font-bold text-md bg-transparent focus:outline-none focus:border-b-2 border-dashed border-pink-pastel select-all w-52 font-medium">
-              </div>
-            </div>
-            
-            <div class="flex flex-wrap gap-2">
-              <button onclick="downloadBatchPDF('${batchName}')" class="px-4 py-2 rounded-xl bg-purple-pastel text-white font-bold text-xs shadow-md hover:bg-opacity-90 flex items-center space-x-1.5 transition-all">
-                <i data-lucide="file-down" class="w-4 h-4"></i>
-                <span>Simpan PDF Batch</span>
-              </button>
-            </div>
-          </div>
-          
-          <div class="space-y-6" id="users-batch-invoice-list-${batchName.replace(/\s+/g, '-')}"></div>
-        `;
-
-        wrapper.appendChild(batchContainer);
-
-        const usersInBatchContainer = document.getElementById(`users-batch-invoice-list-${batchName.replace(/\s+/g, '-')}`);
-        
-        Object.keys(userGroups).forEach(pUser => {
-          const uItems = userGroups[pUser];
-          const uProfile = users.find(u => u.username === pUser) || { nama: pUser, phone: "" };
-          const totalUserAmount = uItems.reduce((acc, curr) => acc + (Number(curr.total) || 0), 0);
-
-          const userCard = document.createElement('div');
-          userCard.className = "bg-cream bg-opacity-30 p-4 rounded-2xl border border-slate-100 space-y-3";
-          userCard.innerHTML = `
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white border-dashed pb-2">
-              <div class="flex items-center space-x-2">
-                <div class="w-8 h-8 rounded-full bg-pink-pastel text-white flex items-center justify-center font-bold text-xs">
-                  ${pUser.substring(0, 2).toUpperCase()}
-                </div>
-                <div>
-                  <h4 class="text-xs font-bold text-slate-700">${uProfile.nama} <span class="text-[10px] text-slate-400 font-normal">(@${pUser})</span></h4>
-                  <p class="text-[10px] text-slate-400 font-medium">WA: ${uProfile.phone || 'Belum diatur'}</p>
-                </div>
-              </div>
-              
-              ${currentUser.role === 'admin' ? `
-                <button onclick="sendFonnteWhatsApp('${pUser}', '${batchName}', ${totalUserAmount})" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-[10px] shadow-sm transition-all flex items-center space-x-1 font-medium">
-                  <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                  <span>Kirim Invoice WA (Fonnte)</span>
-                </button>
-              ` : ''}
-            </div>
-
-            <div class="space-y-3">
-              ${uItems.map(inv => {
-                const totalCalculated = (Number(inv.qty) * Number(inv.rateSharing)) + Number(inv.feeWh);
-                const isReadOnly = currentUser.role !== 'admin';
-
-                return `
-                  <div class="bg-white p-3.5 rounded-xl shadow-sm border border-slate-100 grid grid-cols-1 sm:grid-cols-6 gap-3 items-center">
-                    
-                    <div class="sm:col-span-2">
-                      <div class="flex items-center space-x-1 mb-1">
-                        <span class="text-[9px] font-bold text-slate-400">RESI:</span>
-                        <input type="text" value="${inv.resi}" ${isReadOnly ? 'disabled' : ''} 
-                          onchange="updateInvoiceField('${inv.id}', 'resi', this.value)" 
-                          class="bg-transparent font-bold text-xs text-slate-700 focus:outline-none w-full border-b border-transparent focus:border-pink-pastel">
-                      </div>
-                      <textarea rows="1" ${isReadOnly ? 'disabled' : ''} 
-                        onchange="updateInvoiceField('${inv.id}', 'detail', this.value)" 
-                        class="bg-transparent text-[11px] text-slate-500 w-full focus:outline-none border-b border-transparent focus:border-pink-pastel resize-none font-medium">${inv.detail}</textarea>
-                    </div>
-
-                    <div>
-                      <span class="text-[9px] font-bold text-slate-400 block">QTY / BERAT</span>
-                      <input type="number" step="0.01" value="${inv.qty || 0}" ${isReadOnly ? 'disabled' : ''} 
-                        onchange="updateInvoiceField('${inv.id}', 'qty', this.value)" 
-                        class="w-full bg-cream bg-opacity-20 px-2 py-1.5 rounded-lg text-xs font-bold border border-slate-100 focus:outline-none font-medium">
-                    </div>
-
-                    <div>
-                      <span class="text-[9px] font-bold text-slate-400 block">RATE SHARING</span>
-                      <input type="number" value="${inv.rateSharing || 0}" ${isReadOnly ? 'disabled' : ''} 
-                        onchange="updateInvoiceField('${inv.id}', 'rateSharing', this.value)" 
-                        class="w-full bg-cream bg-opacity-20 px-2 py-1.5 rounded-lg text-xs font-bold border border-slate-100 focus:outline-none font-medium">
-                    </div>
-
-                    <div class="sm:col-span-1">
-                      <span class="text-[9px] font-bold text-pink-pastel block">FEE WAREHOUSE</span>
-                      <input type="number" value="${inv.feeWh || 0}" ${isReadOnly ? 'disabled' : ''} 
-                        onchange="updateInvoiceField('${inv.id}', 'feeWh', this.value)" 
-                        class="w-full bg-cream bg-opacity-20 px-3 py-2.5 rounded-xl text-xs font-bold border-2 border-yellow-pastel focus:outline-none focus:border-pink-pastel font-medium">
-                    </div>
-
-                    <div class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-150">
-                      <div>
-                        <span class="text-[8px] font-bold text-slate-400 block uppercase">TOTAL</span>
-                        <span class="text-xs font-bold text-pink-pastel">Rp ${totalCalculated.toLocaleString('id-ID')}</span>
-                      </div>
-                      ${currentUser.role === 'admin' ? `
-                        <button onclick="deleteInvoiceItem('${inv.id}')" class="text-slate-300 hover:text-pink-pastel transition-colors" title="Hapus Invoice">
-                          <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                      ` : ''}
-                    </div>
-
-                  </div>
-                `;
-              }).join('')}
-            </div>
-
-            <div class="flex justify-between items-center bg-yellow-pastel bg-opacity-50 p-3 rounded-xl border border-yellow-pastel">
-              <span class="text-xs font-bold text-slate-700 font-medium">Subtotal Tagihan (${uProfile.nama}):</span>
-              <span class="text-sm font-bold text-pink-pastel">Rp ${totalUserAmount.toLocaleString('id-ID')}</span>
-            </div>
-          `;
-          usersInBatchContainer.appendChild(userCard);
-        });
-
+      const groups = {};
+      viewInvoices.forEach(inv => {
+        if (!groups[inv.shippingBatch]) groups[inv.shippingBatch] = [];
+        groups[inv.shippingBatch].push(inv);
       });
 
+      Object.keys(groups).forEach(bName => {
+        const div = document.createElement('div');
+        div.className = "bg-white p-6 rounded-3xl shadow-sm border-2 border-yellow-pastel space-y-4";
+        div.innerHTML = `
+          <div class="flex justify-between items-center border-b pb-2">
+            <h3 class="text-xs font-bold text-slate-700 uppercase flex items-center gap-1">
+              <i data-lucide="box" class="w-4 h-4 text-pink-pastel"></i> Batch: ${bName}
+            </h3>
+            <button onclick="downloadBatchPDF('${bName}')" class="px-3 py-1.5 bg-purple-pastel hover:bg-opacity-95 text-white font-bold text-[10px] rounded-xl shadow-sm flex items-center gap-1">
+              <i data-lucide="file-down" class="w-3.5 h-3.5"></i> Simpan PDF
+            </button>
+          </div>
+        `;
+        groups[bName].forEach(inv => {
+          div.innerHTML += `
+            <div class="p-3.5 bg-slate-50 rounded-2xl flex justify-between items-center text-xs">
+              <div>
+                <p class="font-bold text-slate-700">${inv.resi} <span class="text-[10px] text-slate-400 font-medium">(@${inv.pemilik})</span></p>
+                <p class="text-[10px] text-slate-400 font-medium">${inv.detail || '-'}</p>
+              </div>
+              <div class="text-right flex items-center gap-3">
+                <span class="font-bold text-pink-pastel">Rp ${(inv.total || 0).toLocaleString('id-ID')}</span>
+                ${currentUser.role === 'admin' ? `<button onclick="deleteInvoiceItem('${inv.id}')" class="text-slate-300 hover:text-pink-pastel"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>` : ''}
+              </div>
+            </div>`;
+        });
+        wrapper.appendChild(div);
+      });
       lucide.createIcons();
     }
 
-    // Toggle Spreadsheet Import Panel view
-    function toggleImportPanel() {
-      const panel = document.getElementById('admin-mass-import-panel');
-      if (panel.classList.contains('hidden')) {
-        panel.classList.remove('hidden');
-        document.getElementById('import-textarea').value = '';
-        cancelImportPreview();
-      } else {
-        panel.classList.add('hidden');
-      }
-    }
-
-    // Process pasted spreadsheet/CSV data
-    function processSpreadsheetData() {
-      const rawText = document.getElementById('import-textarea').value;
-      if (!rawText.trim()) {
-        showToast("Mohon tempelkan data spreadsheet terlebih dahulu!", "error");
-        return;
-      }
-
-      const lines = rawText.split('\n');
-      temporaryParsedImportRows = [];
-      let skippedLinesCount = 0;
-
-      lines.forEach(line => {
-        if (!line.trim()) return;
-
-        // Split standard Excel copy-paste (Tab) or alternative separators (Comma/Semicolon)
-        let cols = line.split('\t');
-        if (cols.length < 3) cols = line.split(';');
-        if (cols.length < 3) cols = line.split(',');
-
-        const batch = cols[0]?.trim() || "";
-        const resi = cols[1]?.trim() || "";
-        const username = cols[2]?.trim().toLowerCase() || "";
-        const detail = cols[3]?.trim() || "-";
-        
-        const rawQty = cols[4]?.replace(/[^0-9.]/g, '') || "0";
-        const qty = parseFloat(rawQty) || 0;
-
-        const rawRate = cols[5]?.replace(/[^0-9.]/g, '') || "0";
-        const rate = parseFloat(rawRate) || 0;
-
-        const rawFee = cols[6]?.replace(/[^0-9.]/g, '') || "0";
-        const fee = parseFloat(rawFee) || 0;
-
-        // Mandatory fields check
-        if (!batch || !resi || !username) {
-          skippedLinesCount++;
-          return;
-        }
-
-        const userObj = users.find(u => u.username === username);
-        const userIsValid = !!userObj;
-
-        temporaryParsedImportRows.push({
-          batch,
-          resi,
-          username,
-          detail,
-          qty,
-          rate,
-          fee,
-          total: (qty * rate) + fee,
-          userIsValid,
-          userRealName: userObj ? userObj.nama : "Tidak Ditemukan"
-        });
-      });
-
-      if (temporaryParsedImportRows.length === 0) {
-        showToast(`Gagal membaca data! ${skippedLinesCount} baris diabaikan karena kolom tidak lengkap.`, "error");
-        return;
-      }
-
-      // Render parsed data in preview table
-      const previewTbody = document.getElementById('import-preview-tbody');
-      previewTbody.innerHTML = '';
-
-      temporaryParsedImportRows.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.className = row.userIsValid ? "hover:bg-slate-50 text-slate-700" : "bg-red-50 text-red-900";
-        tr.innerHTML = `
-          <td class="p-3 font-semibold border-b">${row.batch}</td>
-          <td class="p-3 border-b">${row.resi}</td>
-          <td class="p-3 border-b">@${row.username}</td>
-          <td class="p-3 border-b max-w-[150px] truncate" title="${row.detail}">${row.detail}</td>
-          <td class="p-3 border-b text-right font-semibold">${row.qty}</td>
-          <td class="p-3 border-b text-right font-mono text-[11px]">Rp ${row.rate.toLocaleString('id-ID')}</td>
-          <td class="p-3 border-b text-right font-mono text-[11px]">Rp ${row.fee.toLocaleString('id-ID')}</td>
-          <td class="p-3 border-b text-right font-bold text-emerald-600 font-mono">Rp ${row.total.toLocaleString('id-ID')}</td>
-          <td class="p-3 border-b text-center font-bold">
-            ${row.userIsValid ? 
-              `<span class="text-emerald-600">✓ ${row.userRealName}</span>` : 
-              `<span class="text-pink-pastel">⚠ Akun Tidak Ada</span>`
-            }
-          </td>
-        `;
-        previewTbody.appendChild(tr);
-      });
-
-      document.getElementById('import-preview-box').classList.remove('hidden');
-      showToast(`Berhasil membaca ${temporaryParsedImportRows.length} baris data. Silakan teliti pratinjau sebelum menyimpan!`, "success");
-    }
-
-    // Save Mass Uploaded Data to Database
-    function saveMassImportedData() {
-      if (temporaryParsedImportRows.length === 0) return;
-
-      const invalidRows = temporaryParsedImportRows.filter(r => !r.userIsValid);
-      if (invalidRows.length > 0) {
-        showToast("Tidak bisa menyimpan! Masih ada username pemilik akun yang tidak terdaftar.", "error");
-        return;
-      }
-
-      const mode = document.querySelector('input[name="import-mode"]:checked').value; 
-      const batchesToProcess = [...new Set(temporaryParsedImportRows.map(r => r.batch))];
-
-      if (mode === "replace") {
-        invoices = invoices.filter(inv => !batchesToProcess.includes(inv.shippingBatch));
-      }
-
-      temporaryParsedImportRows.forEach(row => {
-        const newInvoice = {
-          id: "inv-bulk-" + Date.now() + Math.floor(Math.random() * 100000),
-          shippingBatch: row.batch,
-          resi: row.resi,
-          detail: row.detail,
-          pemilik: row.username,
-          qty: row.qty,
-          rateSharing: row.rate,
-          feeWh: row.fee,
-          total: row.total
-        };
-        invoices.push(newInvoice);
-
-        const existingBarangIdx = barang.findIndex(b => b.resi === row.resi);
-        if (existingBarangIdx === -1) {
-          const dateString = new Date().toISOString().split('T')[0];
-          
-          let inferredNegara = "Korea";
-          if (row.resi.toUpperCase().startsWith("CN")) inferredNegara = "China";
-          else if (row.resi.toUpperCase().startsWith("TH")) inferredNegara = "Thailand";
-
-          const newBarang = {
-            id: "brg-bulk-" + Date.now() + Math.floor(Math.random() * 100000),
-            resi: row.resi,
-            detail: row.detail,
-            pemilik: row.username,
-            tanggalUpdate: dateString,
-            foto1: "",
-            foto2: "",
-            shippingBatch: row.batch,
-            negara: inferredNegara
-          };
-          barang.push(newBarang);
-        } else {
-          barang[existingBarangIdx].shippingBatch = row.batch;
-          barang[existingBarangIdx].pemilik = row.username;
-          barang[existingBarangIdx].detail = row.detail;
-        }
-      });
-
-      localStorage.setItem('bs_invoices', JSON.stringify(invoices));
-      localStorage.setItem('bs_barang', JSON.stringify(barang));
-
-      showToast(`Sukses mengimpor massal ${temporaryParsedImportRows.length} tagihan secara instan!`, "success");
-      
-      toggleImportPanel(); 
-      syncShippingBatchDropdown();
-      renderInvoice();
-      renderDashboardNotifications();
-    }
-
-    // Tambah item manual dengan Dropdown Pemilik Akun terdaftar & SINKRON KE BARANG
     function addManualInvoice() {
       const sBatch = document.getElementById('manual-batch').value.trim();
       const sResi = document.getElementById('manual-resi').value.trim();
-      const sUser = document.getElementById('manual-user').value; 
+      const sUser = document.getElementById('manual-user').value;
       const sDetail = document.getElementById('manual-detail').value.trim();
 
-      if (!sBatch || !sResi || !sDetail || !sUser) {
-        showToast("Lengkapi seluruh form input manual invoice!", "error");
+      if (!sBatch || !sResi || !sUser) {
+        showToast("Mohon lengkapi data manual invoice!", "error");
         return;
       }
 
-      // 1. Tambahkan ke list tagihan invoice
       const newInv = {
         id: "inv-" + Date.now(),
         shippingBatch: sBatch,
         resi: sResi,
         detail: sDetail,
         pemilik: sUser,
-        qty: 0,
-        rateSharing: 0,
-        feeWh: 0,
-        total: 0
+        qty: 1, rateSharing: 0, feeWh: 0, total: 0
       };
 
       invoices.push(newInv);
       localStorage.setItem('bs_invoices', JSON.stringify(invoices));
-
-      // 2. Sinkronkan dengan Daftar Barang
-      const existingBarangIdx = barang.findIndex(b => b.resi === sResi);
-      if (existingBarangIdx === -1) {
-        const dateString = new Date().toISOString().split('T')[0];
-        
-        let inferredNegara = "Korea";
-        if (sResi.toUpperCase().startsWith("CN")) inferredNegara = "China";
-        else if (sResi.toUpperCase().startsWith("TH")) inferredNegara = "Thailand";
-
-        const newBarang = {
-          id: "brg-" + Date.now(),
-          resi: sResi,
-          detail: sDetail,
-          pemilik: sUser,
-          tanggalUpdate: dateString,
-          foto1: "",
-          foto2: "",
-          shippingBatch: sBatch,
-          negara: inferredNegara
-        };
-        barang.push(newBarang);
-        localStorage.setItem('bs_barang', JSON.stringify(barang));
-      } else {
-        barang[existingBarangIdx].shippingBatch = sBatch;
-        barang[existingBarangIdx].pemilik = sUser;
-        barang[existingBarangIdx].detail = sDetail;
-        localStorage.setItem('bs_barang', JSON.stringify(barang));
-      }
-
-      showToast("Data invoice ditambahkan & otomatis tersinkron ke Daftar Barang!", "success");
+      pushAllDataToSheet(); // Auto Save
+      showToast("Manual invoice disimpan!", "success");
       
       document.getElementById('manual-resi').value = '';
       document.getElementById('manual-detail').value = '';
-      
       syncShippingBatchDropdown();
       renderInvoice();
-      renderDashboardNotifications();
-    }
-
-    function updateInvoiceField(id, field, value) {
-      const idx = invoices.findIndex(i => i.id === id);
-      if (idx !== -1) {
-        invoices[idx][field] = value;
-        
-        const qty = Number(invoices[idx].qty) || 0;
-        const rate = Number(invoices[idx].rateSharing) || 0;
-        const whFee = Number(invoices[idx].feeWh) || 0;
-        invoices[idx].total = (qty * rate) + whFee;
-
-        localStorage.setItem('bs_invoices', JSON.stringify(invoices));
-        renderInvoice();
-      }
     }
 
     function deleteInvoiceItem(id) {
-      triggerCustomConfirm(
-        "Hapus Tagihan Invoice?",
-        "Tindakan ini akan menghapus data baris tagihan invoice ini secara permanen.",
-        () => {
-          invoices = invoices.filter(i => i.id !== id);
-          localStorage.setItem('bs_invoices', JSON.stringify(invoices));
-          showToast("Item tagihan dihapus.", "success");
-          renderInvoice();
-        }
-      );
+      triggerCustomConfirm("Hapus Tagihan?", "Hapus dari database?", () => {
+        invoices = invoices.filter(i => i.id !== id);
+        localStorage.setItem('bs_invoices', JSON.stringify(invoices));
+        pushAllDataToSheet(); // Auto Save
+        showToast("Invoice berhasil dihapus.", "success");
+        renderInvoice();
+      });
     }
 
-    function renameShippingBatch(oldName, newName) {
-      if (!newName.trim()) return;
-      
-      invoices.forEach(inv => {
-        if (inv.shippingBatch === oldName) {
-          inv.shippingBatch = newName;
+    // ==========================================
+    // IMPOR MASSAL
+    // ==========================================
+    function toggleImportPanel() { document.getElementById('admin-mass-import-panel').classList.toggle('hidden'); }
+    function cancelImportPreview() { document.getElementById('import-preview-box').classList.add('hidden'); temporaryParsedImportRows = []; }
+
+    function processSpreadsheetData() {
+      const rawText = document.getElementById('import-textarea').value;
+      if (!rawText.trim()) { showToast("Silakan tempelkan data spreadsheet dahulu!", "error"); return; }
+      const lines = rawText.split('\n');
+      temporaryParsedImportRows = [];
+      lines.forEach(line => {
+        if (!line.trim()) return;
+        let cols = line.split('\t');
+        if (cols.length < 3) cols = line.split(';');
+        const batch = cols[0]?.trim() || "";
+        const resi = cols[1]?.trim() || "";
+        const username = cols[2]?.trim().toLowerCase() || "";
+        const detail = cols[3]?.trim() || "-";
+        const qty = parseFloat(cols[4]) || 0;
+        const rate = parseFloat(cols[5]) || 0;
+        const fee = parseFloat(cols[6]) || 0;
+        if (batch && resi && username) {
+          const userIsValid = users.some(u => u.username === username);
+          temporaryParsedImportRows.push({ batch, resi, username, detail, qty, rate, fee, total: (qty * rate) + fee, userIsValid });
         }
+      });
+      const previewTbody = document.getElementById('import-preview-tbody');
+      previewTbody.innerHTML = '';
+      temporaryParsedImportRows.forEach(r => {
+        previewTbody.innerHTML += `
+          <tr class="${r.userIsValid ? '' : 'bg-red-50 text-red-900'}">
+            <td class="p-3 border-b">${r.batch}</td>
+            <td class="p-3 border-b">${r.resi}</td>
+            <td class="p-3 border-b">@${r.username}</td>
+            <td class="p-3 border-b truncate max-w-[120px]">${r.detail}</td>
+            <td class="p-3 border-b text-right font-bold text-pink-pastel">Rp ${r.total.toLocaleString('id-ID')}</td>
+            <td class="p-3 border-b text-center">${r.userIsValid ? 'OK' : '⚠ Salah'}</td>
+          </tr>`;
+      });
+      document.getElementById('import-preview-box').classList.remove('hidden');
+    }
+
+    function saveMassImportedData() {
+      if (temporaryParsedImportRows.length === 0) return;
+      if (temporaryParsedImportRows.some(r => !r.userIsValid)) { showToast("Ada username yang belum terdaftar!", "error"); return; }
+      temporaryParsedImportRows.forEach(row => {
+        invoices.push({
+          id: "inv-bulk-" + Date.now() + Math.floor(Math.random()*1000),
+          shippingBatch: row.batch, resi: row.resi, detail: row.detail, pemilik: row.username, qty: row.qty, rateSharing: row.rate, feeWh: row.fee, total: row.total
+        });
       });
       localStorage.setItem('bs_invoices', JSON.stringify(invoices));
-
-      barang.forEach(b => {
-        if (b.shippingBatch === oldName) {
-          b.shippingBatch = newName;
-        }
-      });
-      localStorage.setItem('bs_barang', JSON.stringify(barang));
-
-      showToast(`Berhasil mengubah nama batch menjadi "${newName}"!`, "success");
-      syncShippingBatchDropdown();
+      pushAllDataToSheet(); // Auto Save
+      showToast("Data massal tersimpan!", "success");
+      toggleImportPanel();
       renderInvoice();
     }
 
-    function syncInvoiceFromBarang(item) {
-      if (!item.shippingBatch) return;
-
-      const exists = invoices.find(inv => inv.resi === item.resi && inv.shippingBatch === item.shippingBatch);
-      if (!exists) {
-        const newInv = {
-          id: "inv-" + Date.now() + Math.floor(Math.random() * 100),
-          shippingBatch: item.shippingBatch,
-          resi: item.resi,
-          detail: item.detail,
-          pemilik: item.pemilik,
-          qty: 0,
-          rateSharing: 0,
-          feeWh: 0,
-          total: 0
-        };
-        invoices.push(newInv);
-        localStorage.setItem('bs_invoices', JSON.stringify(invoices));
-      }
-    }
-
-    function syncInvoiceDetails(barangId, field, value) {
-      const item = barang.find(b => b.id === barangId);
-      if (item && item.shippingBatch) {
-        invoices.forEach(inv => {
-          if (inv.resi === item.resi && inv.shippingBatch === item.shippingBatch) {
-            inv[field] = value;
-            const qty = Number(inv.qty) || 0;
-            const rate = Number(inv.rateSharing) || 0;
-            const whFee = Number(inv.feeWh) || 0;
-            inv.total = (qty * rate) + whFee;
-          }
-        });
-        localStorage.setItem('bs_invoices', JSON.stringify(invoices));
-      }
-    }
-
-
     // ==========================================
-    // MODULE: FORM REFUND SHOPEE LOGIC
+    // SHOPEE REFUND
     // ==========================================
     function initRefundMenu() {
-      const refundUserSelect = document.getElementById('refund-user');
-      const refundBatchSelect = document.getElementById('refund-batch');
-
-      if (currentUser.role === 'pengguna') {
-        refundUserSelect.innerHTML = `<option value="${currentUser.username}">${currentUser.nama} (@${currentUser.username})</option>`;
-        refundUserSelect.disabled = true;
-      } else {
-        refundUserSelect.innerHTML = users.map(u => `
-          <option value="${u.username}">${u.nama} (@${u.username})</option>
-        `).join('');
-        refundUserSelect.disabled = false;
-      }
-
+      document.getElementById('refund-user').innerHTML = users.map(u => `<option value="${u.username}">${u.name}</option>`).join('');
       const uniqueBatches = [...new Set(barang.map(b => b.shippingBatch).filter(Boolean))];
-      if (uniqueBatches.length === 0) {
-        refundBatchSelect.innerHTML = `
-          <option value="Batch Manual">Batch Manual 📦</option>
-          <option value="Batch 1A">Batch 1A</option>
-        `;
-      } else {
-        refundBatchSelect.innerHTML = uniqueBatches.map(b => `
-          <option value="${b}">${b} 📦</option>
-        `).join('') + `<option value="Batch Manual">Input Baru / Lainnya</option>`;
-      }
-
-      document.getElementById('refund-form').reset();
+      document.getElementById('refund-batch').innerHTML = uniqueBatches.map(b => `<option value="${b}">${b}</option>`).join('') + `<option value="Batch Manual">Batch Manual</option>`;
       renderRefundTable();
     }
 
     function saveRefundItem(e) {
       e.preventDefault();
-
-      const userVal = document.getElementById('refund-user').value;
-      const batchVal = document.getElementById('refund-batch').value;
-      const noOrderVal = document.getElementById('refund-no-order').value.trim();
-      const manualTransfer = Number(document.getElementById('refund-nominal-transfer').value) || 0;
-      const shopeeCheckout = Number(document.getElementById('refund-nominal-shopee').value) || 0;
-      const totalRefund = Number(document.getElementById('refund-total-amount').value) || 0;
-      const noteVal = document.getElementById('refund-note').value.trim();
-      const dateString = new Date().toISOString().split('T')[0];
-
-      const newRefund = {
+      refunds.push({
         id: "ref-" + Date.now(),
-        pemilik: userVal,
-        shippingBatch: batchVal,
-        noOrderShopee: noOrderVal,
-        nominalTransfer: manualTransfer,
-        nominalShopee: shopeeCheckout,
-        totalRefund: totalRefund,
-        statusRefund: "pending", 
-        tanggal: dateString,
-        keterangan: noteVal
-      };
-
-      refunds.push(newRefund);
+        pemilik: document.getElementById('refund-user').value,
+        shippingBatch: document.getElementById('refund-batch').value || "Batch Manual",
+        noOrderShopee: document.getElementById('refund-no-order').value,
+        nominalTransfer: Number(document.getElementById('refund-nominal-transfer').value),
+        nominalShopee: Number(document.getElementById('refund-nominal-shopee').value),
+        totalRefund: Number(document.getElementById('refund-total-amount').value),
+        statusRefund: "pending",
+        tanggal: new Date().toISOString().split('T')[0],
+        keterangan: document.getElementById('refund-note').value
+      });
       localStorage.setItem('bs_refunds', JSON.stringify(refunds));
-      showToast("Data Refund Shopee berhasil disimpan!", "success");
-
+      pushAllDataToSheet(); // Auto Save
+      showToast("Refund tersimpan ke cloud!", "success");
       document.getElementById('refund-form').reset();
       renderRefundTable();
     }
 
     function renderRefundTable() {
       const tbody = document.getElementById('refund-table-body');
-      tbody.innerHTML = '';
-
+      if (!tbody) return; tbody.innerHTML = '';
       const searchVal = document.getElementById('refund-search-input').value.trim().toLowerCase();
       const statusFilterVal = document.getElementById('refund-status-filter').value;
-
-      let filteredRefunds = (currentUser.role === 'pengguna') 
-        ? refunds.filter(r => r.pemilik === currentUser.username)
-        : refunds;
-
-      if (searchVal) {
-        filteredRefunds = filteredRefunds.filter(r => 
-          r.noOrderShopee.toLowerCase().includes(searchVal) ||
-          r.pemilik.toLowerCase().includes(searchVal) ||
-          (r.keterangan && r.keterangan.toLowerCase().includes(searchVal))
-        );
-      }
-
-      if (statusFilterVal !== "semua") {
-        filteredRefunds = filteredRefunds.filter(r => r.statusRefund === statusFilterVal);
-      }
-
-      if (filteredRefunds.length === 0) {
-        tbody.innerHTML = `
-          <tr>
-            <td colspan="7" class="p-8 text-center text-slate-400 font-semibold">
-              Tidak ada riwayat refund Shopee ditemukan.
-            </td>
-          </tr>
-        `;
-        return;
-      }
-
-      filteredRefunds.forEach(item => {
-        const uProfile = users.find(u => u.username === item.pemilik) || { nama: item.pemilik };
-        const isPending = item.statusRefund === "pending";
-        const isAdmin = currentUser.role === 'admin';
-
-        const tr = document.createElement('tr');
-        tr.className = "hover:bg-cream hover:bg-opacity-20 transition-all font-semibold text-slate-700";
-        tr.innerHTML = `
-          <td class="p-3">
-            <span class="block text-slate-700 font-bold">${item.noOrderShopee}</span>
-            <span class="text-[9px] text-slate-400">${item.tanggal || ''}</span>
-            
-            ${isAdmin ? `
-              <div class="mt-1.5 flex items-center gap-1">
-                <span class="text-[9px] text-pink-pastel font-bold shrink-0">Note:</span>
-                <input type="text" value="${item.keterangan || ''}" 
-                  placeholder="Keterangan..." 
-                  onchange="updateRefundField('${item.id}', 'keterangan', this.value)" 
-                  class="w-full px-2 py-0.5 text-[10px] rounded border border-slate-150 focus:outline-none bg-yellow-50 font-medium">
-              </div>
-            ` : (item.keterangan ? `
-              <p class="text-[10px] text-pink-pastel italic mt-1 font-medium bg-pink-50 px-2.5 py-0.5 rounded-lg w-fit">
-                Note: ${item.keterangan}
-              </p>
-            ` : '')}
-          </td>
-          <td class="p-3">
-            <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-lg text-[10px] font-bold">
-              ${item.shippingBatch || 'No Batch'}
-            </span>
-          </td>
-          <td class="p-3">
-            <span class="block font-medium">${uProfile.nama}</span>
-            <span class="text-[9px] text-slate-400">@${item.pemilik}</span>
-          </td>
-          <td class="p-3 text-right">
-            ${isAdmin ? `
-              <div class="space-y-1">
-                <div class="flex items-center justify-end space-x-1 text-[11px]">
-                  <span class="text-slate-400">Trf:</span>
-                  <input type="number" value="${item.nominalTransfer}" 
-                    onchange="updateRefundField('${item.id}', 'nominalTransfer', this.value)" 
-                    class="w-20 px-1 py-0.5 text-right text-[10px] rounded border border-slate-150 focus:outline-none font-mono text-emerald-600 bg-yellow-50 font-medium">
-                </div>
-                <div class="flex items-center justify-end space-x-1 text-[11px]">
-                  <span class="text-slate-400">CO:</span>
-                  <input type="number" value="${item.nominalShopee}" 
-                    onchange="updateRefundField('${item.id}', 'nominalShopee', this.value)" 
-                    class="w-20 px-1 py-0.5 text-right text-[10px] rounded border border-slate-150 focus:outline-none font-mono text-slate-600 bg-yellow-50 font-medium">
-                </div>
-              </div>
-            ` : `
-              <span class="block text-[11px] text-emerald-600 font-mono">Trf: Rp ${item.nominalTransfer.toLocaleString('id-ID')}</span>
-              <span class="block text-[11px] text-slate-400 font-mono">CO: Rp ${item.nominalShopee.toLocaleString('id-ID')}</span>
-            `}
-          </td>
-          <td class="p-3 text-right font-bold font-mono text-pink-pastel text-sm">
-            ${isAdmin ? `
-              <div class="flex items-center justify-end space-x-1">
-                <span class="text-[10px] text-pink-pastel">Rp</span>
-                <input type="number" value="${item.totalRefund}" 
-                  onchange="updateRefundField('${item.id}', 'totalRefund', this.value)" 
-                  class="w-24 px-1.5 py-1 text-right text-xs font-bold rounded-lg border border-slate-200 focus:outline-none focus:ring-1 focus:ring-pink-pastel font-mono text-pink-pastel bg-yellow-50">
-              </div>
-            ` : `
-              Rp ${item.totalRefund.toLocaleString('id-ID')}
-            `}
-          </td>
-          <td class="p-3 text-center">
-            <span class="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider ${!isPending ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">
-              ${!isPending ? 'Done Refund ✅' : 'Pending ⏳'}
-            </span>
-          </td>
-          <td class="p-3 text-center space-x-1.5 min-w-[120px]">
-            ${isAdmin && isPending ? `
-              <button onclick="toggleRefundStatus('${item.id}', 'done')" class="px-2 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-[10px] font-bold transition-all shadow-sm">
-                Set Done
-              </button>
-            ` : ''}
-            ${isAdmin && !isPending ? `
-              <button onclick="toggleRefundStatus('${item.id}', 'pending')" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-[10px] font-bold transition-all shadow-sm">
-                Set Pending
-              </button>
-            ` : ''}
-            <button onclick="printRefundReceipt('${item.id}')" class="p-1 text-slate-400 hover:text-purple-pastel inline-block transition-colors" title="Cetak Kuitansi">
-              <i data-lucide="printer" class="w-4 h-4 inline-block"></i>
-            </button>
-            ${isAdmin ? `
-              <button onclick="deleteRefundItem('${item.id}')" class="p-1 text-slate-300 hover:text-pink-pastel inline-block transition-colors" title="Hapus Data">
-                <i data-lucide="trash-2" class="w-4 h-4 inline-block"></i>
-              </button>
-            ` : ''}
-          </td>
-        `;
-        tbody.appendChild(tr);
+      let filtered = refunds;
+      if (searchVal) filtered = filtered.filter(r => r.noOrderShopee.toLowerCase().includes(searchVal));
+      if (statusFilterVal !== "semua") filtered = filtered.filter(r => r.statusRefund === statusFilterVal);
+      filtered.forEach(ref => {
+        tbody.innerHTML += `
+          <tr class="text-xs">
+            <td class="p-3 font-bold">${ref.noOrderShopee}</td>
+            <td class="p-3">${ref.shippingBatch}</td>
+            <td class="p-3">@${ref.pemilik}</td>
+            <td class="p-3 text-right font-bold text-pink-pastel">Rp ${ref.totalRefund.toLocaleString('id-ID')}</td>
+            <td class="p-3 text-center uppercase font-bold text-[10px] text-pink-pastel">${ref.statusRefund}</td>
+            <td class="p-3 text-center"><button onclick="deleteRefund('${ref.id}')" class="text-pink-pastel font-bold">Hapus</button></td>
+          </tr>`;
       });
-
-      lucide.createIcons();
     }
 
-    function updateRefundField(id, field, value) {
-      const idx = refunds.findIndex(r => r.id === id);
-      if (idx !== -1) {
-        if (field === 'keterangan') {
-          refunds[idx][field] = value;
-        } else {
-          refunds[idx][field] = Number(value) || 0;
-        }
+    function deleteRefund(id) {
+      triggerCustomConfirm("Hapus?", "Hapus refund dari cloud?", () => {
+        refunds = refunds.filter(r => r.id !== id);
         localStorage.setItem('bs_refunds', JSON.stringify(refunds));
-        showToast("Data refund diperbarui!", "success");
+        pushAllDataToSheet(); // Auto Save
+        showToast("Refund terhapus.", "success");
         renderRefundTable();
-      }
-    }
-
-    // Ubah status dan update notifikasi jika diperlukan
-    function toggleRefundStatus(id, newStatus) {
-      const idx = refunds.findIndex(r => r.id === id);
-      if (idx !== -1) {
-        refunds[idx].statusRefund = newStatus;
-        localStorage.setItem('bs_refunds', JSON.stringify(refunds));
-        showToast(`Status refund berhasil diubah menjadi ${newStatus.toUpperCase()}!`, "success");
-        renderRefundTable();
-      }
-    }
-
-    function deleteRefundItem(id) {
-      triggerCustomConfirm(
-        "Hapus Data Refund Shopee?",
-        "Tindakan ini akan menghapus data riwayat transaksi refund ini secara permanen.",
-        () => {
-          refunds = refunds.filter(r => r.id !== id);
-          localStorage.setItem('bs_refunds', JSON.stringify(refunds));
-          showToast("Data refund berhasil dihapus.", "success");
-          renderRefundTable();
-        }
-      );
-    }
-
-    // PDF receipt print out
-    function printRefundReceipt(id) {
-      const ref = refunds.find(r => r.id === id);
-      if (!ref) return;
-
-      const uProfile = users.find(u => u.username === ref.pemilik) || { nama: ref.pemilik };
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('p', 'mm', [100, 160]); 
-
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(14);
-      doc.setTextColor(212, 85, 117); 
-      doc.text("BONIN STORE", 50, 15, { align: 'center' });
-
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(8);
-      doc.setTextColor(120, 120, 120);
-      doc.text("Tanda Terima Refund Shopee", 50, 20, { align: 'center' });
-      doc.text("----------------------------------------------------------------", 50, 24, { align: 'center' });
-
-      let currentY = 30;
-      doc.setTextColor(50, 50, 50);
-      doc.setFont("Helvetica", "bold");
-      doc.text(`TANGGAL:`, 10, currentY);
-      doc.setFont("Helvetica", "normal");
-      doc.text(`${ref.tanggal || '-'}`, 45, currentY);
-
-      currentY += 8;
-      doc.setFont("Helvetica", "bold");
-      doc.text(`PEMILIK / USER:`, 10, currentY);
-      doc.setFont("Helvetica", "normal");
-      doc.text(`${uProfile.nama} (@${ref.pemilik})`, 45, currentY);
-
-      currentY += 8;
-      doc.setFont("Helvetica", "bold");
-      doc.text(`SHIPPING BATCH:`, 10, currentY);
-      doc.setFont("Helvetica", "normal");
-      doc.text(`${ref.shippingBatch || '-'}`, 45, currentY);
-
-      currentY += 8;
-      doc.setFont("Helvetica", "bold");
-      doc.text(`NO. ORDER SHOPEE:`, 10, currentY);
-      doc.setFont("Helvetica", "normal");
-      doc.text(`${ref.noOrderShopee}`, 45, currentY);
-
-      if (ref.keterangan) {
-        currentY += 8;
-        doc.setFont("Helvetica", "bold");
-        doc.text(`NOTE / KET:`, 10, currentY);
-        doc.setFont("Helvetica", "normal");
-        const splitNote = doc.splitTextToSize(ref.keterangan, 48);
-        doc.text(splitNote, 45, currentY);
-        currentY += (splitNote.length - 1) * 4;
-      }
-
-      currentY += 8;
-      doc.text("----------------------------------------------------------------", 50, currentY, { align: 'center' });
-
-      currentY += 8;
-      doc.setFont("Helvetica", "bold");
-      doc.text(`NOMINAL TRF MANUAL:`, 10, currentY);
-      doc.text(`Rp ${ref.nominalTransfer.toLocaleString('id-ID')}`, 90, currentY, { align: 'right' });
-
-      currentY += 8;
-      doc.text(`CHECKOUT SHOPEE:`, 10, currentY);
-      doc.text(`Rp ${ref.nominalShopee.toLocaleString('id-ID')}`, 90, currentY, { align: 'right' });
-
-      currentY += 10;
-      doc.setFillColor(255, 244, 225); 
-      doc.rect(8, currentY - 6, 84, 12, 'F');
-      
-      doc.setFontSize(10);
-      doc.setTextColor(212, 85, 117);
-      doc.text(`TOTAL REFUND:`, 12, currentY + 1);
-      doc.text(`Rp ${ref.totalRefund.toLocaleString('id-ID')}`, 88, currentY + 1, { align: 'right' });
-
-      currentY += 14;
-      doc.setFontSize(8);
-      doc.setTextColor(120, 120, 120);
-      doc.text("Status Transaksi:", 10, currentY);
-      doc.setFont("Helvetica", "bold");
-      doc.text(`${ref.statusRefund.toUpperCase() === 'DONE' ? 'DONE REFUND ✅' : 'PENDING ⏳'}`, 45, currentY);
-
-      currentY += 12;
-      doc.setFont("Helvetica", "normal");
-      doc.text("Terima kasih atas kepercayaannya!", 50, currentY, { align: 'center' });
-
-      doc.save(`Refund-Receipt-${ref.noOrderShopee}.pdf`);
-      showToast("Kuitansi PDF Refund Shopee sukses diunduh!", "success");
-    }
-
-
-    // ==========================================
-    // PDF EXPORT BY BATCH WRITER
-    // ==========================================
-    function downloadBatchPDF(batchName) {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF('p', 'mm', 'a4');
-
-      const mainColor = [212, 85, 117]; 
-
-      let batchItems = invoices.filter(inv => (inv.shippingBatch || "Tanpa Batch") === batchName);
-      batchItems.sort((a, b) => a.pemilik.localeCompare(b.pemilik));
-
-      doc.setFillColor(255, 244, 225); 
-      doc.rect(0, 0, 210, 40, 'F');
-
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(22);
-      doc.setTextColor(mainColor[0], mainColor[1], mainColor[2]);
-      doc.text("BONIN STORE INVOICE", 14, 20);
-
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(10);
-      doc.setTextColor(100, 100, 100);
-      doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, 14, 26);
-
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(14);
-      doc.setTextColor(80, 80, 80);
-      doc.text(`BATCH: ${batchName.toUpperCase()}`, 140, 18);
-
-      let currentY = 50;
-
-      const grouped = {};
-      batchItems.forEach(item => {
-        if (!grouped[item.pemilik]) grouped[item.pemilik] = [];
-        grouped[item.pemilik].push(item);
-      });
-
-      Object.keys(grouped).forEach((owner, idx) => {
-        const uProfile = users.find(u => u.username === owner) || { nama: owner, phone: "" };
-        const uItems = grouped[owner];
-
-        if (idx > 0 && currentY > 230) {
-          doc.addPage();
-          currentY = 20;
-        }
-
-        doc.setFont("Helvetica", "bold");
-        doc.setFontSize(11);
-        doc.setTextColor(50, 50, 50);
-        doc.text(`TAGIHAN UNTUK: ${uProfile.nama.toUpperCase()} (WA: ${uProfile.phone || "-"})`, 14, currentY);
-        currentY += 4;
-
-        const rows = [];
-        let subtotal = 0;
-        uItems.forEach(item => {
-          const totalLine = (Number(item.qty) * Number(item.rateSharing)) + Number(item.feeWh);
-          subtotal += totalLine;
-
-          rows.push([
-            item.resi,
-            item.detail,
-            `${item.qty || 0} gr/pcs`,
-            `Rp ${(item.rateSharing || 0).toLocaleString('id-ID')}`,
-            `Rp ${(item.feeWh || 0).toLocaleString('id-ID')}`,
-            `Rp ${totalLine.toLocaleString('id-ID')}`
-          ]);
-        });
-
-        rows.push([
-          { content: 'SUBTOTAL AKHIR', colSpan: 5, styles: { halign: 'right', fontStyle: 'bold', fillColor: [255, 252, 245] } },
-          { content: `Rp ${subtotal.toLocaleString('id-ID')}`, styles: { fontStyle: 'bold', fillColor: [255, 252, 245] } }
-        ]);
-
-        doc.autoTable({
-          startY: currentY,
-          head: [['No Resi', 'Detail Barang', 'Qty/Berat', 'Rate Sharing', 'Fee WH', 'Total Line']],
-          body: rows,
-          theme: 'grid',
-          headStyles: {
-            fillColor: mainColor,
-            textColor: [255, 255, 255],
-            fontSize: 9,
-            fontStyle: 'bold'
-          },
-          bodyStyles: {
-            fontSize: 8,
-            textColor: [60, 60, 60]
-          },
-          margin: { left: 14, right: 14 },
-          didDrawPage: (data) => {
-            currentY = data.cursor.y + 12;
-          }
-        });
-
-        currentY += 4;
-      });
-
-      doc.save(`Invoice-BoninStore-${batchName.replace(/\s+/g, '-')}.pdf`);
-      showToast(`Sukses mengekspor PDF ${batchName}!`, "success");
-    }
-
-
-    // ==========================================
-    // INTEGRASI NOTIFIKASI WHATSAPP VIA FONNTE API
-    // ==========================================
-    function sendFonnteWhatsApp(username, batchName, amount) {
-      if (!fonnteToken) {
-        showToast("Token Fonnte belum diatur oleh Admin! Silakan isi token di pengaturan menu sidebar.", "error");
-        return;
-      }
-
-      const uProfile = users.find(u => u.username === username);
-      if (!uProfile || !uProfile.phone) {
-        showToast("Nomor WhatsApp pengguna tidak valid atau belum diatur!", "error");
-        return;
-      }
-
-      const userItems = invoices.filter(inv => (inv.shippingBatch || "Tanpa Batch") === batchName && inv.pemilik === username);
-      let itemsListText = "";
-      userItems.forEach((item, index) => {
-        const itemTotal = (Number(item.qty) * Number(item.rateSharing)) + Number(item.feeWh);
-        itemsListText += `${index + 1}. Resi: *${item.resi}*\n   📦 ${item.detail}\n   ⚖️ Qty: ${item.qty} | Fee WH: Rp ${item.feeWh.toLocaleString('id-ID')} | Total: *Rp ${itemTotal.toLocaleString('id-ID')}*\n\n`;
-      });
-
-      const waMessage = `Halo kak *${uProfile.nama}*,\n\nTagihan Invoice dari *Bonin Store* untuk pengiriman *${batchName}* sudah siap! Berikut rincian barang kakak:\n\n${itemsListText}*GRAND TOTAL TAGIHAN: Rp ${amount.toLocaleString('id-ID')}*\n\nSilakan lakukan pembayaran dan konfirmasi kepada Admin Gudang Bonin Store. Terima kasih atas kepercayaan Anda! 🌸✨`;
-
-      const formData = new FormData();
-      formData.append('target', uProfile.phone);
-      formData.append('message', waMessage);
-      formData.append('countryCode', '62'); 
-
-      showToast("Sedang mengirim notifikasi WhatsApp...", "success");
-
-      fetch('https://api.fonnte.com/send', {
-        method: 'POST',
-        headers: {
-          'Authorization': fonnteToken
-        },
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.status) {
-          showToast(`Notifikasi Invoice WA sukses terkirim ke ${uProfile.nama}!`, "success");
-        } else {
-          showToast(`Gagal kirim Fonnte: ${data.reason || 'Sebab tidak diketahui'}`, "error");
-        }
-      })
-      .catch(error => {
-        console.error("Fonnte Error: ", error);
-        showToast("Gagal terhubung ke Server API Fonnte.", "error");
       });
     }
 
-
     // ==========================================
-    // MODULE 4: USER MANAGEMENT (ADMIN CONTROL)
+    // USER MANAGEMENT
     // ==========================================
     document.getElementById('add-user-form').addEventListener('submit', function(e) {
       e.preventDefault();
-      const uName = document.getElementById('new-user-nama').value.trim();
-      const uUsername = document.getElementById('new-user-username').value.trim().toLowerCase();
-      const uPass = document.getElementById('new-user-password').value;
-      const uPhone = document.getElementById('new-user-phone').value.trim();
-      const uRole = document.getElementById('new-user-role').value;
-
-      if (users.find(u => u.username === uUsername)) {
-        showToast("Username sudah digunakan!", "error");
-        return;
-      }
-
-      const newUser = {
-        nama: uName,
-        username: uUsername,
-        password: uPass,
-        role: uRole,
-        status: "aktif",
-        phone: uPhone
-      };
-
-      users.push(newUser);
+      users.push({
+        id: "u-" + Date.now(),
+        name: document.getElementById('new-user-nama').value,
+        username: document.getElementById('new-user-username').value.trim().toLowerCase(),
+        password: document.getElementById('new-user-password').value,
+        phone: document.getElementById('new-user-phone').value,
+        role: document.getElementById('new-user-role').value,
+        status: "aktif"
+      });
       localStorage.setItem('bs_users', JSON.stringify(users));
-      showToast(`User ${uName} berhasil didaftarkan!`, "success");
+      pushAllDataToSheet(); // Auto Save
+      showToast("User baru berhasil didaftarkan!", "success");
       document.getElementById('add-user-form').reset();
       renderUserManagement();
     });
@@ -2525,91 +1515,49 @@
     function renderUserManagement() {
       const wrapper = document.getElementById('user-list-wrapper');
       wrapper.innerHTML = '';
-
-      users.forEach((u, index) => {
-        const isMainAdmin = u.username === 'admin';
-
-        const row = document.createElement('div');
-        row.className = "p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-cream hover:bg-opacity-20 transition-all";
-        row.innerHTML = `
-          <div class="space-y-1">
-            <div class="flex items-center space-x-2">
-              <span class="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase ${u.role === 'admin' ? 'bg-pink-pastel text-white' : u.role === 'admin2' ? 'bg-purple-pastel text-white' : 'bg-yellow-pastel text-slate-800'}">
-                ${u.role}
-              </span>
-              <strong class="text-xs text-slate-700 font-semibold">${u.nama}</strong>
-            </div>
-            <p class="text-[11px] text-slate-400">Username: <strong class="text-slate-500 font-medium">@${u.username}</strong> | WA: <strong class="text-slate-500 font-medium">${u.phone || '-'}</strong></p>
-          </div>
-
-          <div class="flex flex-wrap items-center gap-3">
-            <input type="text" value="${u.nama}" placeholder="Ubah Nama" onchange="updateUserField('${u.username}', 'nama', this.value)" 
-              class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-pink-pastel w-28 font-medium">
-
-            <input type="text" value="${u.username}" placeholder="Ubah Username" ${isMainAdmin ? 'disabled' : ''} onchange="updateUserField('${u.username}', 'username', this.value)" 
-              class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-pink-pastel w-28 disabled:bg-slate-100 disabled:text-slate-400 font-medium">
-
-            <input type="text" value="${u.password}" placeholder="Password" onchange="updateUserField('${u.username}', 'password', this.value)" 
-              class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-pink-pastel w-24 font-medium">
-
-            <input type="text" value="${u.phone || ''}" placeholder="No WA (cth: 628...)" onchange="updateUserField('${u.username}', 'phone', this.value)" 
-              class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-pink-pastel w-32 font-medium">
-
-            <select ${isMainAdmin ? 'disabled' : ''} onchange="updateUserField('${u.username}', 'role', this.value)" 
-              class="px-2 py-1.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:border-pink-pastel bg-white w-28 disabled:bg-slate-100 font-medium">
-              <option value="pengguna" ${u.role === 'pengguna' ? 'selected' : ''}>Pengguna</option>
-              <option value="admin2" ${u.role === 'admin2' ? 'selected' : ''}>Admin 2</option>
-              <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
-            </select>
-
-            <button ${isMainAdmin ? 'disabled' : ''} onclick="toggleUserStatus('${u.username}')" 
-              class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50 font-medium ${u.status === 'aktif' ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-red-100 text-red-700 hover:bg-red-200'}">
-              ${u.status === 'aktif' ? 'Aktif' : 'Nonaktif'}
-            </button>
-          </div>
-        `;
-        wrapper.appendChild(row);
+      users.forEach(u => {
+        wrapper.innerHTML += `
+          <div class="p-4 flex justify-between items-center text-xs">
+            <div><p class="font-bold text-slate-700">${u.name} <span class="text-slate-400">(@${u.username})</span></p></div>
+            <button onclick="deleteUser('${u.id}')" class="text-pink-pastel font-bold hover:underline">Hapus</button>
+          </div>`;
       });
     }
 
-    function updateUserField(username, field, value) {
-      if (!value.trim()) return;
-      const idx = users.findIndex(u => u.username === username);
-      if (idx !== -1) {
-        users[idx][field] = value;
+    function deleteUser(id) {
+      triggerCustomConfirm("Hapus User?", "Hapus pengguna ini?", () => {
+        users = users.filter(u => u.id !== id);
         localStorage.setItem('bs_users', JSON.stringify(users));
-
-        if (currentUser && currentUser.username === username) {
-          currentUser[field] = value;
-          document.getElementById('current-user-name').innerText = currentUser.nama;
-          document.getElementById('welcome-message').innerText = `Halo, Selamat Datang ${currentUser.nama}!`;
-        }
-
-        showToast(`Data pengguna @${username} berhasil diperbarui!`, "success");
+        pushAllDataToSheet(); // Auto Save
+        showToast("User berhasil dihapus.", "success");
         renderUserManagement();
-      }
+      });
     }
 
-    function toggleUserStatus(username) {
-      const idx = users.findIndex(u => u.username === username);
-      if (idx !== -1) {
-        users[idx].status = users[idx].status === 'aktif' ? 'nonaktif' : 'aktif';
-        localStorage.setItem('bs_users', JSON.stringify(users));
-        showToast(`Status akun @${username} berhasil diubah!`, "success");
-        renderUserManagement();
-      }
+    function openAppsScriptTutorial() { document.getElementById('tutorial-modal').classList.remove('hidden'); }
+    function closeAppsScriptTutorial() { document.getElementById('tutorial-modal').classList.add('hidden'); }
+
+    function downloadBatchPDF(batchName) {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF('p', 'mm', 'a4');
+      doc.setFont("Helvetica", "bold"); doc.setFontSize(14); doc.setTextColor(212, 85, 117);
+      doc.text(`INVOICE BATCH: ${batchName.toUpperCase()}`, 14, 20);
+      const filtered = invoices.filter(i => i.shippingBatch === batchName);
+      const rows = filtered.map(i => [i.resi, `@${i.pemilik}`, i.detail, `Rp ${i.total.toLocaleString('id-ID')}`]);
+      doc.autoTable({ startY: 30, head: [['No Resi', 'Pemilik', 'Detail Barang', 'Total']], body: rows, theme: 'grid', headStyles: { fillColor: [212, 85, 117] } });
+      doc.save(`Invoice-Batch-${batchName}.pdf`);
     }
 
+    // INITIALIZATION ON LOAD
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
-
-      const rememberedUser = localStorage.getItem('bs_remembered_username');
-      const rememberedPass = localStorage.getItem('bs_remembered_password');
-      const rememberChecked = localStorage.getItem('bs_remember_me_checked') === 'true';
-
-      if (rememberedUser && rememberedPass && rememberChecked) {
-        document.getElementById('username-input').value = rememberedUser;
-        document.getElementById('password-input').value = rememberedPass;
+      
+      // Mengisi form input login otomatis jika 'Remember Me' aktif
+      const remUser = localStorage.getItem('bs_remembered_username');
+      const remPass = localStorage.getItem('bs_remembered_password');
+      if (remUser && remPass) {
+        document.getElementById('username-input').value = remUser;
+        document.getElementById('password-input').value = remPass;
         document.getElementById('remember-me').checked = true;
       }
     });
