@@ -77,7 +77,12 @@
             <label class="block text-xs sm:text-sm font-bold text-gray-600 mb-1">Password</label>
             <div class="relative">
               <i data-lucide="lock" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400"></i>
-              <input type="password" id="loginPassword" required class="w-full pl-10 pr-4 py-2.5 sm:py-3 rounded-2xl border-2 border-gray-100 focus:border-[#d45575] outline-none text-sm transition" placeholder="••••••••">
+              <!-- Input password dengan padding kanan yang disesuaikan untuk tombol mata -->
+              <input type="password" id="loginPassword" required class="w-full pl-10 pr-12 py-2.5 sm:py-3 rounded-2xl border-2 border-gray-100 focus:border-[#d45575] outline-none text-sm transition" placeholder="••••••••">
+              <!-- Tombol Show/Hide Password -->
+              <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none transition-all">
+                <i id="eyeIcon" data-lucide="eye" class="w-4 h-4 sm:w-5 sm:h-5"></i>
+              </button>
             </div>
           </div>
           
@@ -99,7 +104,7 @@
     </div>
   </div>
 
-  <!-- Halaman Utama Aplikasi (Hidden default) -->
+  <!-- Halaman Utama Aplikasi -->
   <div id="mainApp" class="hidden min-h-screen flex flex-col">
     <!-- Header Atas (Logo & Menu di Kiri, Sign Out di Kanan) -->
     <header class="bg-white/80 backdrop-blur-md shadow-md border-b-2 border-[#fff4e1] sticky top-0 z-30 px-3 py-2.5 sm:px-4 sm:py-3 flex items-center justify-between">
@@ -504,7 +509,7 @@
     </main>
   </div>
 
-  <!-- Custom Confirmation Modal (Mengganti Native Browser Confirm agar 100% Aman di iFrame) -->
+  <!-- Custom Confirmation Modal -->
   <div id="confirmModal" class="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 hidden">
     <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border-4 border-red-400 text-center space-y-4">
       <div class="text-red-500 flex justify-center">
@@ -1008,6 +1013,21 @@
       }
     }
 
+    // Fitur Baru: Menampilkan / Menyembunyikan password ketikan login
+    function togglePasswordVisibility() {
+      const pwdInput = document.getElementById('loginPassword');
+      const eyeIcon = document.getElementById('eyeIcon');
+      if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        eyeIcon.setAttribute('data-lucide', 'eye-off');
+      } else {
+        pwdInput.type = 'password';
+        eyeIcon.setAttribute('data-lucide', 'eye');
+      }
+      lucide.createIcons();
+    }
+    window.togglePasswordVisibility = togglePasswordVisibility;
+
     // Setup Aplikasi Sesuai Hak Akses
     function setupAplikasiSesuaiRole(userObj) {
       state.currentUser = userObj;
@@ -1317,10 +1337,17 @@
       }
     }
 
-    // Unggah foto ke Firebase Firestore (Base64)
+    // Unggah foto ke Firebase Firestore (Base64) - Ditambah proteksi file size anti stuck
     async function handlePhotoUpload(barangId, photoField, inputEl) {
       const file = inputEl.files[0];
       if (!file) return;
+
+      // Proteksi ukuran file: Maksimal 800KB agar dokumen aman dari limit 1MB Firestore
+      if (file.size > 800000) { 
+        showToast("Ukuran foto terlalu besar! Gunakan foto beresolusi lebih rendah (Maksimal 800 KB) agar penyimpanan Firebase lancar.", "error");
+        inputEl.value = ""; // Reset form file
+        return;
+      }
 
       showLoading(true);
       const reader = new FileReader();
@@ -1335,6 +1362,10 @@
           showLoading(false);
           showToast("Gagal menyimpan foto ke Firebase: " + err.message, "error");
         }
+      };
+      reader.onerror = function() {
+        showLoading(false);
+        showToast("Gagal membaca file gambar.", "error");
       };
       reader.readAsDataURL(file);
     }
@@ -1655,7 +1686,7 @@
       });
     }
 
-    // Grouping batch (RULE 2 - Memproses data di memori klien)
+    // Grouping batch (RULE 2)
     function groupInvoiceByBatch() {
       const query = document.getElementById('searchInvoice').value.toLowerCase();
       const activeCountry = state.selectedCountryInvoice; 
@@ -2376,6 +2407,7 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       document.getElementById('userModal').classList.remove('hidden');
     }
 
+    // Tutup Modal User
     function closeUserModal() {
       document.getElementById('userModal').classList.add('hidden');
     }
