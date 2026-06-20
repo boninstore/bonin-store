@@ -16,11 +16,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
-  <!-- Firebase Legacy/Compat SDKs untuk Single-File Integration -->
-  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
-
   <style>
     body {
       font-family: 'Quicksand', sans-serif;
@@ -57,7 +52,7 @@
       <div class="absolute inset-0 rounded-full border-4 border-dashed border-[#d45575] animate-spin"></div>
       <img src="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg" class="absolute inset-2 w-16 h-16 rounded-full object-cover shadow-md">
     </div>
-    <p class="mt-4 font-bold text-[#d45575] text-sm animate-pulse">Menghubungkan ke Warehouse...</p>
+    <p class="mt-4 font-bold text-[#d45575] text-sm animate-pulse">Menghubungkan ke Spreadsheet...</p>
   </div>
 
   <!-- Halaman Login -->
@@ -647,27 +642,27 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-[10px] sm:text-xs font-bold text-gray-600 mb-1">User / Pemilik</label>
-            <select id="refundPemilik" class="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs sm:text-sm bg-white outline-none"></select>
+            <select id="refundPemilik" class="w-full px-3 py-2 rounded-xl border-2 border-gray-200 text-xs sm:text-sm bg-white outline-none"></select>
           </div>
           <div>
             <label class="block text-[10px] sm:text-xs font-bold text-gray-600 mb-1">Shipping Batch</label>
-            <input type="text" id="refundBatch" required class="w-full px-3 py-2 rounded-xl border border-gray-200 outline-none text-xs sm:text-sm" placeholder="Contoh: BATCH-KR-03">
+            <input type="text" id="refundBatch" required class="w-full px-3 py-2 rounded-xl border-2 border-gray-200 outline-none text-xs sm:text-sm" placeholder="Contoh: BATCH-KR-03">
           </div>
         </div>
 
         <div>
           <label class="block text-[10px] sm:text-xs font-bold text-gray-600 mb-1">No Order Checkout Shopee</label>
-          <input type="text" id="refundNoOrder" required class="w-full px-3 py-2 rounded-xl border border-gray-200 outline-none text-xs sm:text-sm" placeholder="Contoh: 240620AA998XX">
+          <input type="text" id="refundNoOrder" required class="w-full px-3 py-2 rounded-xl border-2 border-gray-200 outline-none text-xs sm:text-sm" placeholder="Contoh: 240620AA998XX">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-[10px] sm:text-xs font-bold text-gray-600 mb-1">Nominal Transfer Manual (Rp)</label>
-            <input type="number" id="refundNominalTransfer" required class="w-full px-3 py-2 rounded-xl border border-gray-200 outline-none text-xs sm:text-sm" placeholder="0">
+            <input type="number" id="refundNominalTransfer" required class="w-full px-3 py-2 rounded-xl border-2 border-gray-200 outline-none text-xs sm:text-sm" placeholder="0">
           </div>
           <div>
             <label class="block text-[10px] sm:text-xs font-bold text-gray-600 mb-1">Nominal Checkout Shopee (Rp)</label>
-            <input type="number" id="refundNominalCheckout" required class="w-full px-3 py-2 rounded-xl border border-gray-200 outline-none text-xs sm:text-sm" placeholder="0">
+            <input type="number" id="refundNominalCheckout" required class="w-full px-3 py-2 rounded-xl border-2 border-gray-200 outline-none text-xs sm:text-sm" placeholder="0">
           </div>
         </div>
 
@@ -709,26 +704,12 @@
   </div>
 
 
-  <!-- ================= LOGIC JAVASCRIPT & INTEGRASI FIREBASE ================= -->
+  <!-- ================= LOGIC JAVASCRIPT & INTEGRASI SPREADSHEET ================= -->
   <script>
-    // ================= CONFIG & KONFIGURASI PENGGUNA =================
-    // GANTI OBJEK DI BAWAH INI DENGAN DATA DARI FIREBASE CONSOLE ANDA:
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-      apiKey: "", // Masukkan API Key Anda di sini
-      authDomain: "warehouse-bonin.firebaseapp.com",
-      projectId: "warehouse-bonin",
-      storageBucket: "warehouse-bonin.appspot.com",
-      messagingSenderId: "1234567890",
-      appId: "1:12345:web:abc"
-    };
+    // Deteksi lingkungan Google Apps Script
+    const isGasEnv = typeof google !== 'undefined' && google.script && google.script.run;
 
-    // Inisialisasi Firebase Compat SDK
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-    const appId = typeof __app_id !== 'undefined' ? __app_id : 'bonin-store-default';
-
-    // State Lokal Real-time yang di-sinkronkan otomatis oleh Firestore
+    // State Aplikasi utama
     let state = {
       currentUser: null,
       users: [],
@@ -742,9 +723,6 @@
 
     let adminLoginAttempts = 0;
 
-    // Helper Referensi Koleksi Berdasarkan RULE 1
-    const getCollectionRef = (name) => db.collection('artifacts').doc(appId).collection('public').doc('data').collection(name);
-
     // Saat Aplikasi Dimuat
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
@@ -756,134 +734,85 @@
         document.getElementById('loginRememberMe').checked = true;
       }
       
-      // Jalankan Otentikasi dan Aktifkan Sinkronisasi Data Firestore (RULE 3)
-      initAuthAndListen();
+      fetchMasterData();
     });
 
-    // Melakukan Otentikasi Terlebih Dahulu Sebelum Melakukan Query ke Firestore (RULE 3)
-    async function initAuthAndListen() {
+    // Sinkronisasi data utama dari Spreadsheet Google / LocalStorage fallback
+    function fetchMasterData() {
       showLoading(true);
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await auth.signInWithCustomToken(__initial_auth_token);
-        } else {
-          await auth.signInAnonymously();
-        }
-      } catch (e) {
-        console.error("Firebase Authentication Failed: ", e);
-        showToast("Masuk sebagai tamu gagal, menggunakan mode offline.", "error");
-        showLoading(false);
-      }
+      if (isGasEnv) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            state.users = res.users || [];
+            state.barang = res.barang || [];
+            state.invoice = res.invoice || [];
+            state.refund = res.refund || []; 
+            state.fonnteToken = res.fonnteToken || '';
+            showLoading(false);
+          })
+          .withFailureHandler((err) => {
+            showToast("Gagal mengambil data dari Google Sheets: " + err, "error");
+            showLoading(false);
+          })
+          .getMasterData();
+      } else {
+        // Mode Standalone LocalStorage Simulation (Jika dijalankan offline / tanpa GAS)
+        setTimeout(() => {
+          const storedUsers = localStorage.getItem('bonin_users');
+          const storedBarang = localStorage.getItem('bonin_barang');
+          const storedInvoice = localStorage.getItem('bonin_invoice');
+          const storedRefund = localStorage.getItem('bonin_refund');
+          const storedToken = localStorage.getItem('bonin_token');
 
-      // Listener Status Otentikasi
-      auth.onAuthStateChanged((user) => {
-        if (user) {
-          // Koneksi Berhasil -> Hubungkan Listener Firestore Realtime secara Instan!
-          setupFirestoreRealtimeListeners(user);
-        } else {
+          state.users = storedUsers ? JSON.parse(storedUsers) : [
+            { id: "u1", nama: "Super Admin", username: "admin", password: "123", role: "Admin", status: "Aktif", noHp: "08123456789" },
+            { id: "u2", nama: "Staff Logistik", username: "admin2", password: "123", role: "Admin 2", status: "Aktif", noHp: "08987654321" },
+            { id: "u3", nama: "Budi Santoso", username: "budi", password: "123", role: "Pengguna", status: "Aktif", noHp: "08554433221" },
+            { id: "u4", nama: "Siti Rahma", username: "siti", password: "123", role: "Pengguna", status: "Aktif", noHp: "08112233445" }
+          ];
+
+          state.barang = storedBarang ? JSON.parse(storedBarang) : [
+            { id: "b1", noResi: "RESI-KR-001", detailBarang: "Album K-Pop & Photocard Set Premium", negaraTujuan: "Korea", tanggalUpdate: "2026-06-20", foto1: "", foto2: "", shippingBatch: "BATCH-KR-01", pemilik: "budi" },
+            { id: "b2", noResi: "RESI-CN-002", detailBarang: "Jaket Kulit Winter Edition XL", negaraTujuan: "China", tanggalUpdate: "2026-06-19", foto1: "", foto2: "", shippingBatch: "BATCH-CN-01", pemilik: "budi" },
+            { id: "b3", noResi: "RESI-TH-003", detailBarang: "Snack Thai Tea Pack Original 20 Pcs", negaraTujuan: "Thailand", tanggalUpdate: "2026-06-18", foto1: "", foto2: "", shippingBatch: "BATCH-TH-01", pemilik: "siti" }
+          ];
+
+          state.invoice = storedInvoice ? JSON.parse(storedInvoice) : [
+            { id: "i1", noResi: "RESI-KR-001", detailBarang: "Album K-Pop & Photocard Set Premium", shippingBatch: "BATCH-KR-01", qty: 2.5, rateSharing: 150000, feeWh: 25000, pemilik: "budi" },
+            { id: "i2", noResi: "RESI-CN-002", detailBarang: "Jaket Kulit Winter Edition XL", shippingBatch: "BATCH-CN-01", qty: 1.2, rateSharing: 120000, feeWh: 15000, pemilik: "budi" },
+            { id: "i3", noResi: "RESI-TH-003", detailBarang: "Snack Thai Tea Pack Original 20 Pcs", shippingBatch: "BATCH-TH-01", qty: 4, rateSharing: 50000, feeWh: 10000, pemilik: "siti" }
+          ];
+
+          state.refund = storedRefund ? JSON.parse(storedRefund) : [
+            { id: "rf1", pemilik: "budi", shippingBatch: "BATCH-KR-01", noOrderShopee: "240612SHP001", nominalTransfer: 200000, nominalCheckout: 180000, totalRefund: 20000, statusDone: "Done", note: "Refund selisih diskon live" }
+          ];
+
+          state.fonnteToken = storedToken || '';
+          
+          saveAllLocalData(); // Save to sync first load
           showLoading(false);
-        }
-      });
+        }, 500);
+      }
     }
 
-    // Mengaktifkan Sync Data Realtime dari Firebase (RULE 2 - sorting & filter manual di memori JS)
-    function setupFirestoreRealtimeListeners(user) {
-      // 1. Sinkronisasi Config (Fonnte Token)
-      getCollectionRef('config').doc('fonnte').onSnapshot((doc) => {
-        if (doc.exists) {
-          state.fonnteToken = doc.data().token || '';
-          const input = document.getElementById('fonnteTokenInput');
-          if (input) input.value = state.fonnteToken;
-        }
-      }, (err) => console.error("Config fetch error:", err));
-
-      // 2. Sinkronisasi Data Users
-      getCollectionRef('users').onSnapshot((snapshot) => {
-        const list = [];
-        snapshot.forEach(doc => {
-          list.push({ id: doc.id, ...doc.data() });
-        });
-        state.users = list;
-
-        // Auto-seed data akun jika database masih kosong pertama kali
-        if (list.length === 0) {
-          seedDefaultUsers();
-          return;
-        }
-
-        populateUserDropdowns();
-        if (state.currentUser) {
-          renderUserMgmt();
-        }
-      }, (err) => console.error("Sync Users Error:", err));
-
-      // 3. Sinkronisasi Data Barang Logistik
-      getCollectionRef('barang').onSnapshot((snapshot) => {
-        const list = [];
-        snapshot.forEach(doc => {
-          list.push({ id: doc.id, ...doc.data() });
-        });
-        state.barang = list;
-        
-        // Auto Update Dashboard & Tampilan jika sedang masuk
-        if (state.currentUser) {
-          updateDashboardStats();
-          renderNotifications();
-          renderDaftarBarang();
-        }
-      }, (err) => console.error("Sync Barang Error:", err));
-
-      // 4. Sinkronisasi Data Invoice
-      getCollectionRef('invoice').onSnapshot((snapshot) => {
-        const list = [];
-        snapshot.forEach(doc => {
-          list.push({ id: doc.id, ...doc.data() });
-        });
-        state.invoice = list;
-        
-        if (state.currentUser) {
-          renderInvoice();
-        }
-      }, (err) => console.error("Sync Invoice Error:", err));
-
-      // 5. Sinkronisasi Data Refund Shopee
-      getCollectionRef('refund').onSnapshot((snapshot) => {
-        const list = [];
-        snapshot.forEach(doc => {
-          list.push({ id: doc.id, ...doc.data() });
-        });
-        state.refund = list;
-        
-        if (state.currentUser) {
-          renderRefundShopee();
-        }
-        showLoading(false);
-      }, (err) => {
-        console.error("Sync Refund Error:", err);
-        showLoading(false);
-      });
+    // Penyimpanan local data fallback
+    function saveAllLocalData() {
+      if (!isGasEnv) {
+        localStorage.setItem('bonin_users', JSON.stringify(state.users));
+        localStorage.setItem('bonin_barang', JSON.stringify(state.barang));
+        localStorage.setItem('bonin_invoice', JSON.stringify(state.invoice));
+        localStorage.setItem('bonin_refund', JSON.stringify(state.refund));
+        localStorage.setItem('bonin_token', state.fonnteToken);
+      }
     }
 
-    // Seeding Default Akun (Khusus database kosong)
-    function seedDefaultUsers() {
-      const defaults = [
-        { nama: "Super Admin", username: "admin", password: "123", role: "Admin", status: "Aktif", noHp: "08123456789" },
-        { nama: "Staff Logistik", username: "admin2", password: "123", role: "Admin 2", status: "Aktif", noHp: "08987654321" },
-        { nama: "Budi Santoso", username: "budi", password: "123", role: "Pengguna", status: "Aktif", noHp: "08554433221" },
-        { nama: "Siti Rahma", username: "siti", password: "123", role: "Pengguna", status: "Aktif", noHp: "08112233445" }
-      ];
-      defaults.forEach(u => {
-        getCollectionRef('users').add(u);
-      });
-    }
-
-    // Toggle Menu Navigasi
+    // Toggle Menu Navigasi (Meluncur dari KIRI)
     function toggleMenu() {
       const sideMenu = document.getElementById('sideMenu');
       sideMenu.classList.toggle('-translate-x-full');
     }
 
-    // Custom Modal Confirmation Helper (Pengganti Native Browser Confirm)
+    // Custom Modal Confirmation Helper
     let confirmCallback = null;
     function showConfirm(text, callback) {
       document.getElementById('confirmModalText').innerText = text;
@@ -911,6 +840,28 @@
       }
     }
 
+    // Custom Toast Notification Helper
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+      
+      toastMsg.innerText = message;
+      
+      if (type === 'success') {
+        toast.className = "fixed bottom-4 right-4 z-50 bg-[#d45575] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-3 text-xs sm:text-sm font-semibold border-2 border-[#fff4e1] transform translate-y-0 opacity-100 transition-all duration-300";
+        toastIcon.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i>`;
+      } else {
+        toast.className = "fixed bottom-4 right-4 z-50 bg-red-500 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-3 text-xs sm:text-sm font-semibold border-2 border-red-200 transform translate-y-0 opacity-100 transition-all duration-300";
+        toastIcon.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i>`;
+      }
+      lucide.createIcons();
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-20');
+      }, 3500);
+    }
+
     // Penanganan Login
     function handleLogin(event) {
       event.preventDefault();
@@ -920,53 +871,177 @@
       const errorDiv = document.getElementById('loginError');
 
       errorDiv.classList.add('hidden');
+      showLoading(true);
 
-      const match = state.users.find(u => u.username.toLowerCase() === user.toLowerCase());
-      
-      if (match) {
-        if (match.status !== "Aktif") {
-          errorDiv.innerText = "Akun Anda berstatus Nonaktif.";
-          errorDiv.classList.remove('hidden');
-          return;
-        }
+      const isAdminUser = (user.toLowerCase() === 'admin');
 
-        if (match.password === pass) {
-          adminLoginAttempts = 0;
-          if (rememberMe) {
-            localStorage.setItem('bonin_username', user);
-            localStorage.setItem('bonin_password', pass);
-            localStorage.setItem('bonin_remember', 'true');
-          } else {
-            localStorage.removeItem('bonin_username');
-            localStorage.removeItem('bonin_password');
-            localStorage.removeItem('bonin_remember');
-          }
-          setupAplikasiSesuaiRole(match);
-        } else {
-          // Password Salah
-          if (match.role === 'Admin' || match.username === 'admin') {
-            adminLoginAttempts++;
-            if (adminLoginAttempts >= 3) {
-              // Reset Password Admin otomatis di database Firebase ke "123"
-              getCollectionRef('users').doc(match.id).update({ password: "123" })
-                .then(() => {
-                  adminLoginAttempts = 0;
-                  errorDiv.innerHTML = "⚠️ <strong>Sandi Admin salah 3 kali!</strong> Sandi otomatis di-reset ke: <strong>123</strong> demi keamanan. Silakan coba kembali.";
-                  errorDiv.classList.remove('hidden');
-                });
-              return;
+      if (isGasEnv) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            showLoading(false);
+            if (res.success) {
+              adminLoginAttempts = 0;
+              setupAplikasiSesuaiRole(res.user);
+            } else {
+              if (isAdminUser) {
+                adminLoginAttempts++;
+                if (adminLoginAttempts >= 3) {
+                  google.script.run
+                    .withSuccessHandler(() => {
+                      adminLoginAttempts = 0;
+                      errorDiv.innerHTML = "⚠️ <strong>Sandi Admin salah 3 kali!</strong> Sandi otomatis di-reset ke: <strong>123</strong> demi keamanan. Silakan coba kembali.";
+                      errorDiv.classList.remove('hidden');
+                    })
+                    .resetAdminPassword();
+                  return;
+                }
+              }
+              errorDiv.innerText = res.message + (isAdminUser ? ` (Percobaan: ${adminLoginAttempts}/3)` : '');
+              errorDiv.classList.remove('hidden');
             }
+          })
+          .withFailureHandler(() => {
+            showLoading(false);
+            errorDiv.innerText = "Gagal menghubungi server Google Apps Script.";
+            errorDiv.classList.remove('hidden');
+          })
+          .loginUser(user, pass);
+      } else {
+        // Fallback login local
+        showLoading(false);
+        const match = state.users.find(u => u.username.toLowerCase() === user.toLowerCase());
+        if (match) {
+          if (match.status !== "Aktif") {
+            errorDiv.innerText = "Akun Anda berstatus Nonaktif.";
+            errorDiv.classList.remove('hidden');
+            return;
           }
-          errorDiv.innerText = `Sandi salah. (Percobaan: ${adminLoginAttempts}/3)`;
+
+          if (match.password === pass) {
+            adminLoginAttempts = 0;
+            if (rememberMe) {
+              localStorage.setItem('bonin_username', user);
+              localStorage.setItem('bonin_password', pass);
+              localStorage.setItem('bonin_remember', 'true');
+            } else {
+              localStorage.removeItem('bonin_username');
+              localStorage.removeItem('bonin_password');
+              localStorage.removeItem('bonin_remember');
+            }
+            setupAplikasiSesuaiRole(match);
+          } else {
+            if (match.role === 'Admin' || match.username === 'admin') {
+              adminLoginAttempts++;
+              if (adminLoginAttempts >= 3) {
+                match.password = "123";
+                saveAllLocalData();
+                adminLoginAttempts = 0;
+                errorDiv.innerHTML = "⚠️ <strong>Sandi Admin salah 3 kali!</strong> Sandi otomatis di-reset ke: <strong>123</strong> secara lokal. Silakan coba kembali.";
+                errorDiv.classList.remove('hidden');
+                return;
+              }
+            }
+            errorDiv.innerText = `Sandi salah. (Percobaan: ${adminLoginAttempts}/3)`;
+            errorDiv.classList.remove('hidden');
+          }
+        } else {
+          errorDiv.innerText = "Username tidak ditemukan.";
           errorDiv.classList.remove('hidden');
         }
-      } else {
-        errorDiv.innerText = "Username tidak terdaftar.";
-        errorDiv.classList.remove('hidden');
       }
     }
 
-    // Log Keluar
+    // Setup Aplikasi Sesuai Hak Akses
+    function setupAplikasiSesuaiRole(userObj) {
+      state.currentUser = userObj;
+      document.getElementById('loginPage').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      
+      document.getElementById('userNameLabel').innerText = userObj.nama;
+      document.getElementById('badgeUserRole').innerText = userObj.role;
+      document.getElementById('welcomeGreeting').innerText = `Selamat Datang di Warehouse, Kak ${userObj.nama}! 👋`;
+
+      // Reset menu sidebar
+      document.getElementById('btnMenuFormResi').classList.remove('hidden');
+      document.getElementById('btnMenuInvoice').classList.remove('hidden');
+      document.getElementById('btnMenuUserMgmt').classList.remove('hidden');
+      document.getElementById('fonnteConfigCard').classList.add('hidden');
+      document.getElementById('adminFormResiAdditions').classList.add('hidden');
+
+      document.getElementById('quickFormResi').classList.remove('hidden');
+      document.getElementById('quickDaftarBarang').classList.remove('hidden');
+      document.getElementById('quickInvoice').classList.remove('hidden');
+      document.getElementById('quickUserMgmt').classList.remove('hidden');
+
+      if (userObj.role === 'Admin') {
+        document.getElementById('btnTambahInvoiceManual').classList.remove('hidden');
+        document.getElementById('fonnteConfigCard').classList.remove('hidden');
+        document.getElementById('fonnteTokenInput').value = state.fonnteToken;
+        document.getElementById('adminFormResiAdditions').classList.remove('hidden');
+        populateUserDropdowns();
+      } else {
+        document.getElementById('btnTambahInvoiceManual').classList.add('hidden');
+        if (userObj.role === 'Admin 2') {
+          document.getElementById('btnMenuFormResi').classList.add('hidden');
+          document.getElementById('btnMenuInvoice').classList.add('hidden');
+          document.getElementById('btnMenuUserMgmt').classList.add('hidden');
+          
+          document.getElementById('quickFormResi').classList.add('hidden');
+          document.getElementById('quickInvoice').classList.add('hidden');
+          document.getElementById('quickUserMgmt').classList.add('hidden');
+        } else {
+          document.getElementById('btnMenuUserMgmt').classList.add('hidden');
+          document.getElementById('quickUserMgmt').classList.add('hidden');
+        }
+      }
+
+      updateTabStyles();
+      updateDashboardStats();
+      renderNotifications();
+
+      if (userObj.role === 'Admin 2') {
+        changeMenu('daftarBarang');
+      } else {
+        changeMenu('dashboard');
+      }
+    }
+
+    // Sabet status tab menu negara
+    function updateTabStyles() {
+      const listNegara = ['Semua', 'Korea', 'China', 'Thailand'];
+      listNegara.forEach(c => {
+        const btnDaftar = document.getElementById(`tabDaftar${c}`);
+        if (btnDaftar) {
+          if (state.selectedCountryDaftar === c) {
+            btnDaftar.className = "flex-1 py-2 rounded-xl text-xs font-bold bg-[#d45575] text-white transition-all duration-200 shadow-sm whitespace-nowrap px-3";
+          } else {
+            btnDaftar.className = "flex-1 py-2 rounded-xl text-xs font-bold text-gray-500 hover:text-[#d45575] hover:bg-[#fff4e1]/40 transition-all duration-200 whitespace-nowrap px-3";
+          }
+        }
+
+        const btnInvoice = document.getElementById(`tabInvoice${c}`);
+        if (btnInvoice) {
+          if (state.selectedCountryInvoice === c) {
+            btnInvoice.className = "flex-1 py-2 rounded-xl text-xs font-bold bg-[#d45575] text-white transition-all duration-200 shadow-sm whitespace-nowrap px-3";
+          } else {
+            btnInvoice.className = "flex-1 py-2 rounded-xl text-xs font-bold text-gray-500 hover:text-[#d45575] hover:bg-[#fff4e1]/40 transition-all duration-200 whitespace-nowrap px-3";
+          }
+        }
+      });
+    }
+
+    function setCountryDaftar(country) {
+      state.selectedCountryDaftar = country;
+      updateTabStyles();
+      renderDaftarBarang();
+    }
+
+    function setCountryInvoice(country) {
+      state.selectedCountryInvoice = country;
+      updateTabStyles();
+      renderInvoice();
+    }
+
     function handleLogout() {
       state.currentUser = null;
       document.getElementById('mainApp').classList.add('hidden');
@@ -986,7 +1061,6 @@
       sideMenu.classList.add('-translate-x-full');
     }
 
-    // Pindah Menu Panel
     function changeMenu(menuKey) {
       document.getElementById('secDashboard').classList.add('hidden');
       document.getElementById('secFormResi').classList.add('hidden');
@@ -1019,7 +1093,7 @@
       sideMenu.classList.add('-translate-x-full');
     }
 
-    // Mengisi data dropdown pemilik
+    // Isi dropdown pemilik
     function populateUserDropdowns() {
       const dropdownForm = document.getElementById('resiPemilikCustom');
       const dropdownRefund = document.getElementById('refundPemilik');
@@ -1039,20 +1113,18 @@
       if (datalistModal) datalistModal.innerHTML = datalistOptions;
     }
 
-    // Opsi user di baris tabel
     function getUserOptionsHtml(selectedUsername) {
       return state.users
         .map(u => `<option value="${u.username}" ${u.username === selectedUsername ? 'selected' : ''}>${u.nama} (@${u.username})</option>`)
         .join('');
     }
 
-    // Ambil asal negara resi
     function getCountryForResi(noResi) {
       const match = state.barang.find(b => b.noResi === noResi);
       return match ? match.negaraTujuan : "Korea"; 
     }
 
-    // Dashboard Stats update
+    // Statistik dashboard
     function updateDashboardStats() {
       let filteredBarang = state.barang;
       if (state.currentUser.role === 'Pengguna') {
@@ -1065,7 +1137,7 @@
       document.getElementById('statThailand').innerText = filteredBarang.filter(b => b.negaraTujuan === 'Thailand').length; 
     }
 
-    // Render Widget Notifikasi Update Foto Gudang
+    // Render Widget Notifikasi
     function renderNotifications() {
       const container = document.getElementById('notificationList');
       if (!container) return;
@@ -1111,22 +1183,31 @@
       }
     }
 
-    // Menyimpan Token Fonnte ke Firebase
+    // Simpan Fonnte Token ke Spreadsheet
     function saveFonnteToken() {
       const val = document.getElementById('fonnteTokenInput').value.trim();
       showLoading(true);
-      getCollectionRef('config').doc('fonnte').set({ token: val })
-        .then(() => {
-          showLoading(false);
-          showToast("Token API Fonnte berhasil disimpan di Firebase!");
-        })
-        .catch(err => {
-          showLoading(false);
-          showToast("Gagal menyimpan token: " + err.message, "error");
-        });
+      if (isGasEnv) {
+        google.script.run
+          .withSuccessHandler(() => {
+            state.fonnteToken = val;
+            showLoading(false);
+            showToast("Token Fonnte berhasil disimpan ke Google Sheets!");
+          })
+          .withFailureHandler((err) => {
+            showLoading(false);
+            showToast("Gagal menyimpan token ke Sheets: " + err, "error");
+          })
+          .saveFonnteToken(val);
+      } else {
+        state.fonnteToken = val;
+        saveAllLocalData();
+        showLoading(false);
+        showToast("Token disimpan lokal di memory!");
+      }
     }
 
-    // Kirim input resi barang baru ke Firebase (dan auto create draf invoice)
+    // Input Resi baru ke Spreadsheet
     function submitFormResi(e) {
       e.preventDefault();
       const noResi = document.getElementById('resiNomer').value.trim();
@@ -1149,45 +1230,55 @@
         detailBarang: detail,
         negaraTujuan: negara,
         tanggalUpdate: tanggal,
-        pemilik: pemilik,
-        foto1: "",
-        foto2: "",
-        shippingBatch: defaultBatch
-      };
-
-      const invoiceObj = {
-        noResi: noResi,
-        detailBarang: detail,
-        shippingBatch: defaultBatch,
-        qty: 0,
-        rateSharing: 0,
-        feeWh: 0,
         pemilik: pemilik
       };
 
       showLoading(true);
 
-      const batch = db.batch();
-      const barangRef = getCollectionRef('barang').doc();
-      const invoiceRef = getCollectionRef('invoice').doc();
-      batch.set(barangRef, resiObj);
-      batch.set(invoiceRef, invoiceObj);
+      if (isGasEnv) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            state.barang = res.barang || [];
+            state.invoice = res.invoice || [];
+            showLoading(false);
+            showToast("Sukses menyimpan data ke Google Sheets!");
+            document.getElementById('formInputResi').reset();
+            setCountryDaftar(negara);
+            changeMenu('daftarBarang');
+          })
+          .withFailureHandler((err) => {
+            showLoading(false);
+            showToast("Gagal input resi ke Sheets: " + err, "error");
+          })
+          .addResiBarang(resiObj);
+      } else {
+        // Fallback local simulation
+        const idB = "b_" + new Date().getTime();
+        const newB = { id: idB, ...resiObj, foto1: "", foto2: "", shippingBatch: defaultBatch };
+        state.barang.push(newB);
 
-      batch.commit()
-        .then(() => {
-          showLoading(false);
-          showToast("Data Resi & draf Invoice sukses tersimpan ke Firebase!");
-          document.getElementById('formInputResi').reset();
-          setCountryDaftar(negara);
-          changeMenu('daftarBarang');
-        })
-        .catch(err => {
-          showLoading(false);
-          showToast("Gagal menyimpan resi: " + err.message, "error");
-        });
+        const newI = {
+          id: "i_" + new Date().getTime(),
+          noResi: noResi,
+          detailBarang: detail,
+          shippingBatch: defaultBatch,
+          qty: 0,
+          rateSharing: 0,
+          feeWh: 0,
+          pemilik: pemilik
+        };
+        state.invoice.push(newI);
+
+        saveAllLocalData();
+        showLoading(false);
+        showToast("Resi disimpan di Local Storage!");
+        document.getElementById('formInputResi').reset();
+        setCountryDaftar(negara);
+        changeMenu('daftarBarang');
+      }
     }
 
-    // Unggah Foto update barang ke Firebase Firestore
+    // Unggah foto ke database spreadsheet
     function handlePhotoUpload(barangId, photoField, inputEl) {
       const file = inputEl.files[0];
       if (!file) return;
@@ -1196,18 +1287,32 @@
       const reader = new FileReader();
       reader.onload = function(e) {
         const base64Data = e.target.result;
-        const updateData = {};
-        updateData[photoField] = base64Data;
-
-        getCollectionRef('barang').doc(barangId).update(updateData)
-          .then(() => {
-            showLoading(false);
-            showToast("Foto update barang berhasil diperbarui!");
-          })
-          .catch(err => {
-            showLoading(false);
-            showToast("Gagal mengunggah foto: " + err.message, "error");
-          });
+        
+        if (isGasEnv) {
+          google.script.run
+            .withSuccessHandler((res) => {
+              state.barang = res.barang || [];
+              showLoading(false);
+              showToast("Foto berhasil tersimpan ke Google Sheets!");
+              renderDaftarBarang();
+              renderNotifications();
+            })
+            .withFailureHandler((err) => {
+              showLoading(false);
+              showToast("Gagal menyimpan foto: " + err, "error");
+            })
+            .updateBarangFoto(barangId, photoField, base64Data);
+        } else {
+          const idx = state.barang.findIndex(b => b.id === barangId);
+          if (idx > -1) {
+            state.barang[idx][photoField] = base64Data;
+            saveAllLocalData();
+          }
+          showLoading(false);
+          showToast("Foto disimpan di Local Storage!");
+          renderDaftarBarang();
+          renderNotifications();
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -1229,7 +1334,7 @@
       document.body.removeChild(link);
     }
 
-    // Handler edit pada Daftar Barang (Perubahan tersinkron dua arah ke Invoice secara otomatis!)
+    // Edit Barang Inline (Sinkron Dua Arah)
     function handleBarangEdit(barangId, field, value) {
       const userRole = state.currentUser.role;
       const barangObj = state.barang.find(b => b.id === barangId);
@@ -1251,33 +1356,40 @@
       }
 
       const oldResi = barangObj.noResi;
-      const updateData = {};
-      updateData[field] = value;
+      barangObj[field] = value;
 
-      const connectedInvoice = state.invoice.find(i => i.noResi === oldResi);
-      
-      const batch = db.batch();
-      const barangRef = getCollectionRef('barang').doc(barangId);
-      batch.update(barangRef, updateData);
+      // Sync ke draf invoice lokal
+      state.invoice.forEach(inv => {
+        if (inv.noResi === oldResi) {
+          inv.noResi = barangObj.noResi;
+          inv.detailBarang = barangObj.detailBarang;
+          inv.pemilik = barangObj.pemilik;
+          inv.shippingBatch = barangObj.shippingBatch;
+        }
+      });
 
-      if (connectedInvoice) {
-        const invoiceRef = getCollectionRef('invoice').doc(connectedInvoice.id);
-        const invoiceUpdate = {};
-        invoiceUpdate[field] = value;
-        batch.update(invoiceRef, invoiceUpdate);
+      if (isGasEnv) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            state.barang = res.barang || [];
+            state.invoice = res.invoice || [];
+            renderDaftarBarang();
+            renderInvoice();
+          })
+          .withFailureHandler((err) => {
+            showToast("Gagal sinkronisasi data ke Google Sheets: " + err, "error");
+            renderDaftarBarang();
+          })
+          .updateBarangInline(barangId, field, value);
+      } else {
+        saveAllLocalData();
+        renderDaftarBarang();
+        renderInvoice();
+        showToast("Perubahan berhasil disimpan offline!");
       }
-
-      batch.commit()
-        .then(() => {
-          showToast("Sinkronisasi Firebase berhasil!");
-        })
-        .catch(err => {
-          showToast("Gagal update: " + err.message, "error");
-          renderDaftarBarang();
-        });
     }
 
-    // Handler edit pada Invoice (Sinkronisasi balik ke Daftar Barang Logistik)
+    // Edit Invoice Inline
     function handleInvoiceEdit(invoiceId, field, value) {
       if (state.currentUser.role !== 'Admin') {
         showToast("Akses Ditolak: Hanya Admin yang dapat mengedit data invoice!", "error");
@@ -1289,59 +1401,70 @@
       if (!invoiceObj) return;
 
       const oldResi = invoiceObj.noResi;
-      const updateData = {};
       if (field === 'qty' || field === 'rateSharing' || field === 'feeWh') {
-        updateData[field] = parseFloat(value) || 0;
+        invoiceObj[field] = parseFloat(value) || 0;
       } else {
-        updateData[field] = value;
+        invoiceObj[field] = value;
       }
 
-      const connectedBarang = state.barang.find(b => b.noResi === oldResi);
+      // Sync ke barang logistik lokal
+      state.barang.forEach(b => {
+        if (b.noResi === oldResi) {
+          b.noResi = invoiceObj.noResi;
+          b.detailBarang = invoiceObj.detailBarang;
+          b.pemilik = invoiceObj.pemilik;
+          b.shippingBatch = invoiceObj.shippingBatch;
+        }
+      });
 
-      const batch = db.batch();
-      const invoiceRef = getCollectionRef('invoice').doc(invoiceId);
-      batch.update(invoiceRef, updateData);
-
-      if (connectedBarang && (field === 'noResi' || field === 'detailBarang' || field === 'pemilik' || field === 'shippingBatch')) {
-        const barangRef = getCollectionRef('barang').doc(connectedBarang.id);
-        const barangUpdate = {};
-        barangUpdate[field] = value;
-        batch.update(barangRef, barangUpdate);
+      if (isGasEnv) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            state.invoice = res.invoice || [];
+            state.barang = res.barang || [];
+            recalculateGrandTotals();
+          })
+          .withFailureHandler((err) => {
+            showToast("Gagal update data invoice ke Google Sheets: " + err, "error");
+            renderInvoice();
+          })
+          .updateInvoiceInline(invoiceId, field, value);
+      } else {
+        saveAllLocalData();
+        recalculateGrandTotals();
+        showToast("Invoice diperbarui offline!");
       }
-
-      batch.commit()
-        .then(() => {
-          // synced via snapshot
-        })
-        .catch(err => {
-          showToast("Gagal update invoice: " + err.message, "error");
-          renderInvoice();
-        });
     }
 
-    // Hapus Barang (Menggunakan custom modal confirm)
+    // Hapus barang dari database Spreadsheet
     function deleteBarang(barangId) {
       showConfirm("Apakah Anda yakin ingin menghapus barang ini beserta draf invoicenya?", () => {
         showLoading(true);
-
-        const barangObj = state.barang.find(b => b.id === barangId);
-        const connectedInvoice = barangObj ? state.invoice.find(i => i.noResi === barangObj.noResi) : null;
-
-        const batch = db.batch();
-        batch.delete(getCollectionRef('barang').doc(barangId));
-        if (connectedInvoice) {
-          batch.delete(getCollectionRef('invoice').doc(connectedInvoice.id));
+        if (isGasEnv) {
+          google.script.run
+            .withSuccessHandler((res) => {
+              state.barang = res.barang || [];
+              state.invoice = res.invoice || [];
+              showLoading(false);
+              showToast("Data barang & invoice sukses dihapus dari Google Sheets!");
+              renderDaftarBarang();
+            })
+            .withFailureHandler((err) => {
+              showLoading(false);
+              showToast("Gagal menghapus data dari Google Sheets: " + err, "error");
+            })
+            .deleteBarang(barangId);
+        } else {
+          const bObj = state.barang.find(b => b.id === barangId);
+          if (bObj) {
+            state.invoice = state.invoice.filter(i => i.noResi !== bObj.noResi);
+          }
+          state.barang = state.barang.filter(b => b.id !== barangId);
+          saveAllLocalData();
+          showLoading(false);
+          showToast("Dihapus dari Local Storage!");
+          renderDaftarBarang();
         }
-
-        batch.commit()
-          .then(() => {
-            showLoading(false);
-            showToast("Barang & Invoice berhasil dihapus!");
-          })
-          .catch(err => {
-            showLoading(false);
-            showToast("Gagal menghapus: " + err.message, "error");
-          });
       });
     }
 
@@ -1498,7 +1621,7 @@
       lucide.createIcons();
     }
 
-    // Kalkulasi cepat total baris & batch
+    // Hitung total batch & baris
     function recalculateGrandTotals() {
       state.invoice.forEach(inv => {
         const rowTotalEl = document.getElementById(`total-${inv.id}`);
@@ -1521,7 +1644,6 @@
       });
     }
 
-    // Format Mata Uang Rupiah
     function formatRupiah(angka) {
       return "Rp " + Number(angka).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
@@ -1530,19 +1652,30 @@
     function deleteInvoice(invoiceId) {
       showConfirm("Hapus data baris invoice ini?", () => {
         showLoading(true);
-        getCollectionRef('invoice').doc(invoiceId).delete()
-          .then(() => {
-            showLoading(false);
-            showToast("Item Invoice berhasil dihapus!");
-          })
-          .catch(err => {
-            showLoading(false);
-            showToast("Gagal menghapus invoice: " + err.message, "error");
-          });
+        if (isGasEnv) {
+          google.script.run
+            .withSuccessHandler((res) => {
+              state.invoice = res.invoice || [];
+              showLoading(false);
+              showToast("Item Invoice berhasil dihapus!");
+              renderInvoice();
+            })
+            .withFailureHandler((err) => {
+              showLoading(false);
+              showToast("Gagal menghapus invoice dari Google Sheets: " + err, "error");
+            })
+            .deleteInvoice(invoiceId);
+        } else {
+          state.invoice = state.invoice.filter(i => i.id !== invoiceId);
+          saveAllLocalData();
+          showLoading(false);
+          showToast("Dihapus offline!");
+          renderInvoice();
+        }
       });
     }
 
-    // Pengelompokan invoice berdasarkan batch pengiriman
+    // Grouping batch
     function groupInvoiceByBatch() {
       const query = document.getElementById('searchInvoice').value.toLowerCase();
       const activeCountry = state.selectedCountryInvoice; 
@@ -1580,7 +1713,7 @@
       return grouped;
     }
 
-    // Dialog Invoice Manual
+    // Tambah Invoice Manual
     function openInvoiceManualModal() {
       if (state.currentUser.role !== 'Admin') {
         showToast("Hanya Admin yang dapat menambah invoice manual!", "error");
@@ -1595,7 +1728,6 @@
       document.getElementById('invoiceManualModal').classList.add('hidden');
     }
 
-    // Submit Invoice Manual
     function submitInvoiceManual(e) {
       e.preventDefault();
       const invoiceObj = {
@@ -1608,36 +1740,45 @@
         feeWh: parseFloat(document.getElementById('invManualFee').value) || 0
       };
 
-      const resiObj = {
-        noResi: invoiceObj.noResi,
-        detailBarang: invoiceObj.detailBarang,
-        negaraTujuan: state.selectedCountryInvoice === 'Semua' ? 'Korea' : state.selectedCountryInvoice, 
-        tanggalUpdate: new Date().toISOString().split('T')[0],
-        foto1: "",
-        foto2: "",
-        shippingBatch: invoiceObj.shippingBatch,
-        pemilik: invoiceObj.pemilik
-      };
-
       showLoading(true);
 
-      const batch = db.batch();
-      const invoiceRef = getCollectionRef('invoice').doc();
-      const barangRef = getCollectionRef('barang').doc();
+      if (isGasEnv) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            state.invoice = res.invoice || [];
+            state.barang = res.barang || [];
+            showLoading(false);
+            showToast("Invoice manual berhasil ditambahkan!");
+            closeInvoiceManualModal();
+            renderInvoice();
+          })
+          .withFailureHandler((err) => {
+            showLoading(false);
+            showToast("Gagal menambah invoice: " + err, "error");
+          })
+          .addInvoiceManual(invoiceObj);
+      } else {
+        invoiceObj.id = "i_" + new Date().getTime();
+        state.invoice.push(invoiceObj);
 
-      batch.set(invoiceRef, invoiceObj);
-      batch.set(barangRef, resiObj);
-
-      batch.commit()
-        .then(() => {
-          showLoading(false);
-          showToast("Invoice manual berhasil ditambahkan!");
-          closeInvoiceManualModal();
-        })
-        .catch(err => {
-          showLoading(false);
-          showToast("Gagal menyimpan invoice: " + err.message, "error");
+        state.barang.push({
+          id: "b_" + new Date().getTime(),
+          noResi: invoiceObj.noResi,
+          detailBarang: invoiceObj.detailBarang,
+          negaraTujuan: state.selectedCountryInvoice === 'Semua' ? 'Korea' : state.selectedCountryInvoice, 
+          tanggalUpdate: new Date().toISOString().split('T')[0],
+          foto1: "",
+          foto2: "",
+          shippingBatch: invoiceObj.shippingBatch,
+          pemilik: invoiceObj.pemilik
         });
+
+        saveAllLocalData();
+        showLoading(false);
+        showToast("Tersimpan offline!");
+        closeInvoiceManualModal();
+        renderInvoice();
+      }
     }
 
     // Render Tabel Invoice
@@ -1797,7 +1938,7 @@
       lucide.createIcons();
     }
 
-    // Ekspor Invoice PDF
+    // Ekspor PDF
     function exportBatchPDF(batchName) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('p', 'mm', 'a4');
@@ -1816,7 +1957,7 @@
       doc.setFont("helvetica", "normal");
       doc.setFontSize(9);
       doc.setTextColor(80, 80, 80);
-      doc.text("Laporan Invoice Transaksi Internasional", 15, 24);
+      doc.text("Laporan Invoice Transaksi Internasional (Spreadsheet)", 15, 24);
       doc.text("Korea - China - Thailand Logistics Service", 15, 28);
       doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, 15, 32);
 
@@ -1890,7 +2031,7 @@
       showToast(`Sukses mengekspor PDF ${batchName}!`);
     }
 
-    // Notifikasi WhatsApp (Fonnte Gateway)
+    // WA Sender
     function sendWhatsappInvoice(batchName) {
       if (!state.fonnteToken) {
         showToast("Error: API Token Fonnte belum dikonfigurasi di dashboard!", "error");
@@ -1955,7 +2096,7 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
           }
         })
         .catch(err => {
-          console.error("Gagal mengirim WA untuk " + username, err);
+          console.error("Gagal mengirim WA: " + username, err);
         });
 
         requestPromises.push(promise);
@@ -2001,7 +2142,6 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       document.getElementById('refundModal').classList.add('hidden');
     }
 
-    // Menyimpan Refund ke Firebase
     function submitFormRefund(e) {
       e.preventDefault();
       
@@ -2017,19 +2157,32 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       };
 
       showLoading(true);
-      getCollectionRef('refund').add(refundObj)
-        .then(() => {
-          showLoading(false);
-          showToast("Pengajuan refund Shopee berhasil disimpan!");
-          closeRefundModal();
-        })
-        .catch(err => {
-          showLoading(false);
-          showToast("Gagal mengajukan refund: " + err.message, "error");
-        });
+
+      if (isGasEnv) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            state.refund = res.refund || [];
+            showLoading(false);
+            showToast("Pengajuan refund Shopee sukses disimpan ke Google Sheets!");
+            closeRefundModal();
+            renderRefundShopee();
+          })
+          .withFailureHandler((err) => {
+            showLoading(false);
+            showToast("Gagal menyimpan data ke Sheets: " + err, "error");
+          })
+          .addRefundShopee(refundObj);
+      } else {
+        refundObj.id = "rf_" + new Date().getTime();
+        state.refund.push(refundObj);
+        saveAllLocalData();
+        showLoading(false);
+        showToast("Refund disimpan offline!");
+        closeRefundModal();
+        renderRefundShopee();
+      }
     }
 
-    // Edit table inline refund (Total refund dikunci untuk non-Admin)
     function handleRefundTableEdit(refundId, field, value) {
       const userRole = state.currentUser.role;
       const refundItem = state.refund.find(r => r.id === refundId);
@@ -2050,40 +2203,55 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
         }
       }
 
-      const updateData = {};
       if (field === 'nominalTransfer' || field === 'nominalCheckout' || field === 'totalRefund') {
-        updateData[field] = parseFloat(value) || 0;
+        refundItem[field] = parseFloat(value) || 0;
       } else {
-        updateData[field] = value;
+        refundItem[field] = value;
       }
 
-      getCollectionRef('refund').doc(refundId).update(updateData)
-        .then(() => {
-          // synced via snapshot
-        })
-        .catch(err => {
-          showToast("Gagal memperbarui refund: " + err.message, "error");
-          renderRefundShopee();
-        });
+      if (isGasEnv) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            state.refund = res.refund || [];
+          })
+          .withFailureHandler((err) => {
+            showToast("Gagal update data refund ke Sheets: " + err, "error");
+            renderRefundShopee();
+          })
+          .updateRefundInline(refundId, field, value);
+      } else {
+        saveAllLocalData();
+        renderRefundShopee();
+        showToast("Refund diperbarui offline!");
+      }
     }
 
-    // Menghapus Refund
     function deleteRefund(refundId) {
       showConfirm("Apakah Anda yakin ingin menghapus pengajuan refund Shopee ini?", () => {
         showLoading(true);
-        getCollectionRef('refund').doc(refundId).delete()
-          .then(() => {
-            showLoading(false);
-            showToast("Pengajuan refund berhasil dihapus!");
-          })
-          .catch(err => {
-            showLoading(false);
-            showToast("Gagal menghapus: " + err.message, "error");
-          });
+        if (isGasEnv) {
+          google.script.run
+            .withSuccessHandler((res) => {
+              state.refund = res.refund || [];
+              showLoading(false);
+              showToast("Refund berhasil dihapus dari Google Sheets!");
+              renderRefundShopee();
+            })
+            .withFailureHandler((err) => {
+              showLoading(false);
+              showToast("Gagal menghapus refund di Sheets: " + err, "error");
+            })
+            .deleteRefund(refundId);
+        } else {
+          state.refund = state.refund.filter(r => r.id !== refundId);
+          saveAllLocalData();
+          showLoading(false);
+          showToast("Dihapus offline!");
+          renderRefundShopee();
+        }
       });
     }
 
-    // Render Tabel Refund
     function renderRefundShopee() {
       const tbody = document.getElementById('refundTableBody');
       const searchQuery = document.getElementById('searchRefund').value.toLowerCase();
@@ -2254,17 +2422,31 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
     }
 
     function handleUserTableEdit(userId, field, value) {
-      const updateData = {};
-      updateData[field] = value;
+      const userIndex = state.users.findIndex(u => u.id === userId);
+      if (userIndex === -1) return;
 
-      getCollectionRef('users').doc(userId).update(updateData)
-        .then(() => {
-          // synced via snapshot
-        })
-        .catch(err => {
-          showToast("Gagal memperbarui pengguna: " + err.message, "error");
-          renderUserMgmt();
-        });
+      const userObj = { ...state.users[userIndex] };
+      userObj[field] = value;
+
+      if (isGasEnv) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            state.users = res.users || [];
+            populateUserDropdowns();
+            renderUserMgmt();
+          })
+          .withFailureHandler((err) => {
+            showToast("Gagal update user ke Sheets: " + err, "error");
+            renderUserMgmt();
+          })
+          .saveUser(userObj);
+      } else {
+        state.users[userIndex] = userObj;
+        saveAllLocalData();
+        populateUserDropdowns();
+        renderUserMgmt();
+        showToast("Kredensial disimpan offline!");
+      }
     }
 
     function openUserModal() {
@@ -2294,12 +2476,12 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       document.getElementById('userModal').classList.remove('hidden');
     }
 
-    // Submit user edit/baru ke Firebase
     function submitFormUser(e) {
       e.preventDefault();
       
       const id = document.getElementById('userModalId').value || "";
       const userObj = {
+        id: id,
         nama: document.getElementById('userModalNama').value.trim(),
         username: document.getElementById('userModalUsername').value.trim(),
         password: document.getElementById('userModalPassword').value,
@@ -2310,17 +2492,36 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
 
       showLoading(true);
 
-      const userRef = id ? getCollectionRef('users').doc(id) : getCollectionRef('users').doc();
-      userRef.set(userObj)
-        .then(() => {
-          showLoading(false);
-          showToast("Data akun berhasil disimpan di Firebase!");
-          closeUserModal();
-        })
-        .catch(err => {
-          showLoading(false);
-          showToast("Gagal menyimpan akun: " + err.message, "error");
-        });
+      if (isGasEnv) {
+        google.script.run
+          .withSuccessHandler((res) => {
+            state.users = res.users || [];
+            showLoading(false);
+            showToast("Sukses menyimpan akun baru ke Google Sheets!");
+            closeUserModal();
+            populateUserDropdowns();
+            renderUserMgmt();
+          })
+          .withFailureHandler((err) => {
+            showLoading(false);
+            showToast("Gagal menyimpan akun: " + err, "error");
+          })
+          .saveUser(userObj);
+      } else {
+        if (userObj.id) {
+          const idx = state.users.findIndex(u => u.id === userObj.id);
+          state.users[idx] = userObj;
+        } else {
+          userObj.id = "u_" + new Date().getTime();
+          state.users.push(userObj);
+        }
+        saveAllLocalData();
+        showLoading(false);
+        showToast("Tersimpan offline!");
+        closeUserModal();
+        populateUserDropdowns();
+        renderUserMgmt();
+      }
     }
   </script>
 </body>
