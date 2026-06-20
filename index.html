@@ -16,6 +16,11 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
 
+  <!-- Firebase Legacy/Compat SDKs untuk Single-File Integration -->
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore-compat.js"></script>
+
   <style>
     body {
       font-family: 'Quicksand', sans-serif;
@@ -57,7 +62,6 @@
 
   <!-- Halaman Login -->
   <div id="loginPage" class="min-h-screen flex items-center justify-center p-4">
-    <!-- REVISI: Border kuning pastel diganti lebih halus (tidak terlalu bold) -->
     <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl border-4 border-[#ffcb5e] relative">
       <div class="text-center mb-6">
         <img src="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg" alt="Logo Bonin Store" class="w-24 h-24 mx-auto rounded-full border-4 border-[#d45575] shadow-lg mb-3">
@@ -128,7 +132,7 @@
       </button>
     </header>
 
-    <!-- Navigasi Mengambang / Sidebar Drawer (REVISI: Sekarang keluar dari sebelah KIRI) -->
+    <!-- Navigasi Mengambang / Sidebar Drawer (Meluncur dari KIRI) -->
     <div id="sideMenu" class="fixed inset-y-0 left-0 w-72 bg-white/95 backdrop-blur-lg shadow-2xl z-40 transform -translate-x-full transition-transform duration-300 ease-in-out border-r-4 border-[#b1b0d8] flex flex-col justify-between">
       <div>
         <div class="p-6 border-b border-gray-100 flex items-center justify-between">
@@ -189,7 +193,7 @@
       </div>
     </div>
 
-    <!-- Konten Utama Dinamis (REVISI: Dioptimasi responsif & pas di mobile view) -->
+    <!-- Konten Utama Dinamis (Dioptimasi responsif & pas di mobile view) -->
     <main class="flex-1 p-3 sm:p-4 md:p-6 max-w-7xl w-full mx-auto space-y-4 sm:space-y-6">
 
       <!-- ================= SEKSI DASHBOARD ================= -->
@@ -214,7 +218,7 @@
           </div>
         </div>
 
-        <!-- Kartu Statistik Singkat (REVISI: Sesuai role dan layout grid aman di layar kecil) -->
+        <!-- Kartu Statistik Singkat -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-md border-b-4 border-[#d45575] text-center">
             <span class="text-[10px] sm:text-xs text-gray-500 font-semibold block">Total Resi Masuk</span>
@@ -317,7 +321,7 @@
               <textarea id="resiDetail" required rows="4" class="w-full px-4 py-2.5 sm:py-3 rounded-2xl border-2 border-gray-100 focus:border-[#d45575] outline-none text-xs sm:text-sm transition" placeholder="Tulis rincian barang: Kuantitas, Tipe, Catatan khusus..."></textarea>
             </div>
 
-            <!-- Khusus Admin: Bisa menentukan pemilik resi & Tanggal secara custom -->
+            <!-- Khusus Admin -->
             <div id="adminFormResiAdditions" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 bg-gray-50 p-4 rounded-2xl">
               <div>
                 <label class="block text-[10px] font-bold text-gray-500 mb-1">Pemilik Barang</label>
@@ -352,7 +356,7 @@
           <button onclick="setCountryDaftar('Thailand')" id="tabDaftarThailand" class="flex-1 py-2 rounded-xl text-[11px] font-bold transition-all duration-200 whitespace-nowrap px-3">Thailand</button>
         </div>
 
-        <!-- Kontrol Atas / Pencarian -->
+        <!-- Kontrol Atas -->
         <div class="bg-white p-3 sm:p-4 rounded-2xl shadow-md flex flex-col md:flex-row md:items-center justify-between gap-3 border-2 border-[#b1b0d8]">
           <div class="relative flex-1">
             <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400"></i>
@@ -503,6 +507,21 @@
       </section>
 
     </main>
+  </div>
+
+  <!-- Custom Confirmation Modal (Mengganti Native Browser Confirm agar 100% Aman di iFrame) -->
+  <div id="confirmModal" class="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4 hidden">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border-4 border-red-400 text-center space-y-4">
+      <div class="text-red-500 flex justify-center">
+        <i data-lucide="alert-triangle" class="w-12 h-12"></i>
+      </div>
+      <h3 class="font-bold text-lg text-gray-800" id="confirmModalTitle">Apakah Anda Yakin?</h3>
+      <p class="text-xs text-gray-500" id="confirmModalText">Tindakan ini tidak dapat dibatalkan.</p>
+      <div class="flex gap-3">
+        <button id="confirmCancelBtn" onclick="closeConfirmModal()" class="flex-1 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-xs transition">Batal</button>
+        <button id="confirmYesBtn" class="flex-1 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold text-xs transition">Ya, Lanjutkan</button>
+      </div>
+    </div>
   </div>
 
   <!-- Modal Edit/Tambah User -->
@@ -661,7 +680,7 @@
         </div>
 
         <div class="grid grid-cols-2 gap-3">
-          <!-- Status Done Refund dibungkus agar dapat disembunyikan bagi user biasa -->
+          <!-- Status Done Refund -->
           <div id="refundStatusDoneContainer">
             <label class="block text-[10px] sm:text-xs font-bold text-gray-600 mb-1">Done Refund (Status)</label>
             <select id="refundStatusDone" class="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs sm:text-sm bg-white outline-none">
@@ -690,12 +709,26 @@
   </div>
 
 
-  <!-- ================= LOGIC JAVASCRIPT APLIKASI ================= -->
+  <!-- ================= LOGIC JAVASCRIPT & INTEGRASI FIREBASE ================= -->
   <script>
-    // Penanganan fallback lokal jika dicoba di luar Google Apps Script
-    const isGasEnv = typeof google !== 'undefined' && google.script && google.script.run;
-    
-    // State lokal aplikasi
+    // ================= CONFIG & KONFIGURASI PENGGUNA =================
+    // GANTI OBJEK DI BAWAH INI DENGAN DATA DARI FIREBASE CONSOLE ANDA:
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+      apiKey: "", // Masukkan API Key Anda di sini
+      authDomain: "warehouse-bonin.firebaseapp.com",
+      projectId: "warehouse-bonin",
+      storageBucket: "warehouse-bonin.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:12345:web:abc"
+    };
+
+    // Inisialisasi Firebase Compat SDK
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+    const appId = typeof __app_id !== 'undefined' ? __app_id : 'bonin-store-default';
+
+    // State Lokal Real-time yang di-sinkronkan otomatis oleh Firestore
     let state = {
       currentUser: null,
       users: [],
@@ -707,78 +740,168 @@
       selectedCountryInvoice: 'Semua'  
     };
 
-    // Percobaan login admin untuk deteksi auto reset sandi
     let adminLoginAttempts = 0;
 
-    // Saat Web Pertama Kali Dimuat
+    // Helper Referensi Koleksi Berdasarkan RULE 1
+    const getCollectionRef = (name) => db.collection('artifacts').doc(appId).collection('public').doc('data').collection(name);
+
+    // Saat Aplikasi Dimuat
     window.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
       
-      // Load Remembered Credentials
+      // Mengingat data login (jika diaktifkan)
       if (localStorage.getItem('bonin_remember') === 'true') {
         document.getElementById('loginUsername').value = localStorage.getItem('bonin_username') || '';
         document.getElementById('loginPassword').value = localStorage.getItem('bonin_password') || '';
         document.getElementById('loginRememberMe').checked = true;
       }
       
-      fetchMasterData();
+      // Jalankan Otentikasi dan Aktifkan Sinkronisasi Data Firestore (RULE 3)
+      initAuthAndListen();
     });
 
-    // Ambil Data Master
-    function fetchMasterData() {
+    // Melakukan Otentikasi Terlebih Dahulu Sebelum Melakukan Query ke Firestore (RULE 3)
+    async function initAuthAndListen() {
       showLoading(true);
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.users = res.users;
-            state.barang = res.barang;
-            state.invoice = res.invoice;
-            state.refund = res.refund || []; 
-            state.fonnteToken = res.fonnteToken;
-            showLoading(false);
-          })
-          .withFailureHandler((err) => {
-            showToast('Gagal memuat data dari server GAS', 'error');
-            showLoading(false);
-          })
-          .getMasterData();
-      } else {
-        // Mode Mocking untuk development standalone
-        console.warn('Menjalankan dalam mode demo tanpa server Google Apps Script.');
-        setTimeout(() => {
-          state.users = [
-            { id: "u1", nama: "Super Admin", username: "admin", password: "123", role: "Admin", status: "Aktif", noHp: "08123456789" },
-            { id: "u2", nama: "Staff Logistik", username: "admin2", password: "123", role: "Admin 2", status: "Aktif", noHp: "08987654321" },
-            { id: "u3", nama: "Budi Santoso", username: "budi", password: "123", role: "Pengguna", status: "Aktif", noHp: "08554433221" },
-            { id: "u4", nama: "Siti Rahma", username: "siti", password: "123", role: "Pengguna", status: "Aktif", noHp: "08112233445" }
-          ];
-          state.barang = [
-            { id: "b1", noResi: "RESI-KR-001", detailBarang: "Album K-Pop & Photocard Set Premium", negaraTujuan: "Korea", tanggalUpdate: "2026-06-20", foto1: "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?auto=format&fit=crop&w=300&q=80", foto2: "", shippingBatch: "BATCH-KR-01", pemilik: "budi" },
-            { id: "b2", noResi: "RESI-CN-002", detailBarang: "Jaket Kulit Winter Edition XL", negaraTujuan: "China", tanggalUpdate: "2026-06-19", foto1: "", foto2: "", shippingBatch: "BATCH-CN-01", pemilik: "budi" },
-            { id: "b3", noResi: "RESI-TH-003", detailBarang: "Snack Thai Tea Pack Original 20 Pcs", negaraTujuan: "Thailand", tanggalUpdate: "2026-06-18", foto1: "", foto2: "", shippingBatch: "BATCH-TH-01", pemilik: "siti" }
-          ];
-          state.invoice = [
-            { id: "i1", noResi: "RESI-KR-001", detailBarang: "Album K-Pop & Photocard Set Premium", shippingBatch: "BATCH-KR-01", qty: 2.5, rateSharing: 150000, feeWh: 25000, pemilik: "budi" },
-            { id: "i2", noResi: "RESI-CN-002", detailBarang: "Jaket Kulit Winter Edition XL", shippingBatch: "BATCH-CN-01", qty: 1.2, rateSharing: 120000, feeWh: 15000, pemilik: "budi" },
-            { id: "i3", noResi: "RESI-TH-003", detailBarang: "Snack Thai Tea Pack Original 20 Pcs", shippingBatch: "BATCH-TH-01", qty: 4, rateSharing: 50000, feeWh: 10000, pemilik: "siti" }
-          ];
-          state.refund = [
-            { id: "rf1", pemilik: "budi", shippingBatch: "BATCH-KR-01", noOrderShopee: "240612SHP001", nominalTransfer: 200000, nominalCheckout: 180000, totalRefund: 20000, statusDone: "Done", note: "Refund selisih diskon live" },
-            { id: "rf2", pemilik: "siti", shippingBatch: "BATCH-CN-01", noOrderShopee: "240615SHP002", nominalTransfer: 350000, nominalCheckout: 320000, totalRefund: 30000, statusDone: "Pending", note: "Menunggu transfer balik Shopee" }
-          ];
-          state.fonnteToken = '';
-          showLoading(false);
-        }, 800);
+      try {
+        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+          await auth.signInWithCustomToken(__initial_auth_token);
+        } else {
+          await auth.signInAnonymously();
+        }
+      } catch (e) {
+        console.error("Firebase Authentication Failed: ", e);
+        showToast("Masuk sebagai tamu gagal, menggunakan mode offline.", "error");
+        showLoading(false);
       }
+
+      // Listener Status Otentikasi
+      auth.onAuthStateChanged((user) => {
+        if (user) {
+          // Koneksi Berhasil -> Hubungkan Listener Firestore Realtime secara Instan!
+          setupFirestoreRealtimeListeners(user);
+        } else {
+          showLoading(false);
+        }
+      });
     }
 
-    // Toggle menu navigasi mengambang (REVISI: Transisi arah KIRI)
+    // Mengaktifkan Sync Data Realtime dari Firebase (RULE 2 - sorting & filter manual di memori JS)
+    function setupFirestoreRealtimeListeners(user) {
+      // 1. Sinkronisasi Config (Fonnte Token)
+      getCollectionRef('config').doc('fonnte').onSnapshot((doc) => {
+        if (doc.exists) {
+          state.fonnteToken = doc.data().token || '';
+          const input = document.getElementById('fonnteTokenInput');
+          if (input) input.value = state.fonnteToken;
+        }
+      }, (err) => console.error("Config fetch error:", err));
+
+      // 2. Sinkronisasi Data Users
+      getCollectionRef('users').onSnapshot((snapshot) => {
+        const list = [];
+        snapshot.forEach(doc => {
+          list.push({ id: doc.id, ...doc.data() });
+        });
+        state.users = list;
+
+        // Auto-seed data akun jika database masih kosong pertama kali
+        if (list.length === 0) {
+          seedDefaultUsers();
+          return;
+        }
+
+        populateUserDropdowns();
+        if (state.currentUser) {
+          renderUserMgmt();
+        }
+      }, (err) => console.error("Sync Users Error:", err));
+
+      // 3. Sinkronisasi Data Barang Logistik
+      getCollectionRef('barang').onSnapshot((snapshot) => {
+        const list = [];
+        snapshot.forEach(doc => {
+          list.push({ id: doc.id, ...doc.data() });
+        });
+        state.barang = list;
+        
+        // Auto Update Dashboard & Tampilan jika sedang masuk
+        if (state.currentUser) {
+          updateDashboardStats();
+          renderNotifications();
+          renderDaftarBarang();
+        }
+      }, (err) => console.error("Sync Barang Error:", err));
+
+      // 4. Sinkronisasi Data Invoice
+      getCollectionRef('invoice').onSnapshot((snapshot) => {
+        const list = [];
+        snapshot.forEach(doc => {
+          list.push({ id: doc.id, ...doc.data() });
+        });
+        state.invoice = list;
+        
+        if (state.currentUser) {
+          renderInvoice();
+        }
+      }, (err) => console.error("Sync Invoice Error:", err));
+
+      // 5. Sinkronisasi Data Refund Shopee
+      getCollectionRef('refund').onSnapshot((snapshot) => {
+        const list = [];
+        snapshot.forEach(doc => {
+          list.push({ id: doc.id, ...doc.data() });
+        });
+        state.refund = list;
+        
+        if (state.currentUser) {
+          renderRefundShopee();
+        }
+        showLoading(false);
+      }, (err) => {
+        console.error("Sync Refund Error:", err);
+        showLoading(false);
+      });
+    }
+
+    // Seeding Default Akun (Khusus database kosong)
+    function seedDefaultUsers() {
+      const defaults = [
+        { nama: "Super Admin", username: "admin", password: "123", role: "Admin", status: "Aktif", noHp: "08123456789" },
+        { nama: "Staff Logistik", username: "admin2", password: "123", role: "Admin 2", status: "Aktif", noHp: "08987654321" },
+        { nama: "Budi Santoso", username: "budi", password: "123", role: "Pengguna", status: "Aktif", noHp: "08554433221" },
+        { nama: "Siti Rahma", username: "siti", password: "123", role: "Pengguna", status: "Aktif", noHp: "08112233445" }
+      ];
+      defaults.forEach(u => {
+        getCollectionRef('users').add(u);
+      });
+    }
+
+    // Toggle Menu Navigasi
     function toggleMenu() {
       const sideMenu = document.getElementById('sideMenu');
       sideMenu.classList.toggle('-translate-x-full');
     }
 
-    // Loading overlay helper
+    // Custom Modal Confirmation Helper (Pengganti Native Browser Confirm)
+    let confirmCallback = null;
+    function showConfirm(text, callback) {
+      document.getElementById('confirmModalText').innerText = text;
+      confirmCallback = callback;
+      document.getElementById('confirmModal').classList.remove('hidden');
+      document.getElementById('confirmYesBtn').onclick = () => {
+        if (confirmCallback) confirmCallback();
+        closeConfirmModal();
+      };
+      lucide.createIcons();
+    }
+    
+    function closeConfirmModal() {
+      document.getElementById('confirmModal').classList.add('hidden');
+      confirmCallback = null;
+    }
+
+    // Loader Helper
     function showLoading(show) {
       const loader = document.getElementById('loadingOverlay');
       if (show) {
@@ -788,29 +911,7 @@
       }
     }
 
-    // Custom Toast Notification Helper
-    function showToast(message, type = 'success') {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toastMessage');
-      const toastIcon = document.getElementById('toastIcon');
-      
-      toastMsg.innerText = message;
-      
-      if (type === 'success') {
-        toast.className = "fixed bottom-4 right-4 z-50 bg-[#d45575] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-3 text-xs sm:text-sm font-semibold border-2 border-[#fff4e1] transform translate-y-0 opacity-100 transition-all duration-300";
-        toastIcon.innerHTML = `<i data-lucide="check-circle-2" class="w-5 h-5"></i>`;
-      } else {
-        toast.className = "fixed bottom-4 right-4 z-50 bg-red-500 text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-3 text-xs sm:text-sm font-semibold border-2 border-red-200 transform translate-y-0 opacity-100 transition-all duration-300";
-        toastIcon.innerHTML = `<i data-lucide="alert-triangle" class="w-5 h-5"></i>`;
-      }
-      lucide.createIcons();
-
-      setTimeout(() => {
-        toast.classList.add('opacity-0', 'translate-y-20');
-      }, 3500);
-    }
-
-    // Penanganan Login (Auto reset password Admin jika salah 3x)
+    // Penanganan Login
     function handleLogin(event) {
       event.preventDefault();
       const user = document.getElementById('loginUsername').value.trim();
@@ -818,204 +919,60 @@
       const rememberMe = document.getElementById('loginRememberMe').checked;
       const errorDiv = document.getElementById('loginError');
 
-      showLoading(true);
       errorDiv.classList.add('hidden');
 
-      // Cek apakah login sebagai Admin
-      const isAdminUser = (user.toLowerCase() === 'admin');
+      const match = state.users.find(u => u.username.toLowerCase() === user.toLowerCase());
+      
+      if (match) {
+        if (match.status !== "Aktif") {
+          errorDiv.innerText = "Akun Anda berstatus Nonaktif.";
+          errorDiv.classList.remove('hidden');
+          return;
+        }
 
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            showLoading(false);
-            if (res.success) {
-              adminLoginAttempts = 0; // reset
-              setupAplikasiSesuaiRole(res.user);
-            } else {
-              if (isAdminUser) {
-                adminLoginAttempts++;
-                if (adminLoginAttempts >= 3) {
-                  // Trigger reset password admin ke "123" di database
-                  google.script.run
-                    .withSuccessHandler((resetRes) => {
-                      adminLoginAttempts = 0;
-                      errorDiv.innerHTML = "⚠️ <strong>Password Admin salah 3x!</strong> Sandi otomatis di-reset menjadi: <strong>123</strong> demi keamanan. Silakan coba masuk kembali.";
-                      errorDiv.classList.remove('hidden');
-                    })
-                    .resetAdminPassword();
-                  return;
-                }
-              }
-              errorDiv.innerText = res.message + (isAdminUser ? ` (Percobaan salah: ${adminLoginAttempts}/3)` : '');
-              errorDiv.classList.remove('hidden');
-            }
-          })
-          .withFailureHandler(() => {
-            showLoading(false);
-            errorDiv.innerText = "Koneksi ke Google Server terputus.";
-            errorDiv.classList.remove('hidden');
-          })
-          .loginUser(user, pass);
-      } else {
-        // Demo Auth Offline
-        showLoading(false);
-        const match = state.users.find(u => u.username.toLowerCase() === user.toLowerCase());
-        
-        if (match) {
-          if (match.status !== "Aktif") {
-            errorDiv.innerText = "Akun nonaktif.";
-            errorDiv.classList.remove('hidden');
-            return;
-          }
-
-          if (match.password === pass) {
-            adminLoginAttempts = 0;
-            // Simpan kredensial jika diaktifkan
-            if (rememberMe) {
-              localStorage.setItem('bonin_username', user);
-              localStorage.setItem('bonin_password', pass);
-              localStorage.setItem('bonin_remember', 'true');
-            } else {
-              localStorage.removeItem('bonin_username');
-              localStorage.removeItem('bonin_password');
-              localStorage.removeItem('bonin_remember');
-            }
-            setupAplikasiSesuaiRole(match);
+        if (match.password === pass) {
+          adminLoginAttempts = 0;
+          if (rememberMe) {
+            localStorage.setItem('bonin_username', user);
+            localStorage.setItem('bonin_password', pass);
+            localStorage.setItem('bonin_remember', 'true');
           } else {
-            // Password Salah
-            if (match.role === 'Admin' || match.username === 'admin') {
-              adminLoginAttempts++;
-              if (adminLoginAttempts >= 3) {
-                match.password = "123"; // Auto reset password ke 123
-                adminLoginAttempts = 0;
-                errorDiv.innerHTML = "⚠️ <strong>Password Admin salah 3x!</strong> Sandi otomatis di-reset menjadi: <strong>123</strong> demi keamanan. Silakan coba masuk kembali.";
-                errorDiv.classList.remove('hidden');
-                return;
-              }
-            }
-            errorDiv.innerText = `Sandi salah. (Percobaan: ${adminLoginAttempts}/3)`;
-            errorDiv.classList.remove('hidden');
+            localStorage.removeItem('bonin_username');
+            localStorage.removeItem('bonin_password');
+            localStorage.removeItem('bonin_remember');
           }
+          setupAplikasiSesuaiRole(match);
         } else {
-          errorDiv.innerText = "Username tidak terdaftar.";
+          // Password Salah
+          if (match.role === 'Admin' || match.username === 'admin') {
+            adminLoginAttempts++;
+            if (adminLoginAttempts >= 3) {
+              // Reset Password Admin otomatis di database Firebase ke "123"
+              getCollectionRef('users').doc(match.id).update({ password: "123" })
+                .then(() => {
+                  adminLoginAttempts = 0;
+                  errorDiv.innerHTML = "⚠️ <strong>Sandi Admin salah 3 kali!</strong> Sandi otomatis di-reset ke: <strong>123</strong> demi keamanan. Silakan coba kembali.";
+                  errorDiv.classList.remove('hidden');
+                });
+              return;
+            }
+          }
+          errorDiv.innerText = `Sandi salah. (Percobaan: ${adminLoginAttempts}/3)`;
           errorDiv.classList.remove('hidden');
         }
-      }
-    }
-
-    // Persiapan Menu & Akses Berdasarkan Role
-    function setupAplikasiSesuaiRole(userObj) {
-      state.currentUser = userObj;
-      document.getElementById('loginPage').classList.add('hidden');
-      document.getElementById('mainApp').classList.remove('hidden');
-      
-      document.getElementById('userNameLabel').innerText = userObj.nama;
-      document.getElementById('badgeUserRole').innerText = userObj.role;
-
-      // Sapaan sesuai nama user masing-masing pada bubble dashboard
-      document.getElementById('welcomeGreeting').innerText = `Selamat Datang di Warehouse, Kak ${userObj.nama}! 👋`;
-
-      // Reset visibilitas menu sidebar
-      document.getElementById('btnMenuFormResi').classList.remove('hidden');
-      document.getElementById('btnMenuInvoice').classList.remove('hidden');
-      document.getElementById('btnMenuUserMgmt').classList.remove('hidden');
-      document.getElementById('fonnteConfigCard').classList.add('hidden');
-      document.getElementById('adminFormResiAdditions').classList.add('hidden');
-
-      // Proteksi menu dashboard navigasi cepat
-      document.getElementById('quickFormResi').classList.remove('hidden');
-      document.getElementById('quickDaftarBarang').classList.remove('hidden');
-      document.getElementById('quickInvoice').classList.remove('hidden');
-      document.getElementById('quickUserMgmt').classList.remove('hidden');
-
-      // Pembatasan ketat Tambah Invoice Manual (Hanya ADMIN yang bisa akses)
-      if (userObj.role === 'Admin') {
-        document.getElementById('btnTambahInvoiceManual').classList.remove('hidden');
-        document.getElementById('fonnteConfigCard').classList.remove('hidden');
-        document.getElementById('fonnteTokenInput').value = state.fonnteToken;
-        document.getElementById('adminFormResiAdditions').classList.remove('hidden');
-        populateUserDropdowns();
       } else {
-        document.getElementById('btnTambahInvoiceManual').classList.add('hidden');
-        if (userObj.role === 'Admin 2') {
-          // Hanya bisa akses Daftar Barang & Refund Shopee (akses input & update data non-total refund)
-          document.getElementById('btnMenuFormResi').classList.add('hidden');
-          document.getElementById('btnMenuInvoice').classList.add('hidden');
-          document.getElementById('btnMenuUserMgmt').classList.add('hidden');
-          
-          document.getElementById('quickFormResi').classList.add('hidden');
-          document.getElementById('quickInvoice').classList.add('hidden');
-          document.getElementById('quickUserMgmt').classList.add('hidden');
-        } else {
-          // Pengguna / User Biasa
-          document.getElementById('btnMenuUserMgmt').classList.add('hidden');
-          document.getElementById('quickUserMgmt').classList.add('hidden');
-        }
-      }
-
-      // Atur tab agar render pertama kali tersorot dengan benar
-      updateTabStyles();
-
-      // Update Statistik & Notifikasi di Dashboard
-      updateDashboardStats();
-      renderNotifications();
-
-      // Buka Dashboard Sebagai Layar Utama
-      if (userObj.role === 'Admin 2') {
-        changeMenu('daftarBarang');
-      } else {
-        changeMenu('dashboard');
+        errorDiv.innerText = "Username tidak terdaftar.";
+        errorDiv.classList.remove('hidden');
       }
     }
 
-    // Update Visual Tab Menu Negara yang Aktif
-    function updateTabStyles() {
-      const listNegara = ['Semua', 'Korea', 'China', 'Thailand'];
-      listNegara.forEach(c => {
-        // Tab pada Daftar Barang
-        const btnDaftar = document.getElementById(`tabDaftar${c}`);
-        if (btnDaftar) {
-          if (state.selectedCountryDaftar === c) {
-            btnDaftar.className = "flex-1 py-2 rounded-xl text-xs font-bold bg-[#d45575] text-white transition-all duration-200 shadow-sm whitespace-nowrap px-3";
-          } else {
-            btnDaftar.className = "flex-1 py-2 rounded-xl text-xs font-bold text-gray-500 hover:text-[#d45575] hover:bg-[#fff4e1]/40 transition-all duration-200 whitespace-nowrap px-3";
-          }
-        }
-
-        // Tab pada Invoice
-        const btnInvoice = document.getElementById(`tabInvoice${c}`);
-        if (btnInvoice) {
-          if (state.selectedCountryInvoice === c) {
-            btnInvoice.className = "flex-1 py-2 rounded-xl text-xs font-bold bg-[#d45575] text-white transition-all duration-200 shadow-sm whitespace-nowrap px-3";
-          } else {
-            btnInvoice.className = "flex-1 py-2 rounded-xl text-xs font-bold text-gray-500 hover:text-[#d45575] hover:bg-[#fff4e1]/40 transition-all duration-200 whitespace-nowrap px-3";
-          }
-        }
-      });
-    }
-
-    // Set Menu Negara terpilih pada daftar barang
-    function setCountryDaftar(country) {
-      state.selectedCountryDaftar = country;
-      updateTabStyles();
-      renderDaftarBarang();
-    }
-
-    // Set Menu Negara terpilih pada Invoice
-    function setCountryInvoice(country) {
-      state.selectedCountryInvoice = country;
-      updateTabStyles();
-      renderInvoice();
-    }
-
-    // Logout
+    // Log Keluar
     function handleLogout() {
       state.currentUser = null;
       document.getElementById('mainApp').classList.add('hidden');
       document.getElementById('loginPage').classList.remove('hidden');
       document.getElementById('formLogin').reset();
       
-      // Auto fill kembali jika "ingat saya" aktif
       if (localStorage.getItem('bonin_remember') === 'true') {
         document.getElementById('loginUsername').value = localStorage.getItem('bonin_username') || '';
         document.getElementById('loginPassword').value = localStorage.getItem('bonin_password') || '';
@@ -1026,12 +983,11 @@
 
       document.getElementById('loginError').classList.add('hidden');
       const sideMenu = document.getElementById('sideMenu');
-      sideMenu.classList.add('-translate-x-full'); // REVISI: Slide kembali ke KIRI
+      sideMenu.classList.add('-translate-x-full');
     }
 
-    // Switch Menu Utama Aplikasi
+    // Pindah Menu Panel
     function changeMenu(menuKey) {
-      // Sembunyikan semua seksi
       document.getElementById('secDashboard').classList.add('hidden');
       document.getElementById('secFormResi').classList.add('hidden');
       document.getElementById('secDaftarBarang').classList.add('hidden');
@@ -1039,7 +995,6 @@
       document.getElementById('secRefundShopee').classList.add('hidden'); 
       document.getElementById('secUserMgmt').classList.add('hidden');
 
-      // Tampilkan seksi yang dipilih
       if (menuKey === 'dashboard') {
         updateDashboardStats();
         renderNotifications();
@@ -1060,12 +1015,11 @@
         document.getElementById('secUserMgmt').classList.remove('hidden');
       }
 
-      // Tutup drawer menu (REVISI: Arah KIRI)
       const sideMenu = document.getElementById('sideMenu');
       sideMenu.classList.add('-translate-x-full');
     }
 
-    // Populasi Dropdown Pemilik di Form & Modal Datalist
+    // Mengisi data dropdown pemilik
     function populateUserDropdowns() {
       const dropdownForm = document.getElementById('resiPemilikCustom');
       const dropdownRefund = document.getElementById('refundPemilik');
@@ -1080,34 +1034,27 @@
         .map(u => `<option value="${u.username}">${u.nama} @${u.username}</option>`)
         .join('');
 
-      if (dropdownForm) {
-        dropdownForm.innerHTML = selectOptions;
-      }
-      if (dropdownRefund) {
-        dropdownRefund.innerHTML = selectOptions;
-      }
-      if (datalistModal) {
-        datalistModal.innerHTML = datalistOptions;
-      }
+      if (dropdownForm) dropdownForm.innerHTML = selectOptions;
+      if (dropdownRefund) dropdownRefund.innerHTML = selectOptions;
+      if (datalistModal) datalistModal.innerHTML = datalistOptions;
     }
 
-    // Generate List User HTML Dropdown untuk Table Cell
+    // Opsi user di baris tabel
     function getUserOptionsHtml(selectedUsername) {
       return state.users
         .map(u => `<option value="${u.username}" ${u.username === selectedUsername ? 'selected' : ''}>${u.nama} (@${u.username})</option>`)
         .join('');
     }
 
-    // Mencari negara berdasarkan resi barang
+    // Ambil asal negara resi
     function getCountryForResi(noResi) {
       const match = state.barang.find(b => b.noResi === noResi);
       return match ? match.negaraTujuan : "Korea"; 
     }
 
-    // Hitung Dashboard Stats
+    // Dashboard Stats update
     function updateDashboardStats() {
       let filteredBarang = state.barang;
-      
       if (state.currentUser.role === 'Pengguna') {
         filteredBarang = state.barang.filter(b => b.pemilik === state.currentUser.username);
       }
@@ -1118,7 +1065,7 @@
       document.getElementById('statThailand').innerText = filteredBarang.filter(b => b.negaraTujuan === 'Thailand').length; 
     }
 
-    // Mengisi Kolom Notifikasi Foto Update untuk Resi milik User
+    // Render Widget Notifikasi Update Foto Gudang
     function renderNotifications() {
       const container = document.getElementById('notificationList');
       if (!container) return;
@@ -1164,26 +1111,22 @@
       }
     }
 
-    // Save Fonnte Token (Khusus Admin)
+    // Menyimpan Token Fonnte ke Firebase
     function saveFonnteToken() {
       const val = document.getElementById('fonnteTokenInput').value.trim();
       showLoading(true);
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.fonnteToken = val;
-            showLoading(false);
-            showToast(res.message);
-          })
-          .saveFonnteToken(val);
-      } else {
-        state.fonnteToken = val;
-        showLoading(false);
-        showToast("Token disimpan di Memory Lokal!", "success");
-      }
+      getCollectionRef('config').doc('fonnte').set({ token: val })
+        .then(() => {
+          showLoading(false);
+          showToast("Token API Fonnte berhasil disimpan di Firebase!");
+        })
+        .catch(err => {
+          showLoading(false);
+          showToast("Gagal menyimpan token: " + err.message, "error");
+        });
     }
 
-    // Input Resi Baru
+    // Kirim input resi barang baru ke Firebase (dan auto create draf invoice)
     function submitFormResi(e) {
       e.preventDefault();
       const noResi = document.getElementById('resiNomer').value.trim();
@@ -1206,58 +1149,45 @@
         detailBarang: detail,
         negaraTujuan: negara,
         tanggalUpdate: tanggal,
+        pemilik: pemilik,
+        foto1: "",
+        foto2: "",
+        shippingBatch: defaultBatch
+      };
+
+      const invoiceObj = {
+        noResi: noResi,
+        detailBarang: detail,
+        shippingBatch: defaultBatch,
+        qty: 0,
+        rateSharing: 0,
+        feeWh: 0,
         pemilik: pemilik
       };
 
       showLoading(true);
 
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.barang = res.barang;
-            state.invoice = res.invoice;
-            showLoading(false);
-            showToast("Resi sukses ditambahkan ke warehouse!");
-            document.getElementById('formInputResi').reset();
-            setCountryDaftar(negara);
-            changeMenu('daftarBarang');
-          })
-          .withFailureHandler(() => {
-            showLoading(false);
-            showToast("Gagal menyimpan data ke Google Apps Script.", "error");
-          })
-          .addResiBarang(resiObj);
-      } else {
-        const newB = {
-          id: "b_" + new Date().getTime(),
-          ...resiObj,
-          foto1: "",
-          foto2: "",
-          shippingBatch: defaultBatch
-        };
-        state.barang.push(newB);
+      const batch = db.batch();
+      const barangRef = getCollectionRef('barang').doc();
+      const invoiceRef = getCollectionRef('invoice').doc();
+      batch.set(barangRef, resiObj);
+      batch.set(invoiceRef, invoiceObj);
 
-        const newI = {
-          id: "i_" + new Date().getTime(),
-          noResi: noResi,
-          detailBarang: detail,
-          shippingBatch: defaultBatch,
-          qty: 0,
-          rateSharing: 0,
-          feeWh: 0,
-          pemilik: pemilik
-        };
-        state.invoice.push(newI);
-
-        showLoading(false);
-        showToast("Draf Resi sukses ditambahkan ke Memory Lokal!");
-        document.getElementById('formInputResi').reset();
-        setCountryDaftar(negara);
-        changeMenu('daftarBarang');
-      }
+      batch.commit()
+        .then(() => {
+          showLoading(false);
+          showToast("Data Resi & draf Invoice sukses tersimpan ke Firebase!");
+          document.getElementById('formInputResi').reset();
+          setCountryDaftar(negara);
+          changeMenu('daftarBarang');
+        })
+        .catch(err => {
+          showLoading(false);
+          showToast("Gagal menyimpan resi: " + err.message, "error");
+        });
     }
 
-    // Mengambil Image & Mengubahnya ke Base64
+    // Unggah Foto update barang ke Firebase Firestore
     function handlePhotoUpload(barangId, photoField, inputEl) {
       const file = inputEl.files[0];
       if (!file) return;
@@ -1266,27 +1196,18 @@
       const reader = new FileReader();
       reader.onload = function(e) {
         const base64Data = e.target.result;
-        
-        if (isGasEnv) {
-          google.script.run
-            .withSuccessHandler((res) => {
-              state.barang = res.barang;
-              showLoading(false);
-              showToast("Foto berhasil diperbarui!");
-              renderDaftarBarang();
-              renderNotifications();
-            })
-            .updateBarangFoto(barangId, photoField, base64Data);
-        } else {
-          const index = state.barang.findIndex(b => b.id === barangId);
-          if (index > -1) {
-            state.barang[index][photoField] = base64Data;
-          }
-          showLoading(false);
-          showToast("Foto disimpan di Local Memory!");
-          renderDaftarBarang();
-          renderNotifications();
-        }
+        const updateData = {};
+        updateData[photoField] = base64Data;
+
+        getCollectionRef('barang').doc(barangId).update(updateData)
+          .then(() => {
+            showLoading(false);
+            showToast("Foto update barang berhasil diperbarui!");
+          })
+          .catch(err => {
+            showLoading(false);
+            showToast("Gagal mengunggah foto: " + err.message, "error");
+          });
       };
       reader.readAsDataURL(file);
     }
@@ -1308,30 +1229,7 @@
       document.body.removeChild(link);
     }
 
-    // ================= SINKRONISASI INSTAN & BI-DIRECTIONAL =================
-    function syncBarangToInvoiceLocal(oldResi, updatedBarang) {
-      state.invoice.forEach(inv => {
-        if (inv.noResi === oldResi) {
-          inv.noResi = updatedBarang.noResi;
-          inv.detailBarang = updatedBarang.detailBarang;
-          inv.pemilik = updatedBarang.pemilik;
-          inv.shippingBatch = updatedBarang.shippingBatch;
-        }
-      });
-    }
-
-    function syncInvoiceToBarangLocal(oldResi, updatedInvoice) {
-      state.barang.forEach(b => {
-        if (b.noResi === oldResi) {
-          b.noResi = updatedInvoice.noResi;
-          b.detailBarang = updatedInvoice.detailBarang;
-          b.pemilik = updatedInvoice.pemilik;
-          b.shippingBatch = updatedInvoice.shippingBatch;
-        }
-      });
-    }
-
-    // Handler edit pada Daftar Barang
+    // Handler edit pada Daftar Barang (Perubahan tersinkron dua arah ke Invoice secara otomatis!)
     function handleBarangEdit(barangId, field, value) {
       const userRole = state.currentUser.role;
       const barangObj = state.barang.find(b => b.id === barangId);
@@ -1353,26 +1251,33 @@
       }
 
       const oldResi = barangObj.noResi;
-      barangObj[field] = value;
-      
-      syncBarangToInvoiceLocal(oldResi, barangObj);
+      const updateData = {};
+      updateData[field] = value;
 
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.barang = res.barang;
-            state.invoice = res.invoice;
-            if (document.getElementById('secDaftarBarang').classList.contains('hidden') === false) renderDaftarBarang();
-            if (document.getElementById('secInvoice').classList.contains('hidden') === false) renderInvoice();
-          })
-          .updateBarangInline(barangId, field, value);
-      } else {
-        renderDaftarBarang();
-        showToast("Perubahan Daftar Barang berhasil tersinkron dengan Invoice!", "success");
+      const connectedInvoice = state.invoice.find(i => i.noResi === oldResi);
+      
+      const batch = db.batch();
+      const barangRef = getCollectionRef('barang').doc(barangId);
+      batch.update(barangRef, updateData);
+
+      if (connectedInvoice) {
+        const invoiceRef = getCollectionRef('invoice').doc(connectedInvoice.id);
+        const invoiceUpdate = {};
+        invoiceUpdate[field] = value;
+        batch.update(invoiceRef, invoiceUpdate);
       }
+
+      batch.commit()
+        .then(() => {
+          showToast("Sinkronisasi Firebase berhasil!");
+        })
+        .catch(err => {
+          showToast("Gagal update: " + err.message, "error");
+          renderDaftarBarang();
+        });
     }
 
-    // Handler edit pada Invoice
+    // Handler edit pada Invoice (Sinkronisasi balik ke Daftar Barang Logistik)
     function handleInvoiceEdit(invoiceId, field, value) {
       if (state.currentUser.role !== 'Admin') {
         showToast("Akses Ditolak: Hanya Admin yang dapat mengedit data invoice!", "error");
@@ -1384,49 +1289,60 @@
       if (!invoiceObj) return;
 
       const oldResi = invoiceObj.noResi;
-
+      const updateData = {};
       if (field === 'qty' || field === 'rateSharing' || field === 'feeWh') {
-        invoiceObj[field] = parseFloat(value) || 0;
+        updateData[field] = parseFloat(value) || 0;
       } else {
-        invoiceObj[field] = value;
+        updateData[field] = value;
       }
 
-      syncInvoiceToBarangLocal(oldResi, invoiceObj);
+      const connectedBarang = state.barang.find(b => b.noResi === oldResi);
 
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.invoice = res.invoice;
-            state.barang = res.barang;
-            recalculateGrandTotals();
-          })
-          .updateInvoiceInline(invoiceId, field, value);
-      } else {
-        recalculateGrandTotals();
-        showToast("Perubahan Invoice berhasil disinkronkan kembali ke Daftar Barang!", "success");
+      const batch = db.batch();
+      const invoiceRef = getCollectionRef('invoice').doc(invoiceId);
+      batch.update(invoiceRef, updateData);
+
+      if (connectedBarang && (field === 'noResi' || field === 'detailBarang' || field === 'pemilik' || field === 'shippingBatch')) {
+        const barangRef = getCollectionRef('barang').doc(connectedBarang.id);
+        const barangUpdate = {};
+        barangUpdate[field] = value;
+        batch.update(barangRef, barangUpdate);
       }
+
+      batch.commit()
+        .then(() => {
+          // synced via snapshot
+        })
+        .catch(err => {
+          showToast("Gagal update invoice: " + err.message, "error");
+          renderInvoice();
+        });
     }
 
-    // Hapus Barang dari warehouse
+    // Hapus Barang (Menggunakan custom modal confirm)
     function deleteBarang(barangId) {
-      if (!confirm("Apakah Anda yakin ingin menghapus barang ini beserta draf invoicenya?")) return;
-      showLoading(true);
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.barang = res.barang;
-            state.invoice = res.invoice;
+      showConfirm("Apakah Anda yakin ingin menghapus barang ini beserta draf invoicenya?", () => {
+        showLoading(true);
+
+        const barangObj = state.barang.find(b => b.id === barangId);
+        const connectedInvoice = barangObj ? state.invoice.find(i => i.noResi === barangObj.noResi) : null;
+
+        const batch = db.batch();
+        batch.delete(getCollectionRef('barang').doc(barangId));
+        if (connectedInvoice) {
+          batch.delete(getCollectionRef('invoice').doc(connectedInvoice.id));
+        }
+
+        batch.commit()
+          .then(() => {
             showLoading(false);
-            showToast("Barang sukses dihapus!");
-            renderDaftarBarang();
+            showToast("Barang & Invoice berhasil dihapus!");
           })
-          .deleteBarang(barangId);
-      } else {
-        state.barang = state.barang.filter(b => b.id !== barangId);
-        showLoading(false);
-        showToast("Barang dihapus dari Memory Lokal!");
-        renderDaftarBarang();
-      }
+          .catch(err => {
+            showLoading(false);
+            showToast("Gagal menghapus: " + err.message, "error");
+          });
+      });
     }
 
     // Render Section Daftar Barang
@@ -1466,7 +1382,6 @@
                 Belum ada data barang untuk kriteria "${activeCountry}" pada menu ini.
               </div>
             ` : `
-              <!-- Desktop Table / Mobile List View -->
               <div class="overflow-x-auto rounded-2xl border border-gray-100">
                 <table class="w-full text-left text-sm whitespace-nowrap min-w-[950px]">
                   <thead class="bg-[#fff4e1] text-gray-700">
@@ -1488,7 +1403,6 @@
                       
                       return `
                         <tr class="hover:bg-pink-50/20 transition-all">
-                          <!-- No Resi Terlebar -->
                           <td class="p-3">
                             <input type="text" value="${b.noResi}" 
                               onchange="handleBarangEdit('${b.id}', 'noResi', this.value)"
@@ -1496,7 +1410,6 @@
                               class="w-full px-3 py-1.5 rounded-lg border border-gray-100 bg-white/50 focus:bg-white focus:border-pink-300 transition text-xs font-bold outline-none min-w-[200px]">
                           </td>
 
-                          <!-- Detail Barang -->
                           <td class="p-3">
                             <textarea onchange="handleBarangEdit('${b.id}', 'detailBarang', this.value)"
                               ${(!canEditFull && !isOwn) ? 'disabled' : ''}
@@ -1504,7 +1417,6 @@
                               class="w-full px-2 py-1 rounded bg-transparent border-0 hover:border focus:border-pink-300 focus:bg-white transition text-xs outline-none font-medium min-w-[220px]">${b.detailBarang}</textarea>
                           </td>
 
-                          <!-- Tanggal Update -->
                           <td class="p-3">
                             <input type="date" value="${b.tanggalUpdate}" 
                               onchange="handleBarangEdit('${b.id}', 'tanggalUpdate', this.value)"
@@ -1512,7 +1424,6 @@
                               class="w-full px-2 py-1 rounded bg-transparent border-0 hover:border focus:border-pink-300 focus:bg-white transition text-xs outline-none">
                           </td>
 
-                          <!-- Shipping Batch -->
                           <td class="p-3">
                             <input type="text" value="${b.shippingBatch || ''}" 
                               placeholder="Ketik batch..."
@@ -1521,7 +1432,6 @@
                               class="w-full px-2 py-1 rounded bg-transparent border-0 hover:border focus:border-pink-300 focus:bg-white transition text-xs font-semibold outline-none">
                           </td>
 
-                          <!-- Pemilik -->
                           <td class="p-3">
                             <select onchange="handleBarangEdit('${b.id}', 'pemilik', this.value)"
                               ${!canEditFull ? 'disabled' : ''}
@@ -1530,7 +1440,6 @@
                             </select>
                           </td>
 
-                          <!-- Foto Update 1 -->
                           <td class="p-3 text-center">
                             <input type="file" id="file-${b.id}-foto1" class="hidden" accept="image/*" onchange="handlePhotoUpload('${b.id}', 'foto1', this)">
                             <div class="flex flex-col items-center gap-1">
@@ -1549,7 +1458,6 @@
                             </div>
                           </td>
 
-                          <!-- Foto Update 2 -->
                           <td class="p-3 text-center">
                             <input type="file" id="file-${b.id}-foto2" class="hidden" accept="image/*" onchange="handlePhotoUpload('${b.id}', 'foto2', this)">
                             <div class="flex flex-col items-center gap-1">
@@ -1568,7 +1476,6 @@
                             </div>
                           </td>
 
-                          <!-- Aksi Delete -->
                           ${userRole === 'Admin' ? `
                             <td class="p-3 text-center">
                               <button onclick="deleteBarang('${b.id}')" class="text-red-500 hover:text-red-700 hover:scale-105 active:scale-95 transition">
@@ -1591,8 +1498,7 @@
       lucide.createIcons();
     }
 
-
-    // Kalkulasi cepat grand total tanpa re-render penuh
+    // Kalkulasi cepat total baris & batch
     function recalculateGrandTotals() {
       state.invoice.forEach(inv => {
         const rowTotalEl = document.getElementById(`total-${inv.id}`);
@@ -1615,33 +1521,28 @@
       });
     }
 
-    // Helper formatting Rupiah
+    // Format Mata Uang Rupiah
     function formatRupiah(angka) {
       return "Rp " + Number(angka).toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
-    // Menghapus item invoice
+    // Hapus Invoice
     function deleteInvoice(invoiceId) {
-      if (!confirm("Hapus data baris invoice ini?")) return;
-      showLoading(true);
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.invoice = res.invoice;
+      showConfirm("Hapus data baris invoice ini?", () => {
+        showLoading(true);
+        getCollectionRef('invoice').doc(invoiceId).delete()
+          .then(() => {
             showLoading(false);
             showToast("Item Invoice berhasil dihapus!");
-            renderInvoice();
           })
-          .deleteInvoice(invoiceId);
-      } else {
-        state.invoice = state.invoice.filter(i => i.id !== invoiceId);
-        showLoading(false);
-        showToast("Invoice dihapus dari Memory Lokal!");
-        renderInvoice();
-      }
+          .catch(err => {
+            showLoading(false);
+            showToast("Gagal menghapus invoice: " + err.message, "error");
+          });
+      });
     }
 
-    // Mengelompokkan Invoice Berdasarkan Shipping Batch
+    // Pengelompokan invoice berdasarkan batch pengiriman
     function groupInvoiceByBatch() {
       const query = document.getElementById('searchInvoice').value.toLowerCase();
       const activeCountry = state.selectedCountryInvoice; 
@@ -1679,7 +1580,7 @@
       return grouped;
     }
 
-    // Buka Modal Invoice Manual
+    // Dialog Invoice Manual
     function openInvoiceManualModal() {
       if (state.currentUser.role !== 'Admin') {
         showToast("Hanya Admin yang dapat menambah invoice manual!", "error");
@@ -1694,7 +1595,7 @@
       document.getElementById('invoiceManualModal').classList.add('hidden');
     }
 
-    // Submit Tambah Invoice Manual
+    // Submit Invoice Manual
     function submitInvoiceManual(e) {
       e.preventDefault();
       const invoiceObj = {
@@ -1707,42 +1608,39 @@
         feeWh: parseFloat(document.getElementById('invManualFee').value) || 0
       };
 
+      const resiObj = {
+        noResi: invoiceObj.noResi,
+        detailBarang: invoiceObj.detailBarang,
+        negaraTujuan: state.selectedCountryInvoice === 'Semua' ? 'Korea' : state.selectedCountryInvoice, 
+        tanggalUpdate: new Date().toISOString().split('T')[0],
+        foto1: "",
+        foto2: "",
+        shippingBatch: invoiceObj.shippingBatch,
+        pemilik: invoiceObj.pemilik
+      };
+
       showLoading(true);
 
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.invoice = res.invoice;
-            showLoading(false);
-            showToast("Item invoice manual berhasil ditambahkan!");
-            closeInvoiceManualModal();
-            renderInvoice();
-          })
-          .addInvoiceManual(invoiceObj);
-      } else {
-        invoiceObj.id = "i_" + new Date().getTime();
-        state.invoice.push(invoiceObj);
-        
-        state.barang.push({
-          id: "b_" + new Date().getTime(),
-          noResi: invoiceObj.noResi,
-          detailBarang: invoiceObj.detailBarang,
-          negaraTujuan: state.selectedCountryInvoice === 'Semua' ? 'Korea' : state.selectedCountryInvoice, 
-          tanggalUpdate: new Date().toISOString().split('T')[0],
-          foto1: "",
-          foto2: "",
-          shippingBatch: invoiceObj.shippingBatch,
-          pemilik: invoiceObj.pemilik
-        });
+      const batch = db.batch();
+      const invoiceRef = getCollectionRef('invoice').doc();
+      const barangRef = getCollectionRef('barang').doc();
 
-        showLoading(false);
-        showToast("Invoice manual disimpan di memory lokal!");
-        closeInvoiceManualModal();
-        renderInvoice();
-      }
+      batch.set(invoiceRef, invoiceObj);
+      batch.set(barangRef, resiObj);
+
+      batch.commit()
+        .then(() => {
+          showLoading(false);
+          showToast("Invoice manual berhasil ditambahkan!");
+          closeInvoiceManualModal();
+        })
+        .catch(err => {
+          showLoading(false);
+          showToast("Gagal menyimpan invoice: " + err.message, "error");
+        });
     }
 
-    // Render Tab Invoice
+    // Render Tabel Invoice
     function renderInvoice() {
       const container = document.getElementById('containerInvoiceBatch');
       const userRole = state.currentUser.role;
@@ -1769,7 +1667,6 @@
 
         html += `
           <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-xl border-t-8 border-[#b1b0d8] space-y-4 sm:space-y-6" id="invoice-batch-section-${batch}">
-            <!-- Header Batch -->
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b pb-4">
               <div>
                 <h3 class="text-base sm:text-lg md:text-xl font-bold text-[#d45575] flex items-center space-x-2">
@@ -1794,7 +1691,6 @@
               </div>
             </div>
 
-            <!-- Tabel Data -->
             <div class="overflow-x-auto rounded-2xl border border-gray-100">
               <table class="w-full text-left text-sm whitespace-nowrap min-w-[950px]">
                 <thead class="bg-[#fff4e1] text-gray-700">
@@ -1824,7 +1720,6 @@
                             class="w-full px-2 py-1 rounded bg-transparent border-0 hover:border focus:border-purple-300 focus:bg-white transition text-xs font-semibold outline-none">
                         </td>
 
-                        <!-- No Resi Terlebar -->
                         <td class="p-3">
                           <input type="text" value="${i.noResi}" 
                             onchange="handleInvoiceEdit('${i.id}', 'noResi', this.value)"
@@ -1886,7 +1781,6 @@
               </table>
             </div>
 
-            <!-- Grand Total Section -->
             <div class="flex items-center justify-end border-t pt-4">
               <div class="bg-[#fff4e1] px-4 py-2 sm:px-6 sm:py-3 rounded-2xl border-2 border-[#ffcb5e] flex items-center space-x-4 sm:space-x-6">
                 <span class="text-xs sm:text-sm font-bold text-gray-600">GRAND TOTAL BATCH:</span>
@@ -1903,8 +1797,7 @@
       lucide.createIcons();
     }
 
-
-    // ================= EKSPOR INVOICE PDF LANGSUNG (CLIENT SIDE) =================
+    // Ekspor Invoice PDF
     function exportBatchPDF(batchName) {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF('p', 'mm', 'a4');
@@ -1997,8 +1890,7 @@
       showToast(`Sukses mengekspor PDF ${batchName}!`);
     }
 
-
-    // ================= INTEGRASI GATEWAY FONNTE (WHATSAPP SENDER) =================
+    // Notifikasi WhatsApp (Fonnte Gateway)
     function sendWhatsappInvoice(batchName) {
       if (!state.fonnteToken) {
         showToast("Error: API Token Fonnte belum dikonfigurasi di dashboard!", "error");
@@ -2075,7 +1967,6 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       });
     }
 
-
     // ================= SEKSI REFUND SHOPEE =================
     function openRefundModal() {
       populateUserDropdowns();
@@ -2110,6 +2001,7 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       document.getElementById('refundModal').classList.add('hidden');
     }
 
+    // Menyimpan Refund ke Firebase
     function submitFormRefund(e) {
       e.preventDefault();
       
@@ -2125,27 +2017,19 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       };
 
       showLoading(true);
-
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.refund = res.refund || [];
-            showLoading(false);
-            showToast("Pengajuan refund Shopee sukses disimpan!");
-            closeRefundModal();
-            renderRefundShopee();
-          })
-          .addRefundShopee(refundObj);
-      } else {
-        refundObj.id = "rf_" + new Date().getTime();
-        state.refund.push(refundObj);
-        showLoading(false);
-        showToast("Pengajuan refund disimpan secara offline!", "success");
-        closeRefundModal();
-        renderRefundShopee();
-      }
+      getCollectionRef('refund').add(refundObj)
+        .then(() => {
+          showLoading(false);
+          showToast("Pengajuan refund Shopee berhasil disimpan!");
+          closeRefundModal();
+        })
+        .catch(err => {
+          showLoading(false);
+          showToast("Gagal mengajukan refund: " + err.message, "error");
+        });
     }
 
+    // Edit table inline refund (Total refund dikunci untuk non-Admin)
     function handleRefundTableEdit(refundId, field, value) {
       const userRole = state.currentUser.role;
       const refundItem = state.refund.find(r => r.id === refundId);
@@ -2166,45 +2050,40 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
         }
       }
 
+      const updateData = {};
       if (field === 'nominalTransfer' || field === 'nominalCheckout' || field === 'totalRefund') {
-        refundItem[field] = parseFloat(value) || 0;
+        updateData[field] = parseFloat(value) || 0;
       } else {
-        refundItem[field] = value;
+        updateData[field] = value;
       }
 
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.refund = res.refund || [];
-          })
-          .updateRefundInline(refundId, field, value);
-      } else {
-        showToast("Draf Refund diperbarui offline!", "success");
-        renderRefundShopee();
-      }
+      getCollectionRef('refund').doc(refundId).update(updateData)
+        .then(() => {
+          // synced via snapshot
+        })
+        .catch(err => {
+          showToast("Gagal memperbarui refund: " + err.message, "error");
+          renderRefundShopee();
+        });
     }
 
+    // Menghapus Refund
     function deleteRefund(refundId) {
-      if (!confirm("Apakah Anda yakin ingin menghapus pengajuan refund Shopee ini?")) return;
-      showLoading(true);
-
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.refund = res.refund || [];
+      showConfirm("Apakah Anda yakin ingin menghapus pengajuan refund Shopee ini?", () => {
+        showLoading(true);
+        getCollectionRef('refund').doc(refundId).delete()
+          .then(() => {
             showLoading(false);
-            showToast("Refund berhasil dihapus!");
-            renderRefundShopee();
+            showToast("Pengajuan refund berhasil dihapus!");
           })
-          .deleteRefund(refundId);
-      } else {
-        state.refund = state.refund.filter(r => r.id !== refundId);
-        showLoading(false);
-        showToast("Refund dihapus offline!");
-        renderRefundShopee();
-      }
+          .catch(err => {
+            showLoading(false);
+            showToast("Gagal menghapus: " + err.message, "error");
+          });
+      });
     }
 
+    // Render Tabel Refund
     function renderRefundShopee() {
       const tbody = document.getElementById('refundTableBody');
       const searchQuery = document.getElementById('searchRefund').value.toLowerCase();
@@ -2318,8 +2197,7 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       lucide.createIcons();
     }
 
-
-    // ================= MANAJEMEN USER (ADMIN ONLY) =================
+    // ================= MANAJEMEN USER =================
     function renderUserMgmt() {
       const tbody = document.getElementById('userTableBody');
       tbody.innerHTML = "";
@@ -2376,26 +2254,17 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
     }
 
     function handleUserTableEdit(userId, field, value) {
-      const userIndex = state.users.findIndex(u => u.id === userId);
-      if (userIndex === -1) return;
+      const updateData = {};
+      updateData[field] = value;
 
-      const userObj = { ...state.users[userIndex] };
-      userObj[field] = value;
-
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.users = res.users;
-            populateUserDropdowns();
-            renderUserMgmt();
-          })
-          .saveUser(userObj);
-      } else {
-        state.users[userIndex] = userObj;
-        populateUserDropdowns();
-        renderUserMgmt();
-        showToast("Perubahan user disimpan secara lokal!");
-      }
+      getCollectionRef('users').doc(userId).update(updateData)
+        .then(() => {
+          // synced via snapshot
+        })
+        .catch(err => {
+          showToast("Gagal memperbarui pengguna: " + err.message, "error");
+          renderUserMgmt();
+        });
     }
 
     function openUserModal() {
@@ -2425,11 +2294,12 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       document.getElementById('userModal').classList.remove('hidden');
     }
 
+    // Submit user edit/baru ke Firebase
     function submitFormUser(e) {
       e.preventDefault();
       
+      const id = document.getElementById('userModalId').value || "";
       const userObj = {
-        id: document.getElementById('userModalId').value || "",
         nama: document.getElementById('userModalNama').value.trim(),
         username: document.getElementById('userModalUsername').value.trim(),
         password: document.getElementById('userModalPassword').value,
@@ -2440,31 +2310,17 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
 
       showLoading(true);
 
-      if (isGasEnv) {
-        google.script.run
-          .withSuccessHandler((res) => {
-            state.users = res.users;
-            showLoading(false);
-            showToast("Data akun berhasil disimpan!");
-            closeUserModal();
-            populateUserDropdowns();
-            renderUserMgmt();
-          })
-          .saveUser(userObj);
-      } else {
-        if (userObj.id) {
-          const idx = state.users.findIndex(u => u.id === userObj.id);
-          state.users[idx] = userObj;
-        } else {
-          userObj.id = "u_" + new Date().getTime();
-          state.users.push(userObj);
-        }
-        showLoading(false);
-        showToast("Akun disimpan di memory lokal!");
-        closeUserModal();
-        populateUserDropdowns();
-        renderUserMgmt();
-      }
+      const userRef = id ? getCollectionRef('users').doc(id) : getCollectionRef('users').doc();
+      userRef.set(userObj)
+        .then(() => {
+          showLoading(false);
+          showToast("Data akun berhasil disimpan di Firebase!");
+          closeUserModal();
+        })
+        .catch(err => {
+          showLoading(false);
+          showToast("Gagal menyimpan akun: " + err.message, "error");
+        });
     }
   </script>
 </body>
