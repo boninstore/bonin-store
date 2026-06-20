@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Data Barang Warehouse Bonin Store</title>
-  <link rel="shortcut icon" href="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg" type="image/x-icon">
+  <link class="shortcut icon" href="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg" type="image/x-icon">
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -762,6 +762,25 @@
       return doc(db, 'artifacts', appId, 'public', 'data', collectionName, documentId);
     };
 
+    // Pembatas Waktu (Timeout Helper) untuk menghentikan loading tak berujung jika Firebase melambat/putus koneksi
+    function withTimeout(promise, ms = 6000) {
+      return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          reject(new Error("Firebase Timeout: Server Firebase tidak merespons. Periksa koneksi internet Anda, konfigurasi Project ID, atau Rules database di Firebase Console Anda."));
+        }, ms);
+        promise.then(
+          (res) => {
+            clearTimeout(timeoutId);
+            resolve(res);
+          },
+          (err) => {
+            clearTimeout(timeoutId);
+            reject(err);
+          }
+        );
+      });
+    }
+
     // Saat Aplikasi Dimuat
     window.addEventListener('DOMContentLoaded', async () => {
       lucide.createIcons();
@@ -792,6 +811,7 @@
             setupFirestoreRealtimeListeners();
           } else {
             showToast("Sesi otentikasi terputus. Menghubungkan ulang...", "error");
+            showLoading(false);
           }
         });
       } catch (err) {
@@ -801,7 +821,7 @@
       }
     }
 
-    // Listener Real-time dua arah menggunakan Firebase Firestore (onSnapshot dengan callback error)
+    // Listener Real-time dua arah menggunakan Firebase Firestore (onSnapshot dengan callback error & penghenti loading)
     function setupFirestoreRealtimeListeners() {
       // 1. Sinkronisasi Pengguna
       unsubUsers = onSnapshot(getCollectionRef('users'), (snapshot) => {
@@ -821,7 +841,8 @@
         }
       }, (err) => {
         console.error("Firestore Users Error:", err);
-        showToast("Gagal sinkronisasi data pengguna!", "error");
+        showToast("Gagal sinkronisasi data pengguna! Periksa kembali Firestore Rules Anda.", "error");
+        showLoading(false);
       });
 
       // 2. Sinkronisasi Data Barang
@@ -857,6 +878,7 @@
       }, (err) => {
         console.error("Firestore Invoice Error:", err);
         showToast("Gagal sinkronisasi data invoice!", "error");
+        showLoading(false);
       });
 
       // 4. Sinkronisasi Data Refund
@@ -872,6 +894,7 @@
       }, (err) => {
         console.error("Firestore Refund Error:", err);
         showToast("Gagal sinkronisasi pengembalian Shopee!", "error");
+        showLoading(false);
       });
 
       // 5. Sinkronisasi Token API Fonnte
@@ -1138,6 +1161,7 @@
       sideMenu.classList.add('-translate-x-full');
     }
 
+    // Pergantian Menu Utama
     function changeMenu(menuKey) {
       document.getElementById('secDashboard').classList.add('hidden');
       document.getElementById('secFormResi').classList.add('hidden');
@@ -1260,13 +1284,17 @@
       }
     }
 
-    // Simpan Fonnte Token ke Firebase Firestore
+    // Simpan Fonnte Token ke Firebase Firestore (Ditambah Proteksi Timeout)
     async function saveFonnteToken() {
+      if (!auth.currentUser) {
+        showToast("Otentikasi Firebase belum siap. Silakan muat ulang halaman.", "error");
+        return;
+      }
       const val = document.getElementById('fonnteTokenInput').value.trim();
       showLoading(true);
       try {
         const settingsRef = doc(db, 'artifacts', appId, 'public', 'data', 'settings', 'fonnte');
-        await setDoc(settingsRef, { token: val }, { merge: true });
+        await withTimeout(setDoc(settingsRef, { token: val }, { merge: true }), 6000);
         state.fonnteToken = val;
         showLoading(false);
         showToast("Token Fonnte berhasil disimpan ke Firebase!");
@@ -1276,9 +1304,14 @@
       }
     }
 
-    // Input Resi baru ke Firebase Firestore
+    // Input Resi baru ke Firebase Firestore (Menggunakan Promise.all + withTimeout agar Anti-Hang)
     async function submitFormResi(e) {
       e.preventDefault();
+      if (!auth.currentUser) {
+        showToast("Akses Ditolak: Anda belum terotentikasi secara aman ke cloud Firebase.", "error");
+        return;
+      }
+
       const noResi = document.getElementById('resiNomer').value.trim();
       const negara = document.getElementById('resiNegara').value;
       const detail = document.getElementById('resiDetail').value.trim();
@@ -1322,9 +1355,11 @@
       showLoading(true);
 
       try {
-        // Tulis data barang & draft invoice secara paralel ke Firestore
-        await setDoc(getDocRef('barang', barangId), resiObj);
-        await setDoc(getDocRef('invoice', invoiceId), invoiceObj);
+        // Tulis data barang & draf invoice secara bersamaan dengan timeout perlindungan
+        await withTimeout(Promise.all([
+          setDoc(getDocRef('barang', barangId), resiObj),
+          setDoc(getDocRef('invoice', invoiceId), invoiceObj)
+        ]), 8000);
 
         showLoading(false);
         showToast("Sukses menyimpan data ke Firebase!");
@@ -1337,37 +1372,74 @@
       }
     }
 
-    // Unggah foto ke Firebase Firestore (Base64) - Ditambah proteksi file size anti stuck
+    // Fungsi pembantu untuk kompresi berkas gambar di sisi klien (Canvas Rendering) sebelum upload
+    function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.6) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            // Mempertahankan rasio aspek gambar saat mengubah ukuran maksimal
+            if (width > height) {
+              if (width > maxWidth) {
+                height = Math.round((height * maxWidth) / width);
+                width = maxWidth;
+              }
+            } else {
+              if (height > maxHeight) {
+                width = Math.round((width * maxHeight) / height);
+                height = maxHeight;
+              }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Konversi ke format JPEG dengan kompresi tingkat tinggi (Kualitas berkas menyusut ~90% namun visual tetap tajam)
+            const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
+            resolve(compressedBase64);
+          };
+          img.onerror = (err) => reject(err);
+        };
+        reader.onerror = (err) => reject(err);
+      });
+    }
+
+    // Unggah foto ke Firebase Firestore (Base64) - Dioptimalkan dengan kompresi otomatis agar instan
     async function handlePhotoUpload(barangId, photoField, inputEl) {
+      if (!auth.currentUser) {
+        showToast("Sesi tidak valid. Silakan masuk kembali.", "error");
+        return;
+      }
       const file = inputEl.files[0];
       if (!file) return;
 
-      // Proteksi ukuran file: Maksimal 800KB agar dokumen aman dari limit 1MB Firestore
-      if (file.size > 800000) { 
-        showToast("Ukuran foto terlalu besar! Gunakan foto beresolusi lebih rendah (Maksimal 800 KB) agar penyimpanan Firebase lancar.", "error");
-        inputEl.value = ""; // Reset form file
-        return;
-      }
-
       showLoading(true);
-      const reader = new FileReader();
-      reader.onload = async function(e) {
-        const base64Data = e.target.result;
-        try {
-          const docRef = getDocRef('barang', barangId);
-          await updateDoc(docRef, { [photoField]: base64Data });
-          showLoading(false);
-          showToast("Foto logistik berhasil diupload ke Firebase!");
-        } catch (err) {
-          showLoading(false);
-          showToast("Gagal menyimpan foto ke Firebase: " + err.message, "error");
-        }
-      };
-      reader.onerror = function() {
+      try {
+        // Melakukan kompresi instan di memori (mengubah gambar kamera HP 5MB menjadi hanya ~40KB tanpa pecah)
+        const compressedBase64 = await compressImage(file, 800, 800, 0.6);
+        
+        const docRef = getDocRef('barang', barangId);
+        // Proteksi simpan dengan timeout 10 detik
+        await withTimeout(updateDoc(docRef, { [photoField]: compressedBase64 }), 10000);
+        
         showLoading(false);
-        showToast("Gagal membaca file gambar.", "error");
-      };
-      reader.readAsDataURL(file);
+        showToast("Foto logistik berhasil dikompresi & disimpan!");
+      } catch (err) {
+        showLoading(false);
+        showToast("Gagal menyimpan foto ke Firebase: " + err.message, "error");
+        console.error("Image Compression Error: ", err);
+      } finally {
+        inputEl.value = ""; // Bersihkan nilai input agar bisa mengunggah file yang sama
+      }
     }
 
     function triggerFileInput(barangId, photoField) {
@@ -1387,8 +1459,13 @@
       document.body.removeChild(link);
     }
 
-    // Edit Barang Inline (Sinkron Dua Arah) ke Firebase
+    // Edit Barang Inline (Sinkron Dua Arah) ke Firebase (Ditambah Proteksi Sesi)
     async function handleBarangEdit(barangId, field, value) {
+      if (!auth.currentUser) {
+        showToast("Sesi otentikasi tidak aktif. Perubahan dibatalkan.", "error");
+        renderDaftarBarang();
+        return;
+      }
       const userRole = state.currentUser.role;
       const barangObj = state.barang.find(b => b.id === barangId);
       if (!barangObj) return;
@@ -1411,7 +1488,7 @@
       const oldResi = barangObj.noResi;
 
       try {
-        await updateDoc(getDocRef('barang', barangId), { [field]: value });
+        await withTimeout(updateDoc(getDocRef('barang', barangId), { [field]: value }), 6000);
 
         // Sinkronisasi nomor resi/data ke tabel invoice yang terkait di Firebase
         const linkedInvoices = state.invoice.filter(inv => inv.noResi === oldResi);
@@ -1423,7 +1500,7 @@
           if (field === 'shippingBatch') updatePayload.shippingBatch = value;
 
           if (Object.keys(updatePayload).length > 0) {
-            await updateDoc(getDocRef('invoice', inv.id), updatePayload);
+            await withTimeout(updateDoc(getDocRef('invoice', inv.id), updatePayload), 6000);
           }
         }
         showToast("Perubahan logistik disinkronkan ke Firebase!");
@@ -1433,8 +1510,13 @@
       }
     }
 
-    // Edit Invoice Inline ke Firebase
+    // Edit Invoice Inline ke Firebase (Ditambah Proteksi Sesi)
     async function handleInvoiceEdit(invoiceId, field, value) {
+      if (!auth.currentUser) {
+        showToast("Sesi otentikasi tidak aktif. Perubahan dibatalkan.", "error");
+        renderInvoice();
+        return;
+      }
       if (state.currentUser.role !== 'Admin') {
         showToast("Akses Ditolak: Hanya Admin yang dapat mengedit data invoice!", "error");
         renderInvoice();
@@ -1448,7 +1530,7 @@
       const parsedValue = (field === 'qty' || field === 'rateSharing' || field === 'feeWh') ? (parseFloat(value) || 0) : value;
 
       try {
-        await updateDoc(getDocRef('invoice', invoiceId), { [field]: parsedValue });
+        await withTimeout(updateDoc(getDocRef('invoice', invoiceId), { [field]: parsedValue }), 6000);
 
         // Sinkronisasi data ke logistik barang di Firebase
         const linkedBarangs = state.barang.filter(b => b.noResi === oldResi);
@@ -1460,7 +1542,7 @@
           if (field === 'shippingBatch') updatePayload.shippingBatch = value;
 
           if (Object.keys(updatePayload).length > 0) {
-            await updateDoc(getDocRef('barang', b.id), updatePayload);
+            await withTimeout(updateDoc(getDocRef('barang', b.id), updatePayload), 6000);
           }
         }
       } catch (err) {
@@ -1471,6 +1553,10 @@
 
     // Hapus barang dari database Firebase Firestore
     async function deleteBarang(barangId) {
+      if (!auth.currentUser) {
+        showToast("Sesi otentikasi tidak aktif.", "error");
+        return;
+      }
       showConfirm("Apakah Anda yakin ingin menghapus barang ini beserta draf invoicenya?", async () => {
         showLoading(true);
         try {
@@ -1478,10 +1564,10 @@
           if (bObj) {
             const linkedInvoices = state.invoice.filter(i => i.noResi === bObj.noResi);
             for (const inv of linkedInvoices) {
-              await deleteDoc(getDocRef('invoice', inv.id));
+              await withTimeout(deleteDoc(getDocRef('invoice', inv.id)), 5000);
             }
           }
-          await deleteDoc(getDocRef('barang', barangId));
+          await withTimeout(deleteDoc(getDocRef('barang', barangId)), 5000);
           showLoading(false);
           showToast("Data barang & invoice sukses dihapus dari Firebase!");
         } catch (err) {
@@ -1673,10 +1759,11 @@
 
     // Hapus Invoice
     async function deleteInvoice(invoiceId) {
+      if (!auth.currentUser) return;
       showConfirm("Hapus data baris invoice ini?", async () => {
         showLoading(true);
         try {
-          await deleteDoc(getDocRef('invoice', invoiceId));
+          await withTimeout(deleteDoc(getDocRef('invoice', invoiceId)), 5000);
           showLoading(false);
           showToast("Item Invoice berhasil dihapus!");
         } catch (err) {
@@ -1741,6 +1828,11 @@
 
     async function submitInvoiceManual(e) {
       e.preventDefault();
+      if (!auth.currentUser) {
+        showToast("Otentikasi Firebase belum siap.", "error");
+        return;
+      }
+      
       const invoiceId = "i_" + new Date().getTime();
       const barangId = "b_" + new Date().getTime();
 
@@ -1770,8 +1862,11 @@
       showLoading(true);
 
       try {
-        await setDoc(getDocRef('invoice', invoiceId), invoiceObj);
-        await setDoc(getDocRef('barang', barangId), barangObj);
+        await withTimeout(Promise.all([
+          setDoc(getDocRef('invoice', invoiceId), invoiceObj),
+          setDoc(getDocRef('barang', barangId), barangObj)
+        ]), 8000);
+        
         showLoading(false);
         showToast("Invoice manual berhasil ditambahkan!");
         closeInvoiceManualModal();
@@ -2144,8 +2239,12 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
 
     async function submitFormRefund(e) {
       e.preventDefault();
-      const refundId = "rf_" + new Date().getTime();
+      if (!auth.currentUser) {
+        showToast("Otentikasi Firebase belum siap.", "error");
+        return;
+      }
       
+      const refundId = "rf_" + new Date().getTime();
       const refundObj = {
         id: refundId,
         pemilik: document.getElementById('refundPemilik').value,
@@ -2161,7 +2260,7 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       showLoading(true);
 
       try {
-        await setDoc(getDocRef('refund', refundId), refundObj);
+        await withTimeout(setDoc(getDocRef('refund', refundId), refundObj), 6000);
         showLoading(false);
         showToast("Pengajuan refund Shopee sukses disimpan ke Firebase!");
         closeRefundModal();
@@ -2172,6 +2271,11 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
     }
 
     async function handleRefundTableEdit(refundId, field, value) {
+      if (!auth.currentUser) {
+        showToast("Otentikasi Firebase tidak aktif.", "error");
+        renderRefundShopee();
+        return;
+      }
       const userRole = state.currentUser ? state.currentUser.role : '';
       const refundItem = state.refund.find(r => r.id === refundId);
       if (!refundItem) return;
@@ -2194,7 +2298,7 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       const parsedVal = (field === 'nominalTransfer' || field === 'nominalCheckout' || field === 'totalRefund') ? (parseFloat(value) || 0) : value;
 
       try {
-        await updateDoc(getDocRef('refund', refundId), { [field]: parsedVal });
+        await withTimeout(updateDoc(getDocRef('refund', refundId), { [field]: parsedVal }), 6000);
       } catch (err) {
         showToast("Gagal update data refund ke Firebase: " + err.message, "error");
         renderRefundShopee();
@@ -2202,10 +2306,11 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
     }
 
     async function deleteRefund(refundId) {
+      if (!auth.currentUser) return;
       showConfirm("Apakah Anda yakin ingin menghapus pengajuan refund Shopee ini?", async () => {
         showLoading(true);
         try {
-          await deleteDoc(getDocRef('refund', refundId));
+          await withTimeout(deleteDoc(getDocRef('refund', refundId)), 5000);
           showLoading(false);
           showToast("Refund berhasil dihapus dari Firebase!");
         } catch (err) {
@@ -2385,6 +2490,7 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
     }
 
     async function handleUserTableEdit(userId, field, value) {
+      if (!auth.currentUser) return;
       const userIndex = state.users.findIndex(u => u.id === userId);
       if (userIndex === -1) return;
 
@@ -2392,7 +2498,7 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       userObj[field] = value;
 
       try {
-        await setDoc(getDocRef('users', userId), userObj);
+        await withTimeout(setDoc(getDocRef('users', userId), userObj), 6000);
         showToast("Kredensial disimpan ke Firebase!");
       } catch (err) {
         showToast("Gagal update user ke Firebase: " + err.message, "error");
@@ -2407,7 +2513,6 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       document.getElementById('userModal').classList.remove('hidden');
     }
 
-    // Tutup Modal User
     function closeUserModal() {
       document.getElementById('userModal').classList.add('hidden');
     }
@@ -2430,6 +2535,10 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
 
     async function submitFormUser(e) {
       e.preventDefault();
+      if (!auth.currentUser) {
+        showToast("Otentikasi Firebase belum siap.", "error");
+        return;
+      }
       
       const id = document.getElementById('userModalId').value || "u_" + new Date().getTime();
       const userObj = {
@@ -2445,7 +2554,7 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       showLoading(true);
 
       try {
-        await setDoc(getDocRef('users', id), userObj);
+        await withTimeout(setDoc(getDocRef('users', id), userObj), 6000);
         showLoading(false);
         showToast("Sukses menyimpan akun baru ke Firebase!");
         closeUserModal();
