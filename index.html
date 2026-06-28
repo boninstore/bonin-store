@@ -118,6 +118,14 @@
           </div>
         </div>
       </div>
+      
+      <!-- Indikator Offline Mode -->
+      <div id="offlineIndicator" class="hidden flex items-center bg-amber-50 border border-amber-300 text-amber-700 px-3 py-1.5 rounded-2xl text-[10px] font-bold gap-1.5 shadow-sm">
+        <i data-lucide="wifi-off" class="w-3.5 h-3.5 animate-pulse"></i>
+        <span>Mode Offline (Browser)</span>
+        <button onclick="tryReconnect()" class="ml-1 px-2 py-0.5 bg-[#ffcb5e] hover:bg-amber-400 text-gray-800 rounded-lg text-[9px] font-bold transition-all active:scale-95 text-center">Hubungkan</button>
+      </div>
+
       <button onclick="handleLogout()" class="flex items-center space-x-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-600 font-bold px-3 py-2 rounded-xl text-xs transition active:scale-95 shadow-sm">
         <i data-lucide="log-out" class="w-4 h-4"></i>
         <span>Sign Out</span>
@@ -923,7 +931,8 @@
       refund: [], 
       fonnteToken: '',
       selectedCountryDaftar: 'Semua', 
-      selectedCountryInvoice: 'Semua'  
+      selectedCountryInvoice: 'Semua',
+      isOfflineMode: false // Flag mode penyimpanan lokal
     };
 
     let adminLoginAttempts = 0;
@@ -1007,14 +1016,16 @@
       await initSpreadsheetDatabase();
     });
 
-    // Inisialisasi Database Spreadsheet
+    // Inisialisasi Database Spreadsheet dengan Penanganan Kegagalan Handal
     async function initSpreadsheetDatabase() {
       showLoading(true);
-      document.getElementById('loadingText').innerText = "Menghubungkan ke data kami...";
+      document.getElementById('loadingText').innerText = "Sabar ya, lagi menghubungkan ke data kami^^";
 
-      if (!SPREADSHEET_SCRIPT_URL) {
-        showToast("Web App Google Sheets belum dikonfigurasi. Menggunakan Mode Demo lokal.", "error");
-        loadMockFallbackData();
+      if (!SPREADSHEET_SCRIPT_URL || SPREADSHEET_SCRIPT_URL.includes("exec") === false) {
+        showToast("Web App Google Sheets belum dikonfigurasi. Menggunakan Mode Offline lokal.", "error");
+        state.isOfflineMode = true;
+        loadFromLocalStorage();
+        updateOfflineBanner();
         showLoading(false);
         return;
       }
@@ -1022,15 +1033,87 @@
       try {
         // Masukkan argument "true" untuk menandakan ini inisialisasi awal agar error bisa ditangkap
         await withTimeout(syncData(true), 8000);
+        state.isOfflineMode = false;
+        updateOfflineBanner();
+        
         // Polling background setiap 15 detik agar sinkronisasi real-time
         syncIntervalId = setInterval(() => syncData(false), 15000);
         showLoading(false);
       } catch (err) {
         console.error("Gagal sinkronisasi awal: ", err);
-        showToast("Gagal terhubung ke server. Menggunakan database lokal sementara.", "error");
-        loadMockFallbackData();
+        showToast("Gagal terhubung ke Google Sheets. Mengaktifkan Mode Offline otomatis.", "error");
+        
+        state.isOfflineMode = true;
+        loadFromLocalStorage();
+        updateOfflineBanner();
         showLoading(false);
       }
+    }
+
+    // Mengambil dan memuat data dari Local Storage
+    function loadFromLocalStorage() {
+      const u = localStorage.getItem('bonin_users');
+      const b = localStorage.getItem('bonin_barang');
+      const i = localStorage.getItem('bonin_invoice');
+      const r = localStorage.getItem('bonin_refund');
+      const f = localStorage.getItem('bonin_fonnteToken');
+
+      if (u) {
+        state.users = JSON.parse(u);
+      } else {
+        loadMockFallbackData(); // Inisialisasi data admin default jika masih kosong
+      }
+
+      state.barang = b ? JSON.parse(b) : [];
+      state.invoice = i ? JSON.parse(i) : [];
+      state.refund = r ? JSON.parse(r) : [];
+      state.fonnteToken = f || '';
+
+      populateUserDropdowns();
+    }
+
+    // Menyimpan state lokal saat ini ke Local Storage
+    function saveToLocalStorage() {
+      localStorage.setItem('bonin_users', JSON.stringify(state.users));
+      localStorage.setItem('bonin_barang', JSON.stringify(state.barang));
+      localStorage.setItem('bonin_invoice', JSON.stringify(state.invoice));
+      localStorage.setItem('bonin_refund', JSON.stringify(state.refund));
+      localStorage.setItem('bonin_fonnteToken', state.fonnteToken);
+    }
+
+    // Fungsi Mencoba Menghubungkan Kembali Offline ke Online
+    async function tryReconnect() {
+      showLoading(true);
+      document.getElementById('loadingText').innerText = "Mencoba menghubungi Google Sheets...";
+      try {
+        state.isOfflineMode = false;
+        await withTimeout(syncData(true), 8000);
+        updateOfflineBanner();
+        showToast("Sukses terhubung kembali ke Google Sheets!");
+        if (!syncIntervalId) {
+          syncIntervalId = setInterval(() => syncData(false), 15000);
+        }
+      } catch (err) {
+        console.error("Gagal terhubung kembali: ", err);
+        state.isOfflineMode = true;
+        updateOfflineBanner();
+        showToast("Koneksi gagal kembali. Tetap menggunakan Mode Offline.", "error");
+      } finally {
+        showLoading(false);
+      }
+    }
+    window.tryReconnect = tryReconnect;
+
+    // Memperbarui UI banner Offline di Header
+    function updateOfflineBanner() {
+      const banner = document.getElementById('offlineIndicator');
+      if (!banner) return;
+      if (state.isOfflineMode) {
+        banner.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+      }
+      lucide.createIcons();
     }
 
     // Database fallback lokal jika URL belum terpasang (Mode Demo Aman)
@@ -1040,15 +1123,15 @@
         { id: "u_admin2", nama: "Staff Logistik", username: "admin2", password: "123", role: "Admin 2", status: "Aktif", noHp: "08987654321" },
         { id: "u_budi", nama: "Budi Santoso", username: "budi", password: "123", role: "Pengguna", status: "Aktif", noHp: "08554433221" }
       ];
-      state.barang = [];
-      state.invoice = [];
-      state.refund = [];
-      state.fonnteToken = '';
       populateUserDropdowns();
     }
 
-    // Mengambil dan mensinkronisasikan seluruh data dari Google Spreadsheet
+    // Mengambil dan mensinkronisasikan seluruh data dari Google Spreadsheet dengan sistem fallback
     async function syncData(isInitial = false) {
+      if (state.isOfflineMode) {
+        loadFromLocalStorage();
+        return;
+      }
       if (!SPREADSHEET_SCRIPT_URL) return;
       // Jangan jalankan sinkronisasi background otomatis jika sedang loading atau mengupload gambar
       if (!isInitial && document.getElementById('loadingOverlay').style.opacity === '1') return;
@@ -1064,6 +1147,8 @@
           state.invoice = res.data.invoice || [];
           state.refund = res.data.refund || [];
           state.fonnteToken = res.data.settings?.fonnte || '';
+          
+          saveToLocalStorage(); // Cadangkan data online yang berhasil dimuat ke lokal
           
           populateUserDropdowns();
           updateDashboardStats();
@@ -1084,15 +1169,99 @@
           // Lemparkan kembali error pada loading awal agar ditangkap oleh initSpreadsheetDatabase
           throw err; 
         } else {
-          showToast("Koneksi internet bermasalah. Mencoba menghubungkan kembali...", "error");
+          showToast("Koneksi bermasalah. Mengalihkan ke Mode Offline otomatis...", "error");
+          state.isOfflineMode = true;
+          updateOfflineBanner();
+          loadFromLocalStorage();
         }
       }
     }
 
-    // Melakukan pengiriman transaksi POST aman ke Google Spreadsheet (Bebas dari CORS Preflight OPTION Block)
+    // Mengelola seluruh aksi penulisan data secara lokal ketika offline
+    function handleLocalPostAction(action, data) {
+      if (action === "saveFonnteToken") {
+        state.fonnteToken = data.token;
+      }
+      else if (action === "addResiAndInvoice") {
+        state.barang = state.barang.filter(b => b.id !== data.resi.id);
+        state.barang.push(data.resi);
+        state.invoice = state.invoice.filter(i => i.id !== data.invoice.id);
+        state.invoice.push(data.invoice);
+      }
+      else if (action === "updateBarangField" || action === "editBarang") {
+        const b = state.barang.find(x => x.id === data.id);
+        if (b) {
+          b[data.field] = data.value;
+        }
+      }
+      else if (action === "updateInvoiceField" || action === "editInvoice") {
+        const inv = state.invoice.find(x => x.id === data.id);
+        if (inv) {
+          inv[data.field] = data.value;
+        }
+      }
+      else if (action === "deleteBarangAndInvoice") {
+        const matchBarang = state.barang.find(b => b.id === data.barangId);
+        if (matchBarang) {
+          state.invoice = state.invoice.filter(i => i.noResi !== matchBarang.noResi);
+        }
+        state.barang = state.barang.filter(b => b.id !== data.barangId);
+      }
+      else if (action === "deleteInvoice") {
+        state.invoice = state.invoice.filter(i => i.id !== data.invoiceId);
+      }
+      else if (action === "addManualInvoiceAndBarang") {
+        state.invoice = state.invoice.filter(i => i.id !== data.invoice.id);
+        state.invoice.push(data.invoice);
+        state.barang = state.barang.filter(b => b.id !== data.barang.id);
+        state.barang.push(data.barang);
+      }
+      else if (action === "addRefund") {
+        state.refund = state.refund.filter(r => r.id !== data.id);
+        state.refund.push(data);
+      }
+      else if (action === "updateRefundField") {
+        const r = state.refund.find(x => x.id === data.id);
+        if (r) {
+          r[data.field] = data.value;
+        }
+      }
+      else if (action === "deleteRefund") {
+        state.refund = state.refund.filter(r => r.id !== data.refundId);
+      }
+      else if (action === "updateUser") {
+        const uIdx = state.users.findIndex(x => x.id === data.id);
+        if (uIdx !== -1) {
+          state.users[uIdx] = data.data;
+        } else {
+          state.users.push(data.data);
+        }
+      }
+      
+      saveToLocalStorage();
+      
+      // Update re-render
+      populateUserDropdowns();
+      updateDashboardStats();
+      renderNotifications();
+      if (state.currentUser) {
+        renderDaftarBarang();
+        renderInvoice();
+        renderRefundShopee();
+        renderUserMgmt();
+      }
+    }
+
+    // Melakukan pengiriman transaksi POST aman ke Google Spreadsheet (Fallback ke lokal jika gagal)
     async function postToSpreadsheet(action, data) {
+      if (state.isOfflineMode) {
+        handleLocalPostAction(action, data);
+        showToast("Tersimpan secara lokal (Mode Offline)", "success");
+        return true;
+      }
       if (!SPREADSHEET_SCRIPT_URL) {
-        showToast("Perubahan tersimpan secara lokal (Mode Demo)", "success");
+        handleLocalPostAction(action, data);
+        showToast("Tersimpan secara lokal (Mode Demo)", "success");
         return true; 
       }
       try {
@@ -1112,8 +1281,11 @@
         }
       } catch (err) {
         console.error("Google Sheets API POST Error:", err);
-        showToast("Gagal memperbarui data: " + err.message, "error");
-        return false;
+        showToast("Koneksi gagal. Mengaktifkan Mode Offline otomatis...", "error");
+        state.isOfflineMode = true;
+        updateOfflineBanner();
+        handleLocalPostAction(action, data);
+        return true;
       }
     }
 
@@ -1487,9 +1659,8 @@
       }
     }
 
-    // Kompresi kualitas file gambar klien untuk menghemat sel memori baris Google Sheets
-    // Menggunakan resolusi maksimal 400x400 dan kualitas 0.3 agar ukuran string base64 < 20KB (jauh di bawah batas 50.000 karakter Google Sheets)
-    function compressImage(file, maxWidth = 400, maxHeight = 400, quality = 0.3) {
+    // Kompresi kualitas file gambar klien dengan resolusi ultra-tinggi untuk menjaga detail aslinya
+    function compressImage(file, maxWidth = 2560, maxHeight = 2560, quality = 0.92) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);
@@ -1501,6 +1672,7 @@
             let width = img.width;
             let height = img.height;
 
+            // Pertahankan rasio aspek gambar saat melakukan resizing resolusi tinggi
             if (width > height) {
               if (width > maxWidth) {
                 height = Math.round((height * maxWidth) / width);
@@ -1527,52 +1699,30 @@
       });
     }
 
-    // Unggah foto base64 terkompresi langsung ke baris Google Sheets (Dilengkapi dengan Optimistic UI update)
+    // Unggah foto berkualitas tinggi langsung ke baris Google Sheets / Drive
     async function handlePhotoUpload(barangId, photoField, inputEl) {
       const file = inputEl.files[0];
       if (!file) return;
 
       showLoading(true);
-      
-      // Temukan item barang yang sesuai di dalam state lokal
-      const match = state.barang.find(b => b.id === barangId);
-      const oldPhotoValue = match ? match[photoField] : "";
-
+      document.getElementById('loadingText').innerText = "Mengamankan foto beresolusi tinggi...";
       try {
-        // Lakukan kompresi ketat agar string Base64 aman di sel Google Sheets
-        const compressedBase64 = await compressImage(file, 400, 400, 0.3);
-        
-        // Optimistic UI Update: Tampilkan foto di layar seketika secara instan
-        if (match) {
-          match[photoField] = compressedBase64;
-          renderDaftarBarang();
-          renderNotifications();
-        }
-
-        // Kirim data ke Google Sheets di latar belakang
+        // Menggunakan batas 2560px dengan kualitas tinggi 92% agar tidak merubah ketajaman foto
+        const compressedBase64 = await compressImage(file, 2560, 2560, 0.92);
         const success = await postToSpreadsheet('updateBarangField', { id: barangId, field: photoField, value: compressedBase64 });
         
         if (success) {
-          showToast("Foto update berhasil tersimpan di data!");
-        } else {
-          // Lakukan Rollback jika transaksi gagal
-          if (match) {
-            match[photoField] = oldPhotoValue;
-            renderDaftarBarang();
-            renderNotifications();
+          if (!SPREADSHEET_SCRIPT_URL) {
+            const match = state.barang.find(b => b.id === barangId);
+            if (match) match[photoField] = compressedBase64;
           }
-          showToast("Gagal mengunggah foto ke database server.", "error");
+          showToast("Foto beresolusi tinggi sukses tersimpan!");
         }
       } catch (err) {
-        // Rollback jika terjadi kegagalan kompresi
-        if (match) {
-          match[photoField] = oldPhotoValue;
-          renderDaftarBarang();
-          renderNotifications();
-        }
         showToast("Gagal memproses gambar: " + err.message, "error");
       } finally {
         showLoading(false);
+        document.getElementById('loadingText').innerText = "Tunggu sebentar ya~";
         inputEl.value = "";
       }
     }
@@ -1582,18 +1732,46 @@
       document.getElementById(`file-${barangId}-${photoField}`).click();
     }
 
-    // Unduh foto
-    function downloadPhoto(base64Data, filename) {
-      if (!base64Data) {
+    // Unduh foto dengan mempertahankan resolusi asli & menangani pembatasan CORS secara aman
+    async function downloadPhoto(urlOrBase64, filename) {
+      if (!urlOrBase64) {
         showToast("Foto tidak tersedia untuk diunduh", "error");
         return;
       }
-      const link = document.createElement("a");
-      link.href = base64Data;
-      link.download = filename || "photo_warehouse.png";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      
+      showToast("Menyiapkan unduhan resolusi penuh...");
+
+      // Jika input berupa Link/URL CDN Google Drive
+      if (urlOrBase64.startsWith("http")) {
+        try {
+          // Coba ambil blob gambar untuk mengunduh secara langsung dengan nama custom
+          const response = await fetch(urlOrBase64);
+          if (!response.ok) throw new Error("Gagal mengunduh langsung");
+          
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          
+          const link = document.createElement("a");
+          link.href = blobUrl;
+          link.download = filename || "photo_warehouse_highres.jpg";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(blobUrl);
+        } catch (err) {
+          // Fallback jika diblokir kebijakan CORS: buka langsung di tab baru pada resolusi aslinya
+          window.open(urlOrBase64, '_blank');
+          showToast("Membuka foto resolusi asli di tab baru. Silakan simpan manual (Klik kanan/Tahan gambar)", "success");
+        }
+      } else {
+        // Jika input berupa data Base64 lokal
+        const link = document.createElement("a");
+        link.href = urlOrBase64;
+        link.download = filename || "photo_warehouse_highres.jpg";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     }
 
     // Edit Logistik Barang Inline -> Sinkronisasi dua arah instan ke Spreadsheet
