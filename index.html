@@ -755,10 +755,41 @@
       return settings;
     }
 
+    function saveToDrive(base64Data, fileName) {
+      try {
+        var base64Clean = base64Data.split(",")[1] || base64Data;
+        var decoded = Utilities.base64Decode(base64Clean);
+        var blob = Utilities.newBlob(decoded, "image/jpeg", fileName);
+        var folderName = "Bonin Store Warehouse Photos";
+        var folders = DriveApp.getFoldersByName(folderName);
+        var folder;
+        if (folders.hasNext()) {
+          folder = folders.next();
+        } else {
+          folder = DriveApp.createFolder(folderName);
+        }
+        var file = folder.createFile(blob);
+        file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+        return { success: true, url: "https://docs.google.com/uc?export=view&id=" + file.getId() };
+      } catch (e) {
+        return { success: false, error: e.toString() };
+      }
+    }
+
     function handlePostAction(action, data) {
       if (action === "saveFonnteToken") {
         saveSettingsValue("fonnte", data.token);
         return "Token Fonnte tersimpan!";
+      }
+
+      if (action === "uploadPhotoToDrive") {
+        var driveResult = saveToDrive(data.base64, data.fileName);
+        if (driveResult.success) {
+          updateSingleField("barang", data.barangId, data.photoField, driveResult.url);
+          return { success: true, url: driveResult.url };
+        } else {
+          throw new Error("Gagal mengunggah ke Google Drive: " + driveResult.error);
+        }
       }
       
       if (action === "addResiAndInvoice") {
@@ -779,7 +810,6 @@
 
       if (action === "deleteBarangAndInvoice") {
         deleteRowById("barang", data.barangId);
-        // Hapus invoice terkait resi jika ada
         return "Barang terhapus!";
       }
 
@@ -839,14 +869,12 @@
       var rows = sheet.getDataRange().getValues();
       var headers = rows[0] || [];
       
-      // Jika sheet masih kosong total
       if (headers.length === 0) {
         headers = Object.keys(obj);
         sheet.appendRow(headers);
         rows = [headers];
       }
 
-      // Pastikan semua key objek ada di header
       Object.keys(obj).forEach(function(k) {
         if (headers.indexOf(k) === -1) {
           headers.push(k);
@@ -856,7 +884,6 @@
 
       var foundRowIndex = -1;
       for (var i = 1; i < rows.length; i++) {
-        // Cari baris berdasarkan ID kolm pertama atau key 'id'
         var idIndex = headers.indexOf("id");
         if (idIndex !== -1 && rows[i][idIndex] === obj.id) {
           foundRowIndex = i + 1;
@@ -883,7 +910,6 @@
       var fieldIndex = headers.indexOf(fieldName);
       
       if (fieldIndex === -1) {
-        // Tambah kolom jika belum ada
         fieldIndex = headers.length;
         sheet.getRange(1, fieldIndex + 1).setValue(fieldName);
       }
@@ -939,10 +965,11 @@
     let syncIntervalId = null;
 
     // Helper pembatas waktu (timeout) untuk mencegah hang selamanya jika server Google down
-    function withTimeout(promise, ms = 7000) {
+    // Ditambahkan penanganan yang lebih toleran terhadap cold-start Google Apps Script (25 Detik default)
+    function withTimeout(promise, ms = 25000) {
       return new Promise((resolve, reject) => {
         const timeoutId = setTimeout(() => {
-          reject(new Error("Timeout: Google Sheets tidak merespons dalam 7 detik."));
+          reject(new Error(`Timeout: Google Sheets tidak merespons dalam ${Math.round(ms / 1000)} detik.`));
         }, ms);
         promise.then(
           (res) => { resolve(res); clearTimeout(timeoutId); },
@@ -1019,7 +1046,7 @@
     // Inisialisasi Database Spreadsheet dengan Penanganan Kegagalan Handal
     async function initSpreadsheetDatabase() {
       showLoading(true);
-      document.getElementById('loadingText').innerText = "Sabar ya, lagi menghubungkan ke data kami^^";
+      document.getElementById('loadingText').innerText = "Menghubungkan ke data kami...";
 
       if (!SPREADSHEET_SCRIPT_URL || SPREADSHEET_SCRIPT_URL.includes("exec") === false) {
         showToast("Web App Google Sheets belum dikonfigurasi. Menggunakan Mode Offline lokal.", "error");
@@ -1031,13 +1058,12 @@
       }
 
       try {
-        // Masukkan argument "true" untuk menandakan ini inisialisasi awal agar error bisa ditangkap
-        await withTimeout(syncData(true), 8000);
+        // Meningkatkan batas waktu tunggu (timeout) hingga 25 detik untuk mengakomodasi cold start Apps Script
+        await withTimeout(syncData(true), 25000);
         state.isOfflineMode = false;
         updateOfflineBanner();
         
-        // Polling background setiap 15 detik agar sinkronisasi real-time
-        syncIntervalId = setInterval(() => syncData(false), 15000);
+        syncIntervalId = setInterval(() => syncData(false), 20000);
         showLoading(false);
       } catch (err) {
         console.error("Gagal sinkronisasi awal: ", err);
@@ -1061,7 +1087,7 @@
       if (u) {
         state.users = JSON.parse(u);
       } else {
-        loadMockFallbackData(); // Inisialisasi data admin default jika masih kosong
+        loadMockFallbackData();
       }
 
       state.barang = b ? JSON.parse(b) : [];
@@ -1087,11 +1113,11 @@
       document.getElementById('loadingText').innerText = "Mencoba menghubungi Google Sheets...";
       try {
         state.isOfflineMode = false;
-        await withTimeout(syncData(true), 8000);
+        await withTimeout(syncData(true), 25000);
         updateOfflineBanner();
         showToast("Sukses terhubung kembali ke Google Sheets!");
         if (!syncIntervalId) {
-          syncIntervalId = setInterval(() => syncData(false), 15000);
+          syncIntervalId = setInterval(() => syncData(false), 20000);
         }
       } catch (err) {
         console.error("Gagal terhubung kembali: ", err);
@@ -1133,7 +1159,6 @@
         return;
       }
       if (!SPREADSHEET_SCRIPT_URL) return;
-      // Jangan jalankan sinkronisasi background otomatis jika sedang loading atau mengupload gambar
       if (!isInitial && document.getElementById('loadingOverlay').style.opacity === '1') return;
 
       try {
@@ -1148,7 +1173,7 @@
           state.refund = res.data.refund || [];
           state.fonnteToken = res.data.settings?.fonnte || '';
           
-          saveToLocalStorage(); // Cadangkan data online yang berhasil dimuat ke lokal
+          saveToLocalStorage();
           
           populateUserDropdowns();
           updateDashboardStats();
@@ -1166,7 +1191,6 @@
       } catch (err) {
         console.error("Sync data error: ", err);
         if (isInitial) {
-          // Lemparkan kembali error pada loading awal agar ditangkap oleh initSpreadsheetDatabase
           throw err; 
         } else {
           showToast("Koneksi bermasalah. Mengalihkan ke Mode Offline otomatis...", "error");
@@ -1240,7 +1264,6 @@
       
       saveToLocalStorage();
       
-      // Update re-render
       populateUserDropdowns();
       updateDashboardStats();
       renderNotifications();
@@ -1268,13 +1291,13 @@
         const response = await fetch(SPREADSHEET_SCRIPT_URL, {
           method: "POST",
           headers: {
-            "Content-Type": "text/plain;charset=utf-8" // Menghindari preflight trigger CORS
+            "Content-Type": "text/plain;charset=utf-8"
           },
           body: JSON.stringify({ action, data })
         });
         const res = await response.json();
         if (res.status === "success") {
-          await syncData(false); // Sinkronkan ulang data lokal agar up-to-date
+          await syncData(false);
           return true;
         } else {
           throw new Error(res.message);
@@ -1647,7 +1670,6 @@
       showLoading(false);
       
       if (success) {
-        // Fallback update memori lokal (untuk mode demo)
         if (!SPREADSHEET_SCRIPT_URL) {
           state.barang.push(resiObj);
           state.invoice.push(invoiceObj);
@@ -1672,7 +1694,6 @@
             let width = img.width;
             let height = img.height;
 
-            // Pertahankan rasio aspek gambar saat melakukan resizing resolusi tinggi
             if (width > height) {
               if (width > maxWidth) {
                 height = Math.round((height * maxWidth) / width);
@@ -1699,27 +1720,69 @@
       });
     }
 
-    // Unggah foto berkualitas tinggi langsung ke baris Google Sheets / Drive
+    // Mengunggah foto beresolusi tinggi langsung ke Google Drive via Apps Script
     async function handlePhotoUpload(barangId, photoField, inputEl) {
       const file = inputEl.files[0];
       if (!file) return;
 
       showLoading(true);
-      document.getElementById('loadingText').innerText = "Mengamankan foto beresolusi tinggi...";
+      document.getElementById('loadingText').innerText = "Mengunggah gambar asli ke Google Drive...";
       try {
-        // Menggunakan batas 2560px dengan kualitas tinggi 92% agar tidak merubah ketajaman foto
+        // Kompresi resolusi tinggi 2560px dengan kualitas tinggi 92% agar tulisan resi tetap sangat terbaca
         const compressedBase64 = await compressImage(file, 2560, 2560, 0.92);
-        const success = await postToSpreadsheet('updateBarangField', { id: barangId, field: photoField, value: compressedBase64 });
         
-        if (success) {
-          if (!SPREADSHEET_SCRIPT_URL) {
+        if (state.isOfflineMode || !SPREADSHEET_SCRIPT_URL) {
+          // Fallback lokal jika offline
+          const match = state.barang.find(b => b.id === barangId);
+          if (match) match[photoField] = compressedBase64;
+          saveToLocalStorage();
+          renderDaftarBarang();
+          showToast("Foto disimpan di browser lokal (Mode Offline)!");
+        } else {
+          // Panggil fungsi upload terdedikasi ke Drive (mencegah overflow payload)
+          const payload = {
+            action: "uploadPhotoToDrive",
+            data: {
+              barangId: barangId,
+              photoField: photoField,
+              base64: compressedBase64,
+              fileName: `${photoField}_${barangId}.jpg`
+            }
+          };
+
+          const response = await fetch(SPREADSHEET_SCRIPT_URL, {
+            method: "POST",
+            headers: {
+              "Content-Type": "text/plain;charset=utf-8"
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const res = await response.json();
+          if (res.status === "success" && res.result && res.result.url) {
+            const driveUrl = res.result.url;
             const match = state.barang.find(b => b.id === barangId);
-            if (match) match[photoField] = compressedBase64;
+            if (match) match[photoField] = driveUrl;
+            
+            saveToLocalStorage();
+            renderDaftarBarang();
+            showToast("Foto sukses diunggah ke Google Drive!", "success");
+          } else {
+            throw new Error((res && res.message) || "Gagal mendapatkan URL Google Drive.");
           }
-          showToast("Foto beresolusi tinggi sukses tersimpan!");
         }
       } catch (err) {
-        showToast("Gagal memproses gambar: " + err.message, "error");
+        console.error("Gagal upload ke Drive:", err);
+        showToast("Google Drive gagal merespons. Menggunakan penyimpanan offline...", "error");
+        
+        // Cadangan instan offline agar input data admin tidak sia-sia
+        try {
+          const localCompressed = await compressImage(file, 1000, 1000, 0.8); // Kompresi aman untuk localStorage
+          const match = state.barang.find(b => b.id === barangId);
+          if (match) match[photoField] = localCompressed;
+          saveToLocalStorage();
+          renderDaftarBarang();
+        } catch (e) {}
       } finally {
         showLoading(false);
         document.getElementById('loadingText').innerText = "Tunggu sebentar ya~";
@@ -1741,10 +1804,8 @@
       
       showToast("Menyiapkan unduhan resolusi penuh...");
 
-      // Jika input berupa Link/URL CDN Google Drive
       if (urlOrBase64.startsWith("http")) {
         try {
-          // Coba ambil blob gambar untuk mengunduh secara langsung dengan nama custom
           const response = await fetch(urlOrBase64);
           if (!response.ok) throw new Error("Gagal mengunduh langsung");
           
@@ -1759,12 +1820,10 @@
           document.body.removeChild(link);
           URL.revokeObjectURL(blobUrl);
         } catch (err) {
-          // Fallback jika diblokir kebijakan CORS: buka langsung di tab baru pada resolusi aslinya
           window.open(urlOrBase64, '_blank');
           showToast("Membuka foto resolusi asli di tab baru. Silakan simpan manual (Klik kanan/Tahan gambar)", "success");
         }
       } else {
-        // Jika input berupa data Base64 lokal
         const link = document.createElement("a");
         link.href = urlOrBase64;
         link.download = filename || "photo_warehouse_highres.jpg";
@@ -2308,16 +2367,13 @@
       img.crossOrigin = "anonymous";
       
       const buildPDF = () => {
-        // Background header pastel soft
         doc.setFillColor(255, 244, 225); 
         doc.rect(0, 0, 210, 40, 'F');
 
-        // Menggambar logo di sebelah kiri atas jika berhasil diload
         try {
           if (img.complete && img.naturalWidth !== 0) {
             doc.addImage(img, 'PNG', 15, 8, 24, 24);
             
-            // Geser koordinat X teks ke kanan (44) agar tidak menimpa logo
             doc.setFont("helvetica", "bold");
             doc.setFontSize(20);
             doc.setTextColor(212, 85, 117); 
@@ -2332,7 +2388,6 @@
             throw new Error("Logo gagal dimuat");
           }
         } catch (e) {
-          // Fallback tanpa logo apabila terdapat masalah CORS/network internet
           doc.setFont("helvetica", "bold");
           doc.setFontSize(22);
           doc.setTextColor(212, 85, 117); 
@@ -2345,7 +2400,6 @@
           doc.text(`Tanggal Cetak: ${new Date().toLocaleDateString('id-ID')}`, 15, 29);
         }
 
-        // Box Batch Kuning
         doc.setFillColor(255, 203, 94); 
         doc.roundedRect(140, 10, 55, 18, 3, 3, 'F');
         doc.setFont("helvetica", "bold");
@@ -2355,7 +2409,6 @@
         doc.setFontSize(12);
         doc.text(batchName, 145, 23);
 
-        // Cari tahu nama pemilik untuk ditambahkan ke sub-header rincian
         const uniqueOwners = [...new Set(items.map(i => i.pemilik))];
         let ownerDisplayName = "";
         if (uniqueOwners.length === 1) {
@@ -2370,7 +2423,6 @@
         doc.setTextColor(50, 50, 50);
         doc.text(`Rincian Tagihan Penerima${ownerDisplayName}`, 15, 52);
 
-        // Susun baris tabel dengan kolom pemilik dihapuskan dari badan tabel
         const tableRows = [];
         let grandTotalSum = 0;
         
@@ -2405,11 +2457,10 @@
             textColor: [50, 50, 50]
           },
           columnStyles: {
-            2: { cellWidth: 70 }, // Diperlebar karena kolom pemilik dihapuskan
+            2: { cellWidth: 70 }, 
           },
           foot: [[
             { content: 'GRAND TOTAL KESELURUHAN BATCH', colSpan: 6, styles: { halign: 'right', fontStyle: 'bold' } },
-            // Text warna grand total dibuat jauh lebih gelap [30, 30, 30] (hampir hitam) agar jelas terbaca
             { content: formatRupiah(grandTotalSum), styles: { fontStyle: 'bold', textColor: [30, 30, 30] } } 
           ]],
           footStyles: {
@@ -2427,9 +2478,8 @@
         showToast(`Sukses mengekspor PDF ${batchName}!`);
       };
 
-      // Load gambar logo terlebih dahulu untuk disematkan
       img.onload = buildPDF;
-      img.onerror = buildPDF; // Tetap buat PDF walaupun gambar logo diblokir CORS/jaringan
+      img.onerror = buildPDF; 
       img.src = logoUrl;
     }
 
@@ -2540,7 +2590,6 @@ Silakan lakukan pembayaran melalui Admin dan lakukan konfirmasi. Terima kasih ba
       document.getElementById('refundModal').classList.remove('hidden');
     }
 
-    // Tutup modal refund
     function closeRefundModal() {
       document.getElementById('refundModal').classList.add('hidden');
     }
