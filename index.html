@@ -1336,7 +1336,7 @@
       errorDiv.classList.add('hidden');
       showLoading(true);
 
-      const match = state.users.find(u => u.username.toLowerCase() === user.toLowerCase());
+      const match = state.users.find(u => String(u.username).toLowerCase() === user.toLowerCase());
       showLoading(false);
 
       if (match) {
@@ -1346,7 +1346,7 @@
           return;
         }
 
-        if (match.password === pass) {
+        if (String(match.password) === String(pass)) {
           adminLoginAttempts = 0;
           if (rememberMe) {
             localStorage.setItem('bonin_username', user);
