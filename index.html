@@ -690,6 +690,13 @@
         return ContentService.createTextOutput(JSON.stringify({ status: "success", data: getAllData() }))
           .setMimeType(ContentService.MimeType.JSON);
       }
+      if (action === "getPhoto") {
+        // Mengirim byte file ASLI dari Google Drive apa adanya, tanpa kompresi/resize
+        // apa pun oleh Google, sehingga resolusi & kualitas foto tetap 100% sama.
+        var fileId = e.parameter.id;
+        var file = DriveApp.getFileById(fileId);
+        return file.getBlob();
+      }
       return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Action doGet tidak valid" }))
         .setMimeType(ContentService.MimeType.JSON);
     }
@@ -755,11 +762,12 @@
       return settings;
     }
 
-    function saveToDrive(base64Data, fileName) {
+    function saveToDrive(base64Data, fileName, mimeType) {
       try {
         var base64Clean = base64Data.split(",")[1] || base64Data;
         var decoded = Utilities.base64Decode(base64Clean);
-        var blob = Utilities.newBlob(decoded, "image/jpeg", fileName);
+        var contentType = mimeType || "image/jpeg";
+        var blob = Utilities.newBlob(decoded, contentType, fileName);
         var folderName = "Bonin Store Warehouse Photos";
         var folders = DriveApp.getFoldersByName(folderName);
         var folder;
@@ -770,7 +778,12 @@
         }
         var file = folder.createFile(blob);
         file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-        return { success: true, url: "https://docs.google.com/uc?export=view&id=" + file.getId() };
+        // Foto diproxy langsung lewat Web App ini sendiri (bukan link preview Google Drive)
+        // supaya byte gambar yang dikirim ke browser PERSIS sama dengan file aslinya
+        // (resolusi & kualitas tidak pernah berubah, tidak seperti link "uc?export=view"
+        // yang oleh Google kadang diganti dengan versi preview yang dikompres).
+        var proxyUrl = ScriptApp.getService().getUrl() + "?action=getPhoto&id=" + file.getId();
+        return { success: true, url: proxyUrl, fileId: file.getId() };
       } catch (e) {
         return { success: false, error: e.toString() };
       }
@@ -783,7 +796,7 @@
       }
 
       if (action === "uploadPhotoToDrive") {
-        var driveResult = saveToDrive(data.base64, data.fileName);
+        var driveResult = saveToDrive(data.base64, data.fileName, data.mimeType);
         if (driveResult.success) {
           updateSingleField("barang", data.barangId, data.photoField, driveResult.url);
           return { success: true, url: driveResult.url };
@@ -1681,42 +1694,14 @@
       }
     }
 
-    // Kompresi kualitas file gambar klien dengan resolusi ultra-tinggi untuk menjaga detail aslinya
-    function compressImage(file, maxWidth = 2560, maxHeight = 2560, quality = 0.92) {
+    // Membaca file foto ASLI apa adanya (tanpa resize/kompresi ulang) agar resolusi
+    // dan kualitas gambar 100% identik dengan file aslinya, dari upload sampai diunduh.
+    function readFileRaw(file) {
       return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (event) => {
-          const img = new Image();
-          img.src = event.target.result;
-          img.onload = () => {
-            const canvas = document.createElement('canvas');
-            let width = img.width;
-            let height = img.height;
-
-            if (width > height) {
-              if (width > maxWidth) {
-                height = Math.round((height * maxWidth) / width);
-                width = maxWidth;
-              }
-            } else {
-              if (height > maxHeight) {
-                width = Math.round((width * maxHeight) / height);
-                height = maxHeight;
-              }
-            }
-
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0, width, height);
-            
-            const compressedBase64 = canvas.toDataURL('image/jpeg', quality);
-            resolve(compressedBase64);
-          };
-          img.onerror = (err) => reject(err);
-        };
+        reader.onload = (event) => resolve(event.target.result);
         reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(file);
       });
     }
 
@@ -1726,18 +1711,20 @@
       if (!file) return;
 
       showLoading(true);
-      document.getElementById('loadingText').innerText = "Mengunggah gambar asli ke Google Drive...";
+      document.getElementById('loadingText').innerText = "Mengunggah foto asli (resolusi penuh) ke Google Drive...";
       try {
-        // Kompresi resolusi tinggi 2560px dengan kualitas tinggi 92% agar tulisan resi tetap sangat terbaca
-        const compressedBase64 = await compressImage(file, 2560, 2560, 0.92);
-        
+        // File dikirim APA ADANYA, tidak di-resize atau dikompres ulang,
+        // supaya resolusi & kualitas aslinya tetap terjaga sampai diunduh nanti.
+        const rawBase64 = await readFileRaw(file);
+        const ext = (file.name && file.name.includes('.')) ? file.name.split('.').pop() : (file.type.split('/')[1] || 'jpg');
+
         if (state.isOfflineMode || !SPREADSHEET_SCRIPT_URL) {
-          // Fallback lokal jika offline
+          // Fallback lokal jika offline (tetap file asli, tanpa kompresi)
           const match = state.barang.find(b => b.id === barangId);
-          if (match) match[photoField] = compressedBase64;
+          if (match) match[photoField] = rawBase64;
           saveToLocalStorage();
           renderDaftarBarang();
-          showToast("Foto disimpan di browser lokal (Mode Offline)!");
+          showToast("Foto disimpan sementara di perangkat ini (Mode Offline). Akan tetap perlu diunggah ulang saat online agar masuk ke Google Drive.", "error");
         } else {
           // Panggil fungsi upload terdedikasi ke Drive (mencegah overflow payload)
           const payload = {
@@ -1745,8 +1732,9 @@
             data: {
               barangId: barangId,
               photoField: photoField,
-              base64: compressedBase64,
-              fileName: `${photoField}_${barangId}.jpg`
+              base64: rawBase64,
+              mimeType: file.type || "image/jpeg",
+              fileName: `${photoField}_${barangId}.${ext}`
             }
           };
 
@@ -1766,23 +1754,14 @@
             
             saveToLocalStorage();
             renderDaftarBarang();
-            showToast("Foto sukses diunggah ke Google Drive!", "success");
+            showToast("Foto resolusi asli sukses diunggah ke Google Drive!", "success");
           } else {
             throw new Error((res && res.message) || "Gagal mendapatkan URL Google Drive.");
           }
         }
       } catch (err) {
         console.error("Gagal upload ke Drive:", err);
-        showToast("Google Drive gagal merespons. Menggunakan penyimpanan offline...", "error");
-        
-        // Cadangan instan offline agar input data admin tidak sia-sia
-        try {
-          const localCompressed = await compressImage(file, 1000, 1000, 0.8); // Kompresi aman untuk localStorage
-          const match = state.barang.find(b => b.id === barangId);
-          if (match) match[photoField] = localCompressed;
-          saveToLocalStorage();
-          renderDaftarBarang();
-        } catch (e) {}
+        showToast("Google Drive gagal merespons. Foto BELUM tersimpan ke Drive, coba unggah ulang.", "error");
       } finally {
         showLoading(false);
         document.getElementById('loadingText').innerText = "Tunggu sebentar ya~";
