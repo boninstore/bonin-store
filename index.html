@@ -780,6 +780,17 @@
     // ID diambil dari URL: https://drive.google.com/drive/folders/<ID INI>
     var TARGET_DRIVE_FOLDER_ID = "1w10kVQSGZ-Yc3Sg33f6RmG6WSFexCtz0";
 
+    // JALANKAN FUNGSI INI SECARA MANUAL SATU KALI dari editor Apps Script
+    // (pilih "testAuth" di dropdown fungsi lalu klik tombol Run ▶️) untuk memicu
+    // popup izin akses Google Drive & Google Sheets. Setujui semua izin yang diminta,
+    // lalu deploy ulang sebagai versi baru. Setelah itu fungsi ini tidak perlu dipakai lagi.
+    function testAuth() {
+      var folder = DriveApp.getFolderById(TARGET_DRIVE_FOLDER_ID);
+      Logger.log("Akses Drive OK, nama folder: " + folder.getName());
+      var ss = SpreadsheetApp.getActiveSpreadsheet();
+      Logger.log("Akses Spreadsheet OK, nama spreadsheet: " + ss.getName());
+    }
+
     function saveToDrive(base64Data, fileName, mimeType) {
       try {
         var base64Clean = base64Data.split(",")[1] || base64Data;
