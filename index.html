@@ -685,6 +685,14 @@
     ----------------- [SALIN KODE DI BAWAH INI] -----------------
     
     function doGet(e) {
+      // Jika dijalankan manual dari editor Apps Script (tombol Run), 'e' akan undefined
+      // karena tidak ada permintaan web sungguhan. Tampilkan pesan ramah, bukan error.
+      if (!e || !e.parameter) {
+        return ContentService.createTextOutput(JSON.stringify({
+          status: "info",
+          message: "Skrip berjalan normal. Ini muncul karena dijalankan manual dari editor (bukan lewat URL Web App), itu hal yang wajar dan hanya dipakai untuk proses otorisasi."
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
       var action = e.parameter.action;
       if (action === "getAll") {
         return ContentService.createTextOutput(JSON.stringify({ status: "success", data: getAllData() }))
@@ -703,6 +711,12 @@
 
     function doPost(e) {
       try {
+        if (!e || !e.postData) {
+          return ContentService.createTextOutput(JSON.stringify({
+            status: "info",
+            message: "Skrip berjalan normal. Ini muncul karena dijalankan manual dari editor (bukan lewat URL Web App), itu hal yang wajar dan hanya dipakai untuk proses otorisasi."
+          })).setMimeType(ContentService.MimeType.JSON);
+        }
         var params = JSON.parse(e.postData.contents);
         var action = params.action;
         var data = params.data;
@@ -1746,7 +1760,15 @@
             body: JSON.stringify(payload)
           });
 
-          const res = await response.json();
+          if (!response.ok) {
+            throw new Error(`Server merespons dengan status ${response.status} (bukan JSON). Kemungkinan Apps Script belum di-deploy ulang atau butuh otorisasi ulang.`);
+          }
+          let res;
+          try {
+            res = await response.json();
+          } catch (parseErr) {
+            throw new Error("Respons dari Apps Script bukan format JSON yang valid (kemungkinan ada error di skrip / belum di-deploy ulang / butuh otorisasi ulang akses Google Drive).");
+          }
           if (res.status === "success" && res.result && res.result.url) {
             const driveUrl = res.result.url;
             const match = state.barang.find(b => b.id === barangId);
@@ -1761,7 +1783,7 @@
         }
       } catch (err) {
         console.error("Gagal upload ke Drive:", err);
-        showToast("Google Drive gagal merespons. Foto BELUM tersimpan ke Drive, coba unggah ulang.", "error");
+        showToast("Gagal upload ke Drive: " + (err && err.message ? err.message : String(err)), "error");
       } finally {
         showLoading(false);
         document.getElementById('loadingText').innerText = "Tunggu sebentar ya~";
