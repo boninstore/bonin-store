@@ -776,20 +776,17 @@
       return settings;
     }
 
+    // Folder Google Drive tujuan penyimpanan foto (sesuai link yang diberikan pengguna).
+    // ID diambil dari URL: https://drive.google.com/drive/folders/<ID INI>
+    var TARGET_DRIVE_FOLDER_ID = "1w10kVQSGZ-Yc3Sg33f6RmG6WSFexCtz0";
+
     function saveToDrive(base64Data, fileName, mimeType) {
       try {
         var base64Clean = base64Data.split(",")[1] || base64Data;
         var decoded = Utilities.base64Decode(base64Clean);
         var contentType = mimeType || "image/jpeg";
         var blob = Utilities.newBlob(decoded, contentType, fileName);
-        var folderName = "Bonin Store Warehouse Photos";
-        var folders = DriveApp.getFoldersByName(folderName);
-        var folder;
-        if (folders.hasNext()) {
-          folder = folders.next();
-        } else {
-          folder = DriveApp.createFolder(folderName);
-        }
+        var folder = DriveApp.getFolderById(TARGET_DRIVE_FOLDER_ID);
         var file = folder.createFile(blob);
         file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
         // Foto diproxy langsung lewat Web App ini sendiri (bukan link preview Google Drive)
