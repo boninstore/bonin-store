@@ -699,11 +699,23 @@
           .setMimeType(ContentService.MimeType.JSON);
       }
       if (action === "getPhoto") {
-        // Mengirim byte file ASLI dari Google Drive apa adanya, tanpa kompresi/resize
-        // apa pun oleh Google, sehingga resolusi & kualitas foto tetap 100% sama.
+        // Mengirim byte file ASLI dari Google Drive apa adanya (base64, lossless),
+        // dibungkus JSON karena doGet Web App Apps Script HANYA mendukung
+        // TextOutput/HtmlOutput sebagai nilai kembalian (mengembalikan Blob mentah
+        // langsung TIDAK didukung dan akan menyebabkan error "jenis pengembalian
+        // tidak didukung"). Base64 di sini murni encoding, tidak mengubah
+        // resolusi/kualitas gambar sedikit pun.
         var fileId = e.parameter.id;
         var file = DriveApp.getFileById(fileId);
-        return file.getBlob();
+        var blob = file.getBlob();
+        var mimeType = blob.getContentType();
+        var base64 = Utilities.base64Encode(blob.getBytes());
+        return ContentService.createTextOutput(JSON.stringify({
+          status: "success",
+          dataUrl: "data:" + mimeType + ";base64," + base64,
+          fileName: file.getName(),
+          mimeType: mimeType
+        })).setMimeType(ContentService.MimeType.JSON);
       }
       return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Action doGet tidak valid" }))
         .setMimeType(ContentService.MimeType.JSON);
@@ -1805,32 +1817,62 @@
     }
 
     // Unduh foto dengan mempertahankan resolusi asli & menangani pembatasan CORS secara aman
+    // Cache di memori supaya foto yang sama tidak difetch berulang kali tiap render.
+    const photoDataCache = {};
+
+    // Mengambil data foto ASLI (base64 lossless) dari endpoint getPhoto Apps Script.
+    // urlProxy = URL hasil saveToDrive, bentuknya: SCRIPT_URL?action=getPhoto&id=FILEID
+    async function fetchPhotoDataUrl(urlProxy) {
+      if (photoDataCache[urlProxy]) return photoDataCache[urlProxy];
+      const res = await fetch(urlProxy);
+      if (!res.ok) throw new Error("Server merespons status " + res.status);
+      const json = await res.json();
+      if (json.status !== "success" || !json.dataUrl) {
+        throw new Error(json.message || "Respons foto tidak valid");
+      }
+      photoDataCache[urlProxy] = json.dataUrl;
+      return json.dataUrl;
+    }
+
+    // Panggil ini SETELAH innerHTML berisi <img class="lazy-photo-img" data-photo-src="...">
+    // diset ke DOM, supaya thumbnail foto terisi otomatis.
+    async function loadLazyPhotos() {
+      const imgs = document.querySelectorAll('img.lazy-photo-img[data-photo-src]');
+      for (const img of imgs) {
+        const src = img.getAttribute('data-photo-src');
+        if (!src || img.dataset.loaded === "1") continue;
+        img.dataset.loaded = "1";
+        if (src.startsWith('http')) {
+          fetchPhotoDataUrl(src).then(dataUrl => { img.src = dataUrl; }).catch(() => {
+            img.alt = "Gagal memuat foto";
+          });
+        } else {
+          // Data lama (offline/base64 langsung tersimpan) - tampilkan apa adanya.
+          img.src = src;
+        }
+      }
+    }
+
     async function downloadPhoto(urlOrBase64, filename) {
       if (!urlOrBase64) {
         showToast("Foto tidak tersedia untuk diunduh", "error");
         return;
       }
-      
+
       showToast("Menyiapkan unduhan resolusi penuh...");
 
       if (urlOrBase64.startsWith("http")) {
         try {
-          const response = await fetch(urlOrBase64);
-          if (!response.ok) throw new Error("Gagal mengunduh langsung");
-          
-          const blob = await response.blob();
-          const blobUrl = URL.createObjectURL(blob);
-          
+          const dataUrl = await fetchPhotoDataUrl(urlOrBase64);
           const link = document.createElement("a");
-          link.href = blobUrl;
+          link.href = dataUrl;
           link.download = filename || "photo_warehouse_highres.jpg";
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-          URL.revokeObjectURL(blobUrl);
         } catch (err) {
           window.open(urlOrBase64, '_blank');
-          showToast("Membuka foto resolusi asli di tab baru. Silakan simpan manual (Klik kanan/Tahan gambar)", "success");
+          showToast("Gagal mengunduh otomatis. Coba buka manual di tab baru.", "error");
         }
       } else {
         const link = document.createElement("a");
@@ -2033,7 +2075,7 @@
                             <input type="file" id="file-${b.id}-foto1" class="hidden" accept="image/*" onchange="handlePhotoUpload('${b.id}', 'foto1', this)">
                             <div class="flex flex-col items-center gap-1">
                               ${b.foto1 ? `
-                                <img src="${b.foto1}" class="w-10 h-10 rounded object-cover cursor-pointer border border-[#d45575]" onclick="downloadPhoto('${b.foto1}', 'Foto1_${b.noResi}.png')">
+                                <img data-photo-src="${b.foto1}" class="lazy-photo-img w-10 h-10 rounded object-cover cursor-pointer border border-[#d45575] bg-[#fff4e1]" onclick="downloadPhoto('${b.foto1}', 'Foto1_${b.noResi}.png')">
                                 ${canEditFull ? `
                                   <button onclick="triggerFileInput('${b.id}', 'foto1')" class="text-[10px] text-pink-600 hover:underline">Ganti</button>
                                 ` : ''}
@@ -2051,7 +2093,7 @@
                             <input type="file" id="file-${b.id}-foto2" class="hidden" accept="image/*" onchange="handlePhotoUpload('${b.id}', 'foto2', this)">
                             <div class="flex flex-col items-center gap-1">
                               ${b.foto2 ? `
-                                <img src="${b.foto2}" class="w-10 h-10 rounded object-cover cursor-pointer border border-[#d45575]" onclick="downloadPhoto('${b.foto2}', 'Foto2_${b.noResi}.png')">
+                                <img data-photo-src="${b.foto2}" class="lazy-photo-img w-10 h-10 rounded object-cover cursor-pointer border border-[#d45575] bg-[#fff4e1]" onclick="downloadPhoto('${b.foto2}', 'Foto2_${b.noResi}.png')">
                                 ${canEditFull ? `
                                   <button onclick="triggerFileInput('${b.id}', 'foto2')" class="text-[10px] text-pink-600 hover:underline">Ganti</button>
                                 ` : ''}
@@ -2085,6 +2127,7 @@
 
       container.innerHTML = html;
       lucide.createIcons();
+      loadLazyPhotos();
     }
 
     // Grand totals
