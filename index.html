@@ -51,7 +51,7 @@
   <div id="loadingOverlay" class="fixed inset-0 bg-white/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center transition-all duration-300">
     <div class="relative w-20 h-20">
       <div class="absolute inset-0 rounded-full border-4 border-dashed border-[#d45575] animate-spin"></div>
-      <img src="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg" class="absolute inset-2 w-16 h-16 rounded-full object-cover shadow-md">
+      <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" class="absolute inset-2 w-16 h-16 rounded-full object-cover shadow-md">
     </div>
     <p id="loadingText" class="mt-4 font-bold text-[#d45575] text-sm animate-pulse">Tunggu sebentar ya~</p>
   </div>
@@ -60,7 +60,7 @@
   <div id="loginPage" class="min-h-screen flex items-center justify-center p-4">
     <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl border-4 border-[#ffcb5e] relative">
       <div class="text-center mb-6">
-        <img src="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg" alt="Logo Bonin Store" class="w-24 h-24 mx-auto rounded-full border-4 border-[#d45575] shadow-lg mb-3">
+        <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" alt="Logo Bonin Store" class="w-24 h-24 mx-auto rounded-full border-4 border-[#d45575] shadow-lg mb-3">
         <h1 class="text-xl sm:text-2xl font-bold text-[#d45575]">Bonin Store</h1>
         <p class="text-[11px] text-gray-500 mt-1">Sistem Data Barang Warehouse &amp; Invoice</p>
       </div>
@@ -112,7 +112,7 @@
           <i data-lucide="menu" class="w-4 h-4 sm:w-5 sm:h-5"></i>
         </button>
         <div class="flex items-center space-x-2">
-          <img src="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-[#d45575] object-cover">
+          <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-[#d45575] object-cover">
           <div class="hidden xs:block text-left">
             <h2 class="font-bold text-xs text-[#d45575] leading-tight">Bonin Store Warehouse</h2>
             <span id="badgeUserRole" class="text-[8px] bg-[#b1b0d8] text-white px-1.5 py-0.2 rounded-full font-bold">Role</span>
@@ -196,7 +196,7 @@
             <h1 id="welcomeGreeting" class="text-xl sm:text-2xl md:text-3xl font-bold text-[#d45575]">Selamat Datang di Warehouse!</h1>
             <p class="text-xs sm:text-sm text-gray-500 max-w-md">Cek pengiriman barang kalian dari Korea, China, dan Thailand secara instan, mudah dan aman disini!^^</p>
           </div>
-          <img src="https://www.image2url.com/r2/default/images/1780648260150-0681a051-55c8-46aa-b3bb-235a653656ed.jpg" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-4 border-[#fff4e1] shadow-xl">
+          <img src="https://www.image2url.com/r2/default/images/1781551073803-c8b53c85-b65b-439a-9c00-6f879ad47650.png" class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-4 border-[#fff4e1] shadow-xl">
         </div>
 
         <!-- Kolom Notifikasi Update Foto Barang Terkini -->
@@ -1153,11 +1153,19 @@
 
     // Menyimpan state lokal saat ini ke Local Storage
     function saveToLocalStorage() {
-      localStorage.setItem('bonin_users', JSON.stringify(state.users));
-      localStorage.setItem('bonin_barang', JSON.stringify(state.barang));
-      localStorage.setItem('bonin_invoice', JSON.stringify(state.invoice));
-      localStorage.setItem('bonin_refund', JSON.stringify(state.refund));
-      localStorage.setItem('bonin_fonnteToken', state.fonnteToken);
+      // Dibungkus try/catch: kalau localStorage penuh (misal karena foto resolusi
+      // penuh yang besar), ini HANYA cadangan lokal di browser - jangan sampai
+      // gagalnya cadangan ini ikut menggagalkan proses upload ke Google Drive
+      // yang sebenarnya sudah berhasil (itu penyebab "cuma bisa upload 1 foto").
+      try {
+        localStorage.setItem('bonin_users', JSON.stringify(state.users));
+        localStorage.setItem('bonin_barang', JSON.stringify(state.barang));
+        localStorage.setItem('bonin_invoice', JSON.stringify(state.invoice));
+        localStorage.setItem('bonin_refund', JSON.stringify(state.refund));
+        localStorage.setItem('bonin_fonnteToken', state.fonnteToken);
+      } catch (err) {
+        console.warn("Cadangan lokal (localStorage) penuh/gagal, dilewati. Data asli tetap aman di Google Sheets/Drive selama online:", err);
+      }
     }
 
     // Fungsi Mencoba Menghubungkan Kembali Offline ke Online
