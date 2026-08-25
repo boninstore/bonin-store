@@ -1233,6 +1233,8 @@
       }
     }
 
+    let consecutiveSyncFailures = 0;
+
     async function syncData(isInitial = false) {
       if (state.isOfflineMode) {
         loadFromLocalStorage();
@@ -1240,6 +1242,9 @@
       }
       if (!SPREADSHEET_SCRIPT_URL) return;
       if (!isInitial && document.getElementById('loadingOverlay').style.opacity === '1') return;
+      // Lewati auto-refresh berkala selagi ada foto yang sedang dimuat, supaya tidak
+      // berebut kuota eksekusi Apps Script dengan proses ambil-foto yang lambat.
+      if (!isInitial && activePhotoFetches > 0) return;
 
       try {
         const response = await fetch(SPREADSHEET_SCRIPT_URL + "?action=getAll");
@@ -1265,6 +1270,7 @@
             renderRefundShopee();
             renderUserMgmt();
           }
+          consecutiveSyncFailures = 0;
         } else {
           throw new Error(res.message || "Gagal sinkron data.");
         }
@@ -1273,10 +1279,16 @@
         if (isInitial) {
           throw err; 
         } else {
-          showToast("Koneksi bermasalah. Mengalihkan ke Mode Offline otomatis...", "error");
-          state.isOfflineMode = true;
-          updateOfflineBanner();
-          loadFromLocalStorage();
+          consecutiveSyncFailures++;
+          // Baru dianggap benar-benar putus koneksi setelah 2x gagal berturut-turut,
+          // supaya 1 kali gangguan sesaat (misalnya server sedang sibuk memproses
+          // permintaan foto) tidak langsung memaksa pindah ke Mode Offline.
+          if (consecutiveSyncFailures >= 2) {
+            showToast("Koneksi bermasalah. Mengalihkan ke Mode Offline otomatis...", "error");
+            state.isOfflineMode = true;
+            updateOfflineBanner();
+            loadFromLocalStorage();
+          }
         }
       }
     }
@@ -1850,19 +1862,29 @@
     // Unduh foto dengan mempertahankan resolusi asli & menangani pembatasan CORS secara aman
     // Cache di memori supaya foto yang sama tidak difetch berulang kali tiap render.
     const photoDataCache = {};
+    // Penanda: berapa banyak proses ambil-foto yang sedang berjalan. Selama ini > 0,
+    // auto-refresh berkala DIJEDA supaya tidak berebut kuota eksekusi Apps Script
+    // dengan proses ambil-foto (yang cenderung lambat), yang sebelumnya menyebabkan
+    // aplikasi salah mengira koneksi putus dan pindah ke Mode Offline.
+    let activePhotoFetches = 0;
 
     // Mengambil data foto ASLI (base64 lossless) dari endpoint getPhoto Apps Script.
     // urlProxy = URL hasil saveToDrive, bentuknya: SCRIPT_URL?action=getPhoto&id=FILEID
     async function fetchPhotoDataUrl(urlProxy) {
       if (photoDataCache[urlProxy]) return photoDataCache[urlProxy];
-      const res = await fetch(urlProxy);
-      if (!res.ok) throw new Error("Server merespons status " + res.status);
-      const json = await res.json();
-      if (json.status !== "success" || !json.dataUrl) {
-        throw new Error(json.message || "Respons foto tidak valid");
+      activePhotoFetches++;
+      try {
+        const res = await fetch(urlProxy);
+        if (!res.ok) throw new Error("Server merespons status " + res.status);
+        const json = await res.json();
+        if (json.status !== "success" || !json.dataUrl) {
+          throw new Error(json.message || "Respons foto tidak valid");
+        }
+        photoDataCache[urlProxy] = json.dataUrl;
+        return json.dataUrl;
+      } finally {
+        activePhotoFetches = Math.max(0, activePhotoFetches - 1);
       }
-      photoDataCache[urlProxy] = json.dataUrl;
-      return json.dataUrl;
     }
 
     // Panggil ini SETELAH innerHTML berisi <img class="lazy-photo-img" data-photo-src="...">
@@ -2048,11 +2070,11 @@
                 <table class="w-full text-left text-sm whitespace-nowrap min-w-[950px]">
                   <thead class="bg-[#fff4e1] text-gray-700">
                     <tr>
-                      <th class="p-3 font-bold text-xs" style="width: 25%;">No Resi</th>
+                      <th class="p-3 font-bold text-xs" style="width: 14%;">No Resi</th>
                       <th class="p-3 font-bold text-xs" style="width: 25%;">Detail Barang</th>
                       <th class="p-3 font-bold text-xs">Tanggal Update</th>
                       <th class="p-3 font-bold text-xs">Shipping Batch</th>
-                      <th class="p-3 font-bold text-xs">Pemilik</th>
+                      <th class="p-3 font-bold text-xs" style="width: 20%;">Pemilik</th>
                       <th class="p-3 font-bold text-xs text-center">Foto Update 1</th>
                       <th class="p-3 font-bold text-xs text-center">Foto Update 2</th>
                       ${userRole === 'Admin' ? `<th class="p-3 font-bold text-xs text-center">Aksi</th>` : ''}
